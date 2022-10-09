@@ -109,7 +109,7 @@ SHORT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
-# Database
+# 
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
@@ -119,7 +119,22 @@ DATABASES = {
     }
 }
 
+#########################################
+# настройки для почтового сервера
+EMAIL_HOST = MY_EMAIL_HOST_DEV
+EMAIL_PORT = MY_EMAIL_PORT_DEV
+EMAIL_HOST_USER = MY_EMAIL_HOST_USER_DEV
+EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD_DEV
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_USE_TLS = True
+EMAIL_SUBJECT_PREFIX = 'OKNARDIA ERR: '     # префикс для оповещений об ошибках и необработанных исключениях
+
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ключи для Google Captha
+CAPTCHA_PUBLIC_KEY = MY_CAPTCHA_PUBLIC_KEY
+CAPTCHA_PRIVATE_KEY = MY_CAPTCHA_PRIVATE_KEY
