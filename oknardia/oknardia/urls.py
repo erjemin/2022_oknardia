@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager
+from web import views, autocomplete_addr, user_manager, blog
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,6 +39,11 @@ urlpatterns = [
     # Ссылка, по которой пользователь может поменять пароль при утере. URL: /USER_%05d/RESTORE:%s
     re_path(r'^USER_(?P<user_id>\d{1,8})/RESTORE:(?P<hash_part_12>\S+)$', user_manager.restore_password),
     re_path(r'^change_password$', user_manager.change_password),
+    # ОБРАБОТЧИКИ СПИСКА ПУБЛИКАЦИЙ И САМИХ ПУБЛИКАЦИЙ БЛОГА
+    re_path(r'^blog/*$', blog.blog_list),
+    re_path(r'^blog/P(?P<page>\d{1,})/*$', blog.blog_list_posts),
+    re_path(r'^blogpost/(?P<post_id>\d{1,})/(?P<page_back>\d{1,})/\S*/*$', blog.blog_post),
+    re_path(r'^blogpost/(?P<post_id>\d{1,})/\S*/*$', blog.blog_post),
 
 ]
 

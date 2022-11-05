@@ -1,0 +1,78 @@
+{% extends "base.html" %}{% load static %}
+
+{% block Title %}Блоги: Стр.{{ PAGE_BACK|add:"1" }}{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Блоги «Окнардия» :: {% for i1 in DIM_BLOGPOST %}{{ i1.HEADER_D }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endblock %}
+
+{% block Keywords %}oknardia, окнардия, blogs, блоги, публикации, цены пластиковых окон, стоимость пластиковых окон, скидки на пластиковые окна, предложения пластиковых окон, {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Author4Meta %}: Блоги{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Блоги{% endblock %}
+
+{% block Top_JS3%}
+<script>
+$(window).load(function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});
+</script>
+{% endblock %}
+
+{% block Main_Content %}
+<div class="container-fluid">
+{# <!--- Хлебные крошки --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/blog/">Блог</a></li>
+        <li>Стр.{{ PAGE_BACK|add:"1" }}</li>
+      </ol>
+      <h1>Блог</h1>
+    </div>
+  </div>{# <!--- /Хлебные крошки ---> #}
+  {% for POST in DIM_BLOGPOST %}<div class="row">
+    <div class="col-md-11 col-xs-12 blog-list-header">
+      <hr class="dotted-black" />
+      <p>{{ POST.PUB_DAT|date:"d.F.Y (l) H:i" }}</p>
+      <p><img src="/media/{{ POST.USER_AVATAR }}" /> {% if POST.NAME1 != "" or POST.NAME2 != "" %} <i>{{ POST.NAME1 }}{% if POST.NAME2 != "" %}&nbsp;{{ POST.NAME2 }}{% endif %}</i>{% endif %}</p>
+      <h2>{{ POST.HEADER|safe }}</h2>
+    </div>
+    <div class="col-md-11 blog-list-tizer">
+{# <!--- Тизер поста в блоге ---> #}{{ POST.CONTENT_CUT|safe|truncatechars:4096 }}{# <!--- /Тизер поста в блоге ---> #}
+      {% if POST.CUT_TEXT != "NONE" %}<p><a href="/blogpost/{{ POST.POST_ID }}/{{ POST.HEADER_T }}?page-back={{ PAGE_BACK }}" class="btn btn-default">{{ POST.CUT_TEXT|safe }}</a></p>{% endif %}
+    </div>
+  </div>{% endfor %}
+  {# <!--- Листалка ---> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <hr class="dotted-black" />
+      <nav aria-label="переходы на страницы">
+        <ul class="pagination">{% if BACK_BUTTON %}
+          <li>
+            <a href="/blog/P{{ BACK_PAGE }}" aria-label="Назад"><span aria-hidden="true">&larr;</span></a>
+          </li>{% else %}<li class="disabled">
+            <span aria-hidden="true">&larr;</span>
+          </li>{% endif %}{% for PAGER in PAGINATION %}{% if PAGER.PAGE == PAGE_BACK %}
+          <li class="active"><a>{{ PAGER.TO_SHOW|safe }}<span class="sr-only">(текущая)</span></a></li>{% else %}
+          <li><a href="/blog/P{{ PAGER.PAGE }}">{{ PAGER.TO_SHOW|safe }}</a></li>{% endif %}{% endfor %}{% if FORW_BUTTON %}
+          <li>
+            <a href="/blog/P{{ FORW_PAGE }}" aria-label="Вперёд"><span aria-hidden="true">&rarr;</span></a>
+          </li>{% else %}<li class="disabled">
+            <span aria-hidden="true">&rarr;</span>
+          </li>{% endif %}
+        </ul>
+      </nav>
+    </div>
+  </div>{# <!--- /Листалка: ---> #}
+  {# <!--- Баннер ---> #}<div class="row"><div class="col-md-12 col-xs-12">{% include "ad/bannet-wide.html" %}</div></div>{# <!--- Баннер: конец --- #}
+</div>{% endblock %}
+
+{% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+
