@@ -45,10 +45,10 @@ hint: See above for details.
 Починить проблему можно воспользовавшись ([рецептом со StackOverflow](https://stackoverflow.com/a/44268445/1504067)):
 ```shell
 brew install mariadb-connector-c
-sudo ln -s /usr/local/opt/mariadb-connector-c/bin/mariadb_config /usr/local/bin/mysql_config
+# sudo ln -s /usr/local/opt/mariadb-connector-c/bin/mariadb_config /usr/local/bin/mysql_config
 
 pip install mysqlclient
 
-rm /usr/local/bin/mysql_config
+# rm /usr/local/bin/mysql_config
 brew unlink mariadb-connector-c
 ```
