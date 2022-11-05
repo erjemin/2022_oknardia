@@ -1,0 +1,130 @@
+{% load static %}{% comment %}
+
+ШАБЛОН LOGIN-LOGOUT
+ Во избежании высоких нагрузок на сервер и для ускорения загрузки страницы
+ организована AJAX-подгрузка блока LOGIN-LOGOUT на уровне фронтенда (клиента).
+
+ Кеширование этого блока (и запросов с ним связанным) позволит снизить  нагрузки.
+
+ В дальнейшем, в случае высоких нагрузок на сервис, возможна простая деградация
+ с помощью отключения этого блока. Также возможен перенос исполнения функционала
+ LOGIN-LOGOUT на отдельный сервер.
+
+Даннеа Google reCAPTCHA: https://www.google.com/recaptcha/admin#site/319090428?setup
+Публичный Ключ: 6Lf87gQTAAAAALmkG5ZsO0eJSvdSXcRvkxoPJCDB
+Секретный ключ: 6Lf87gQTAAAAADlqsJQToiWqg7urOWPrbfG_9zJB
+
+{% endcomment %}
+<script type="text/javascript">
+$.ajaxSetup({ cache: true , dataType: 'script' }); // включить кеширование подгружаемых JS-скриптов
+$.getScript ( "{% static 'js/login_out.js' %}" );  // подгрузить JS-скрипт
+
+</script>
+{% if LOGGED_USER != "" %}<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span> {{ user.username|truncatechars:12 }} <b class="caret"></b></a>
+  <ul class="form-group form-group-sm dropdown-menu nav navbar-nav navbar-right" role="menu">
+    <form id="logout-form">{% csrf_token %}
+      <input type="hidden" name="status" value="" id="status">
+      <div class="input-group">
+        <a href="#">Настройки пользователя
+        <span class="glyphicon glyphicon-cog pull-right"></span></a>
+      </div>
+      <div class="input-group">
+        <a href="#">Статистика
+        <span class="glyphicon glyphicon-stats pull-right"></span></a>
+      </div>
+      <div class="input-group">
+        <a href="#">Отслеживается запросов
+        <small class="badge pull-right"> 2 </small></a>
+      </div>
+      <div class="input-group">
+        <a href="#">Новых предложений
+        <small class="badge pull-right"> 42 </small></a>
+      </div>
+      <div class="input-group" style="border:none;">
+        <button type="submit" class="btn btn-default btn-sm pull-right" name="logout" onclick="$('#status').val('logout');">Выйти&nbsp;<span class="glyphicon glyphicon-log-out"></span></button>
+      </div>
+    </form>
+  </ul>
+{% else %}<a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="in_ntr();" rel="nofollow"><span class="glyphicon glyphicon-user"></span> Вход  <b class="caret"></b></a>
+  <ul class="form-group form-group-sm dropdown-menu nav navbar-nav navbar-right" role="menu">
+    <form id="login-reg-restore-form">{% csrf_token %}
+      <input type="hidden" name="status" value="" id="status">
+      <div class="input-group">
+        <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+        <input type="text" class="form-control" id="username" name="username" placeholder="login" />
+        <span class="input-group-addon check-it">
+          <i class="glyphicon glyphicon-ok-sign" id="valid-username"></i>
+        </span>
+      </div>
+      <dIV class="collapse" id="ili">
+        <small class="input-group">или<br/></small>
+      </dIV>
+      <dIV class="collapse" id="mail">
+        <div class="input-group">
+          <span class="input-group-addon">@</span>
+          <input type="email" class="form-control" id="email" name="email" placeholder="you@email.ru" />
+          <span class="input-group-addon check-it">
+            <i class="glyphicon glyphicon-ok-sign" id="valid-email"></i>
+          </span>
+        </div>
+      </dIV>
+      <dIV class="collapse" id="pwd1">
+        <div class="input-group">
+          <span class="input-group-addon"><small class="glyphicon glyphicon-lock"></small></span>
+          <input type="password" class="form-control" id="password" name="password" placeholder="password" data-toggle="popover" />
+          <span class="input-group-addon check-it">
+            <i class="glyphicon glyphicon-ok-sign" id="valid-password"></i>
+          </span>
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="look_pwd1" type="button"><small><small class="glyphicon glyphicon-eye-open"></small></small></button>
+          </span>
+        </div>
+      </dIV>
+      <dIV class="collapse" id="pwd_comment">
+         <i class="glyphicon glyphicon-info-sign"></i> <span id="pwd_comment_text"><!--- Содержимое этого блока будет подменяться во время набора и валидации пароля --->Шесть (или более) букв (прописных и строчных) и цифр</span>
+      </dIV>
+      <dIV class="collapse" id="pwd2">
+        <div class="input-group">
+          <span class="input-group-addon"><small class="glyphicon glyphicon-lock"></small></span>
+          <input type="password" class="form-control" id="password_repeat" name="password_repeat" placeholder="повторите passport" />
+          <span class="input-group-addon check-it">
+            <i class="glyphicon glyphicon-ok-sign" id="valid-password-repeat"></i>
+          </span>
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="look_pwd2" type="button"><small><small class="glyphicon glyphicon-eye-open"></small></small></button>
+          </span>
+        </div>
+      </dIV>
+      <dIV class="collapse" id="capt">
+        <div class="input-group" id="captcha"><!---сюда по onclick="$('#captcha').load('/captcha');" подгрузится капча ---></div>
+      </dIV>
+      <dIV class="collapse" id="b_vhod">
+        <div class="input-group"><nobr>
+          <button type="submit" class="btn btn-primary btn-sm" name="enter" onclick="$('#status').val('enter');">Войти</button>
+          <small>
+            <a href="#" data-toggle="collapse" data-target="#b_reg" onclick="in_reg();" rel="nofollow">Регистрация</a>
+            <a href="#" data-toggle="collapse" data-target="#b_vost" onclick="in_vost();" rel="nofollow">Воcстановить пароль</a>
+          </small>
+        </nobr></div>
+      </dIV>
+      <dIV class="collapse" id="b_vost">
+        <div class="input-group"><nobr>
+          <button type="submit" class="btn btn-primary btn-sm" name="restore" id="restore" onclick="$('#status').val('restore');">Восстановить пароль</button>
+          <small>
+            <a href="#" data-toggle="collapse" data-target="#b_reg" onclick="in_reg();" rel="nofollow">Регистрация</a>
+            <a href="#" data-toggle="collapse" data-target="#b_vhod" onclick="in_ntr();" rel="nofollow">Войти</a>
+          </small>
+        </nobr></div>
+      </dIV>
+      <dIV class="collapse" id="b_reg">
+        <div class="input-group"><nobr>
+          <button type="submit" class="btn btn-default btn-sm" name="registration" onclick="$('#status').val('registration');"><i class="glyphicon glyphicon-ok"></i>&nbsp;Регистрация</button>
+          <small>
+            <a href="#" data-toggle="collapse" data-target="#b_vhod" onclick="in_ntr();" rel="nofollow">Войти</a>
+            <a href="#" data-toggle="collapse" data-target="#b_vost" onclick="in_vost();" rel="nofollow">Воcстановить пароль</a>
+          </small>
+        </nobr></div>
+      </dIV>
+    </form>
+  </ul>
+{% endif %}

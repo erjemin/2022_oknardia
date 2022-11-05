@@ -1,0 +1,174 @@
+{% load static %}
+<script type="text/javascript">
+  // этот скрипт не имеет смысл делать внешним и выносить в static
+  // он высывается только когда пользователь восстанавливает пароль, а это случается крайне редко
+  if ( document.getElementById("box") == null ) window.location.replace("/"); // проверяем, а не вызвали-ли этот popup отдельно
+  $('#pwd_commentA').collapse('hide');
+  $(document).ready(function(){
+    // ПОДСВЕТИТЬ ПОДСКАЗКУ ПРИ НАБОРЕ ПАРОЛЯ
+    $("#passwordA").focus(function(){ $('#pwd_commentA').collapse('show'); });
+    $("#passwordA").blur(function(){ $('#pwd_commentA').collapse('hide'); });
+    // КНОПОЧКИ "ПОДГЛЯДИЕТЬ ПАРОЛЬ" на основном поле
+    $("#look_pwd1A").mousedown(function() { $("#passwordA").attr('type', 'text'); });
+    $("#look_pwd1A").mouseup(function() { $("#passwordA").attr('type', 'password'); });
+    $("#look_pwd1A").mouseout(function() { $("#passwordA").attr('type', 'password'); });
+    // КНОПОЧКИ "ПОДГЛЯДИЕТЬ ПАРОЛЬ" на поле "ПОВТОРИТЬ PASSWORD"
+    $("#look_pwd2A").mousedown(function() { $("#passwordA").attr('type', 'text'); $("#password_repeatA").attr('type', 'text'); });
+    $("#look_pwd2A").mouseup(function() { $("#passwordA").attr('type', 'password'); $("#password_repeatA").attr('type', 'password'); });
+    $("#look_pwd2A").mouseout(function() { $("#passwordA").attr('type', 'password'); $("#password_repeatA").attr('type', 'password'); });
+    // ПРОВЕРКА КОНТРОЛЬНОГО ПАРОЛЯ
+    $("#password_repeatA").keyup(function(){
+      if( $(this).val() != '')
+        if( $(this).val() == $('#passwordA').val() ) $("#valid-password-repeatA").css({ "color": "green" });
+        else $("#valid-password-repeatA").css({ "color": "red"  });
+      else $("#valid-password-repeatA").css({ "color": "white" });
+      });
+    // ПРОВЕРКА КАЧЕСТВА ПАРОЛЯ
+    $("#passwordA").keyup(function(){
+      var ucase = new RegExp("[A-Z]+");
+      var lcase = new RegExp("[a-z]+");
+	  var num = new RegExp("[0-9]+");
+      if( $(this).val() != '')
+        if( $(this).val().length >= 6  )
+          if( ucase.test($(this).val()) && lcase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "green" });
+            $('#pwd_comment_textA').text("Отличный пароль!");
+            $("#pwd_commentA").css({ "color": "green" });
+            }
+          else if ( ucase.test($(this).val()) && lcase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "grey" });
+            $('#pwd_comment_textA').text("Хороший пароль! Не хватает цифр.");
+            $("#pwd_commentA").css({ "color": "green" });
+            }
+          else if ( lcase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "grey" });
+            $('#pwd_comment_textA').text("Хороший пароль! Не хватает прописных букв.");
+            $("#pwd_commentA").css({ "color": "green" });
+            }
+          else if ( ucase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "grey" });
+            $('#pwd_comment_textA').text("Хороший пароль! Не хватает строчных букв.");
+            $("#pwd_commentA").css({ "color": "green" });
+          }
+          else if ( ucase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Слабый пароль! Не хватает цифр и строчных букв.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else if ( lcase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Слабый пароль! Не хватает цифр и прописных букв.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else if ( num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Слабый пароль! Не хватает букв.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else {
+            $("#valid-passwordA").css({ "color": "grey" });
+            $('#pwd_comment_textA').text("Странный пароль! Вы точно сможете его замнить?");
+            $("#pwd_commentA").css({ "color": "grey" });
+            }
+        else
+          if( ucase.test($(this).val()) && lcase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "grey" });
+            $('#pwd_comment_textA').text("Хороший пароль!.. но короткий.");
+            $("#pwd_commentA").css({ "color": "grey" });
+            }
+          else if ( ucase.test($(this).val()) && lcase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет цифр.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else if ( lcase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет прописных букв.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else if ( ucase.test($(this).val()) && num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "orange" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет строчных букв.");
+            $("#pwd_commentA").css({ "color": "orange" });
+            }
+          else if ( ucase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "red" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет строчных букв и цифр.");
+            $("#pwd_commentA").css({ "color": "red" });
+            }
+          else if ( lcase.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "red" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет прописных букв и цифр.");
+            $("#pwd_commentA").css({ "color": "red" });
+            }
+          else if ( num.test($(this).val()) ) {
+            $("#valid-passwordA").css({ "color": "red" });
+            $('#pwd_comment_textA').text("Короткий пароль!.. и нет букв.");
+            $("#pwd_commentA").css({ "color": "red" });
+            }
+          else {
+            $("#valid-passwordA").css({ "color": "red" });
+            $('#pwd_comment_textA').text("Странныйе символы! Переключитесь на латиницу!");
+            $("#pwd_commentA").css({ "color": "red" });
+            }
+      else {
+        $("#valid-passwordA").css({ "color": "white" });
+        $('#pwd_comment_textA').text('Шесть (или более) букв (прописных и строчных) и цифр');
+        $("#pwd_commentA").css({ "color": "grey" });
+        }
+      });
+      // ОБРАБОТЧИК КНОПКИ SUBMIT. ПЕРЕГРУЖАЕТ БЛОК #box
+      $('#restore-password').submit(
+        function enter(){
+          $.ajax({
+            url:     "/change_password", //Адрес подгружаемой страницы
+            type:     "POST", //Тип запроса
+            dataType: "html", //Тип данных
+            data: $("#restore-password").serialize(),
+            success: function(html){ $("#box").html(html)}
+            });
+          return false;
+          }
+        );
+    })
+</script>
+<h1>Смена пароля</h1>
+<p>Для пользователя: <strong>{{ USERNAME }}</strong> <small>({{ EMAIL }})</small></p>
+<form id="restore-password">
+  {% csrf_token %}
+  <input type="hidden" name="username" value="{{ USERNAME }}" />
+  <input type="hidden" name="user_id" value="{{ USER_ID }}" />
+  <input type="hidden" name="email" value="{{ EMAIL }}" />
+  <div class="col-md-5 pwdA">
+    <div class="input-group">
+      <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+      <input type="password" class="form-control" id="passwordA" name="passwordA" placeholder="password" data-toggle="popover" />
+      <div class="input-group-addon check-it">
+        <i class="glyphicon glyphicon-ok-sign" id="valid-passwordA"></i>
+      </div>
+      <span class="input-group-btn">
+        <button class="btn btn-default" id="look_pwd1A" type="button"><small><small class="glyphicon glyphicon-eye-open"></small></small></button>
+      </span>
+    </div>
+    <dIV class="collapse" id="pwd_commentA" style="padding-top:2px;">
+      <i class="glyphicon glyphicon-info-sign"></i> <span id="pwd_comment_textA"><!--- Содержимое этого блока будет подменяться во время набора и валидации пароля --->Шесть (или более) букв (прописных и строчных) и цифр</span>
+    </dIV>
+  </div>
+
+  <dIV class="col-md-5 pwdA">
+    <div class="input-group">
+      <div class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></div>
+      <input type="password" class="form-control" id="password_repeatA" name="password_repeatA" placeholder="повторите passport" />
+      <div class="input-group-addon check-it">
+        <i class="glyphicon glyphicon-ok-sign" id="valid-password-repeatA"></i>
+      </div>
+      <span class="input-group-btn">
+        <button class="btn btn-default" id="look_pwd2A" type="button"><small><small class="glyphicon glyphicon-eye-open"></small></small></button>
+      </span>
+    </div>
+  </dIV>
+
+  <dIV class="col-md-2 pwdA">
+    <button type="submit" class="btn btn-primary btn" name="change_pwd" onclick="$('#Astatus').val('enter');">Сменить пароль</button>
+  </dIV>
+</form>

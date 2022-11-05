@@ -1,0 +1,86 @@
+{% load static %}{% comment %}
+ШАБЛОН LOGIN-LOGOUT-AFTER
+
+Все что происходит после того как щелкунули кнопки:
+ [[login]], [[регистрация]], [[восстановить пароль]]
+и перед тем как блок '#login-logout' перегрузится в следующее состояние.
+
+Фоновые картинки брать здесь: http://www.loadinfo.net/
+{% endcomment %}
+<script type="text/javascript">
+function refresh() { $('#login-logout').load('/login-logout' ); }
+$(document).ready(function(){
+       setTimeout("refresh();", {{ DELAY|default:5000 }});
+    });
+</script>
+{% if STATUS == "NO_CAPTCHA" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ ВОССТАНОВЛЕНИИ ПАРОЛЯ НЕ ПРОШЕЛ CAPTCHA --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color: red;"></span>&nbsp;Или вы робот, или не ввели captcha</a>
+  </li>
+</ul>
+{% elif STATUS == "LOGOUT" %}
+<!--- ПОЛЬЗОВАТЕЛЬ РАЗЛОГИРУЕТСЯ  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-refresh" style="color:green;"></span>&nbsp;До свиданья</a>
+  </li>
+</ul>
+{% elif STATUS == "GOOD_LOGIN" %}
+<!--- ПОЛЬЗОВАТЕЛЬ НЕ УГАДАЛ ЛОГИН  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ok-sign" style="color:green;"></span>&nbsp;Вхожу</a>
+  </li>
+</ul>
+{% elif STATUS == "SHORT_PWD" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ РЕГИСТРАЦИИ УКАЗАЛ НЕДОСТАТОЧНО ДЛИННЫЙ ПАРОЛЬ  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Слишком короткий пароль при регистрации</a>
+  </li>
+</ul>
+{% elif STATUS == "PWD1_AND_PWD2_DIFFERENT" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ РЕГИСТРАЦИИ НЕ СМОГ ПОВТОРИТЬ ПАРОЛЬ В ПРОВЕРОЧНОМ ПОЛЕ  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Основной и проверочный пароль не совпадают</a>
+  </li>
+</ul>
+{% elif STATUS == "DOUBLE_USER" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ РЕГИСТРАЦИИ ВЫБРАЛ УЖЕ СУЩЕСТВУЮЩИЙ USERNAME  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Пользователь с этим именем уже зарегистрирован</a>
+  </li>
+</ul>
+{% elif STATUS == "NO_USER4RESTORE" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ ВОССТАНОВЛЕНИИ ПАРОЛЯ УКАЗАЛ НЕСУЩЕСТВУЮЩИЙ USERNAME  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Логин {{ USERNAME|default:"с таким именем" }} не существует</a>
+  </li>
+</ul>
+{% elif STATUS == "NO_MULTIPLE_EMAIL" %}
+<!--- ПОЛЬЗОВАТЕЛЬ ПРИ ВОССТАНОВЛЕНИИ УКАЗАЛ EMAIL, НА КОТОРЫЙ ЗЕРЕГИСТРИРОАННО НЕСКОЛЬКО USERNAME  --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;На email {{ EMAIL|default:"" }} зарегистрировано несколько пользователей.</a>
+  </li>
+</ul>
+{% elif STATUS == "NO_EMAIL4RESTORE" %}
+<!--- ПОЛЬЗОВАТЕЛЬ  ПРИ ВОССТАНОВЛЕНИИ С ТАКИМ EMAIL НЕ ОБНАРУЖЕН --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Пользователся с email {{ EMAIL|default:"" }} не обнаружено.</a>
+  </li>
+</ul>
+{% elif STATUS == "RESTORE_MAIL_SENT" %}
+<!--- ПОЛЬЗОВАТЕЛЮ  ПРИ ВОССТАНОВЛЕНИИ ОТПРАВЛЕН EMAIL С ИНСТРУКЦИЯМИ --->
+<ul class="nav navbar-nav navbar-right">
+  <li class="btn-default">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" onclick="refresh();" style="background-image: url({% static 'img/in_progress_grey1.gif' %});background-repeat: no-repeat;background-size: 100% 100%;"><span class="glyphicon glyphicon-ban-circle" style="color:red;"></span>&nbsp;Письмо для воммтановления пароля отправлено на email {{ EMAIL|default:"" }}.</a>
+  </li>
+</ul>{% endif %}
+
