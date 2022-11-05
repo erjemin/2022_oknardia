@@ -8,6 +8,7 @@ from django.contrib import auth
 from django.core import mail
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.template.context_processors import csrf
+from smtplib import SMTPException
 from time import time
 import requests
 import oknardia.settings
@@ -273,9 +274,10 @@ def form_user_menu_processing(request: HttpRequest) -> HttpResponse:
                                           connection=connection)                    # почтовое соединение
                 email.send()            # отправили почту
                 connection.close()      # закрыли почтовый коннект
-            except Exception as e:
+            except SMTPException:
                 # Что-то пошло не так и почта не отправилась. Надо подумать что в этим делать
-                print("ОШИБКА ОТПРАВКИ ПОЧТЫ: ", e)
+                # print("ОШИБКА ОТПРАВКИ ПОЧТЫ")
+                pass
 
             # Логируемся пользователем
             user = auth.authenticate(username=request.POST['username'], password=request.POST['password'])
@@ -359,9 +361,10 @@ def form_user_menu_processing(request: HttpRequest) -> HttpResponse:
                                       connection=connection)                # почтовое соединение
             email.send()            # отправили почту
             connection.close()      # закрыли почтовый коннект
-        except Exception as e:
+        except SMTPException:
             # Что-то пошло не так и почта не отправилась. Надо подумать, что с этим делать
-            print("ОШИБКА ОТПРАВКИ ПОЧТЫ: ", e)
+            # print("ОШИБКА ОТПРАВКИ ПОЧТЫ: ")
+            pass
         to_template.update({"STATUS'": "RESTORE_MAIL_SENT"})
         to_template.update({"EMAIL": email_restore_by})
         to_template.update({"DELAY": "5000"})         # ЗАДЕРЖКА ОБНОВЛЕНИИЯ СТАТУСА
