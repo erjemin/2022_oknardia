@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for oknardia project.
 
@@ -47,6 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'oknardia.apps.OknardiaConfig',
     'web.apps.WebConfig',
 ]
 
@@ -65,8 +68,7 @@ ROOT_URLCONF = 'oknardia.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -98,10 +100,10 @@ LANGUAGE_CODE = 'ru-RU'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
-USE_L10N = False                 # локальный формат дат имеет приоритет
 FIRST_DAY_OF_WEEK = 1            # 1'st day week -- monday
-SHORT_DATE_FORMAT = '%Y-%m-%d'
-SHORT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+SHORT_DATE_FORMAT = 'Y-m-d'
+SHORT_DATETIME_FORMAT = 'Y-m-d H:M:S'
+DATETIME_FORMAT = 'Y-m-d H:M:S'
 
 # Статические файлы (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -109,18 +111,44 @@ SHORT_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
-# 
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if DEBUG:     # DEBUG: заменяем настройки прода, на настройки девопа
+    MEDIA_ROOT = MY_MEDIA_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_MEDIA_ROOT_DEV2
+    # STATIC_ROOT = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
+    STATICFILES_DIRS = [
+        MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2,
+    ]
+    DATABASES = {
+        'default': {
+            'ENGINE': "django.db.backends.mysql",
+            'HOST': MY_DATABASE_HOST_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_DATABASE_HOST_DEV2,
+            'PORT': MY_DATABASE_PORT_DEV,  # Set to "" for default. Not used with sqlite3.
+            'NAME': MY_DATABASE_NAME_DEV,  # Not used with sqlite3.
+            'USER': MY_DATABASE_USER_DEV,  # Not used with sqlite3.
+            'PASSWORD': MY_DATABASE_PASSWORD_DEV,  # Not used with sqlite3.
+            # 'OPTIONS': { 'autocommit': True, }
+        }
     }
-}
+    TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
+else:
+    MEDIA_ROOT = MY_MEDIA_ROOT_PROD
+    STATIC_ROOT = MY_STATIC_ROOT_PROD
+    # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]
+    DATABASES = {
+        'default': {
+            'ENGINE': "django.db.backends.mysql",
+            'HOST': MY_DATABASE_HOST_PROD,  # Set to "" for localhost. Not used with sqlite3.
+            'PORT': MY_DATABASE_PORT_PROD,  # Set to "" for default. Not used with sqlite3.
+            'NAME': MY_DATABASE_NAME_PROD,  # Not used with sqlite3.
+            'USER': MY_DATABASE_USER_PROD,  # Not used with sqlite3.
+            'PASSWORD': MY_DATABASE_PASSWORD_PROD,  # Not used with sqlite3.
+            # 'OPTIONS': { 'autocommit': True, }
+        }
+    }
+    TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
 
 #########################################
-# настройки для почтового сервера
+# настройки для почтового сервера (они одинаковые для DEV и PROD)
 EMAIL_HOST = MY_EMAIL_HOST_DEV
 EMAIL_PORT = MY_EMAIL_PORT_DEV
 EMAIL_HOST_USER = MY_EMAIL_HOST_USER_DEV
@@ -138,3 +166,93 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ключи для Google Captha
 CAPTCHA_PUBLIC_KEY = MY_CAPTCHA_PUBLIC_KEY
 CAPTCHA_PRIVATE_KEY = MY_CAPTCHA_PRIVATE_KEY
+
+# количество коммерческих предложений во фреме отчета
+OFFER_PER_FRAME = 5
+OFFER_PER_FRAME_FOR_ONE_FLAP = 10
+# папка для хранения изображений
+PATH_FOR_IMG = "img"
+PATH_FOR_IMG_BLOG = u"img_for_blog/"
+PATH_FOR_IMG_AVATAR = u"img_avatar/"
+PATH_FOR_IMG_LOGOS = u"logos_img/"
+PATH_FOR_IMG_APARTMENT = u"img_apart/"
+PATH_FOR_IMG_SERIA = u"img_seria/"
+
+# папка для хранения мини-картинок со схемами открывания внутри PATH_FOR_IMG
+PATH_FOR_BIGIMGFLAPCONFIG = "_flap.cfg"
+PATH_FOR_IMGFLAPCONFIG = "_miniflap.cfg"
+
+PATH_FOR_JS = "js"
+PATH_FOR_JS_MAP = "js/4maps"
+SUFFIX_FOR_JS_MAP = "_seria_on_map.js"
+SUFFIX_FOR_MINI_JS_MAP = "_seria_on_map.mini.js"
+PATH_FOR_SERIA_INFO_HTML_INCLUDE = "SeriaInfo/prepared/"
+
+# переменные
+# высота картинки
+PICT_H = 500
+# высота картинки (без обводки)
+PICT_MINIH = 18
+# ширина строки на мини картинке (без обводки)
+PICT_MINWI = 9
+# для рейтинга
+RARING_STAR = 5                 # ЗВЕЗДОЧЕК В РЕЙТИНГЕ
+RARING_SET_MAX = 5.0            # МАКСИМАЛЬНЫЙ РЕЙТИНГ НАБОРА
+RARING_SET_MIN = 0.0            # МИНИМАЛЬНЫЙ РЕЙТИНГ НАБОРА
+RARING_GLAZING_MAX = 5.0
+RARING_GLAZING_MIN = 0.0
+RARING_PVC_PROFILE_MAX = 5.0
+RARING_PVC_PROFILE_MIN = 0.0
+RARING_WEIGHT_PVC_PROFILE_IN_SET = 1.5  # сколько рейтинга (зведочек) набора составляет профиль
+RARING_WEIGHT_GLAZING_IN_SET = 1.5      # сколько рейтинга (зведочек) набора составляет стеклопакет
+# веса ранкинга (веса ранжирования)
+RANK_STEP_SET_MODIFY = 0.75             # Дата последнего обновления цены набора
+RANK_STEP_SET_DELIVERY = 2              # Доставка включена в стоимость
+RANK_STEP_SET_UNINSTALL_INSTALL = 2     # Демонтаж/Монтаж включен в стоимость
+RANK_STEP_SET_SILL = 1.5                # Подоконник включен в стоимость
+RANK_STEP_SET_PANES = 1.5               # Водоотлив включен в стоимость
+RANK_STEP_SET_SLOPE = 1.5               # Откос включен в стоимость
+RANK_STEP_SET_CLIMATE_CONTROL = 0.5     # Климат-контроль включен в стоимость
+RANK_STEP_SET_NUM_OFFER = 0.1           # Число предложений включен в стоимость
+RANK_STEP_DISCOUNT_FLEX = 1             # Гибкость скидок (число шагов скидки)
+RANK_STEP_DISCOUNT_MAX = 1              # Размер скидки (максимальная скидка)
+RANK_GLAZ_SOUNDPROOFING = 1.0           # Шумоизоляция СТЕКЛОПАКЕТА
+RANK_GLAZ_HEAT_TRANSFER = 1.0           # Теплопередача СТЕКЛОПАКЕТА
+RANK_GLAZ_LIGHT_TRANSMISSION = 0.25     # Коэффициент светопропускания СТЕКЛОПАКЕТА
+RANK_GLAZ_PASSING_SUN = 0.15            # Коэффициент солнцепропускания СТЕКЛОПАКЕТА
+RANK_GLAZ_THICKNESS = 0.1               # Толщина СТЕКЛОПАКЕТА
+RANK_GLAZ_CAMERAS_NUM = 0.1             # Число камер СТЕКЛОПАКЕТА
+RANK_GLAZ_CAMERAS_NUM_NAME=u"Число камер"
+RANK_PVCP_SOUNDPROOFING = 1.0           # Шумоизоляция ПРОФИЛЯ
+RANK_PVCP_SOUNDPROOFING_NAME = u"Шумоизоляция"
+RANK_PVCP_HEAT_TRANSFER = 1.0           # Теплопередача ПРОФИЛЯ
+RANK_PVCP_HEAT_TRANSFER_NAME = u"Теплопередача"
+RANK_PVCP_HEIGHT = 0.3                  # Высота в световом проеме ПРОФИЛЯ
+RANK_PVCP_HEIGHT_NAME = u"Высота в проёме"
+RANK_PVCP_RABBET = 0.2                  # Высота фальца ПРОФИЛЯ
+RANK_PVCP_RABBET_NAME = u"Фальц"
+RANK_PVCP_G_THICKNESS = 0.2             # Максимальная толщина стеклопакета ПРОФИЛЯ
+RANK_PVCP_G_THICKNESS_NAME = u"Толщина стеклопакета"
+RANK_PVCP_THICKNESS = 0.2               # Монтажная ширина ПРОФИЛЯ
+RANK_PVCP_THICKNESS_NAME = u"Толщина профиля"
+RANK_PVCP_SEALS = 1.2                   # Контуров уплотненения ПРОФИЛЯ
+RANK_PVCP_SEALS_NAME = u"Уплотнители"
+RANK_PVCP_CAMERAS_NUM = 0.1             # Число камер ПРОФИЛЯ
+RANK_PVCP_CAMERAS_NUM_NAME = u"Число камер"
+RANK_PVCP_CAMERAS_POPULARITY_NAME = u"Популярность"
+# бля блогов
+NUM_BLOG_TIZER_IN_PAGE = 5              # дисто тизеров (анонсов) блогов на страничке
+NUM_PAGE_IN_PAGINATOR = 3               # чисто отображаемых страничек в педжинаторе
+# Унифицированные именования ключей для JSON-объектов
+KEY_URL = "url"
+KEY_NOTE = "note"
+KEY_RATING = "RATING"
+KEY_RATING_VIRTUAL = "RATING_V"
+KEY_DICSOUNT = "%"
+KEY_HTML = "html"
+# KEY_RATING_VIRTUAL = "reting_v"
+# Типы карточек каталога
+CATALOG_RECORD_FOR_PROFILE_MODEL = 1
+CATALOG_RECORD_FOR_PROFILE_MANUFACTURER = 100
+CATALOG_SORTER_MAGIC_NUMBER_ADV = 5
+CATALOG_SORTER_MAGIC_NUMBER_TIZER = 1
