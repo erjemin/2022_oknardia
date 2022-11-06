@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django.contrib.humanize',
+
     'oknardia.apps.OknardiaConfig',
     'web.apps.WebConfig',
 ]
@@ -77,6 +79,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            # 'libraries': {
+            #     'filter': 'app.templatetags.templatetag',
+            # }
         },
     },
 ]
