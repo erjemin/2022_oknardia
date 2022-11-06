@@ -1,0 +1,289 @@
+{% extends "base.html" %}{% load static %}
+
+{% block Title %}Тарифы и услуги{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Description %}Тарифы и услуги маркетплейс-агрегатора Окнардия. Размещение предложений пластиковых и деревянных окон, обновление цен на окна, рекламные баннеры и виджеты на сайт оконной компании.{% endblock %}
+
+{% block Keywords %}типовые проекты зданий, панельное строительство, {% for CountSeria in SERIA_NAV_DIM %}серия {{ CountSeria.SERIA_R }}, {{ CountSeria.SERIA_R }}, {% endfor %}, года простойки, регионы построки, распространенность{% endblock %}
+
+{% block Top_JS1%}
+<script type="text/javascript">
+$(window).load(function(){let images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});
+</script>
+{% endblock %}
+
+{% block Main_Content %}<div class="container-fluid">
+<div class="row">
+  <div class="col-md-9 col-md-offset-1 col-xs-12"><h1>Направления сотрудничества с&nbsp;«Окнардия» и&nbsp;тарифы</h1></div>
+</div>
+
+<div class="row">
+	<div class="col-md-10 col-md-offset-1 col-xs-12 tariff">
+    {% if SENDER %}{% if SENDER == "Ok!" %}<p style="background: lightgreen;">Спасибо за ваше обращение. Мы обязательно свяжемся с вами.</p>{% elif SENDER == "Error!" %}<p style="background: lightsalmon;">Что-то пошло не так. Не удалось отправить e-mail. Попробуйте еще раз или используте для связи info@oknardia.ru </p>{% endif %}{% endif %}
+		<table>
+      <thead>
+        <tr>
+          <th rowspan="2" width="40%">&nbsp;</th>
+          <th rowspan="2" width="4%">&nbsp;</th>
+          <th width="14%"><h2>{&alpha;}<br /><small>старт <i>(альфа)</i></small></h2></th>
+          <th width="14%"><h2>{&beta;}<br /><small>коммерческий <i>(бета)</i></small></h2></th>
+          <th width="14%"><h2>{&delta;}<br /><small>продвинутый <i>(дельта)</i></small></h2></th>
+          <th width="14%"><h2>{&mu;}<br /><small>медийный <i>(мю)</i></small></h2></th>
+          <th width="14%"><h2>{&omega;}<br /><small>виджет <i>(омега)</i></small></h2></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <h3>Наборов ценовых пред&shy;ло&shy;же&shy;ний&nbsp;<small>(шт.)</small>:</h3>
+            <p><small>Ценовые предложения в&nbsp;«Окнардии» размещаются наборами. Набор включает в&nbsp;себя все проёмы и&nbsp;рекомендованные схемы открывания для всех серий типовой застройки из&nbsp;базы «Окнардия». Набор предполагает наличие единого комплекта из&nbsp;стеклопакета, профиля рамы и&nbsp;створки, фурнитуры, подоконника, отлива, откоса и&nbsp;сопутствующих услуг (демонтаж/монтаж, доставка, отделка и&nbsp;т.&nbsp;п.)</small></p>
+          </td>
+          <td></td>
+          <td>&#8531;</td>
+          <td>2</td>
+          <td>12</td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td>18</td>
+        </tr>
+        <tr>
+          <td>
+            <h3>Обновлений ценовых пред&shy;ло&shy;же&shy;ний в&nbsp;месяц<span style="margin-right:0.3em;">&nbsp;</span><small><span style="margin-left:-0.3em;">(</span>шт.)</small>:</h3>
+            <p><small>Могут быть обновлены цены и&nbsp;описания всех цен из&nbsp;одного набора и&nbsp;характеристики самого набора</small></p>
+          </td>
+          <td></td>
+          <td>&#8531;</td>
+          <td>1</td>
+          <td>6</td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>
+            <h3><span style="margin-left:-0.44em;">«</span>Всплытие» ценовых пред&shy;ло&shy;же&shy;ний в&nbsp;выдаче в&nbsp;месяц<span style="margin-right:0.3em;">&nbsp;</span><small><span style="margin-left:-0.3em;">(</span>шт.)</small>:</h3>
+            <p><small>После «всплытия» ценовые предложения из одного набора будут попадать в&nbsp;самый верхний блок выдачи.  «Всплытие» может быть применено к одному и тому же, или к разным наборам.</small></p>
+          </td>
+          <td></td>
+          <td>&#8531;</td>
+          <td>1</td>
+          <td>8</td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td>8</td>
+        </tr>
+        <tr>
+          <td>
+            <h3>Логотип компании:</h3>
+            <p><small>Логотип отображается в&nbsp;ценовой выдаче, сравнениях конфигураций и&nbsp;пр.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+        </tr>
+        <tr>
+          <td>
+            <h3>Расширенная информация:</h3>
+            <p><small>Размещение в каталоге информации с&nbsp;описанием компании, контактная информация и&nbsp;описания всех её&nbsp;наборов оконных предложений.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+        </tr>
+        <tr>
+          <td>
+            <h3>Электронные заявки:</h3>
+            <p><small>Возможность получения ссылок-заявок с&nbsp;сайта «Окнардии».</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в&nbsp;будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в&nbsp;будущем</small></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в&nbsp;будущем</small></td>
+        </tr>
+        <tr>
+          <td>
+            <h3>Электронные<span style="margin-right:0.44em;"> </span><span style="margin-left:-0.44em;">«</span>персональные скидки клиентам»:</h3>
+            <p><small> Возможность выдачи посетителям «Окнардии» персонального GQ-сертификата на&nbsp;дополнительные услуги или скидки.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+        </tr><tr>
+        <td>
+            <h3>Электронные отчёты:</h3>
+            <p><small>Ежемесячная отчётность со&nbsp;статистикой просмотров оконных предложений компании, контактной информации и&nbsp;баннеров.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b><small><br/>в будущем</small></td>
+        </tr><tr>
+        <td>
+            <h3>Баннеры:</h3>
+            <p><small>Показ баннеров между блоками ценовых предложений. Баннеры от&nbsp;всех участников показываются равномерно. Одновременно не&nbsp;более пяти участников баннерного показа в&nbsp;течение месяца. В&nbsp;качестве баннеров может выступать графический файл, Flash, видео и HTML-код включающий JavaScript/CSS-анимацию. Размеры баннера: ширина 100%, высота&nbsp;75&thinsp;px.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+        </tr><tr>
+        <td>
+            <h3>Публикации в блог &laquo;Окнардии&raquo;:</h3>
+            <p><small>Ежемесячные публикации в блог «Окнардии». Принимаются любые тематические материалы рекламной направленности. Публикации могут включать текст, иллюстрации, SVG-графику, анимацию, JavaScrip и видео. Модерация, проверка встраиваемого кода, верстка и размещение от имени компании проводится редакцией «Окнардии». Максимальный размер публикации &thkap; 25&thinsp;000 знаков.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+        </tr><tr>
+          <td>
+            <h3>Виджет:</h3>
+            <p><small>Виджет добавляющий функционал «Окнардии» на&nbsp;сайт поставщика пластиковых окон. Виджет предлагает посетителю указать адреса своего дома, выбрать тип планировки квартиры после чего отображает размеры проемов, схемы открывания и&nbsp;конфигурации наборов окон, их&nbsp;цены и&nbsp;скидки. Пример работы виджета и инструкции по установке: <a href="https://widget.oknardia.ru/" target="_blank">widget.oknardia.ru</a>.</small></p>
+          </td>
+          <td></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-minus-sign"></b></td>
+          <td><b class="glyphicon glyphicon-plus-sign"></b></td>
+        </tr><tr>
+          <td colspan="7"><h3>&nbsp;</h3></td>
+        </tr><tr>
+          <td>
+            <h3> Тариф на&nbsp;запуск и&nbsp;установку:</h3>
+          </td>
+          <td></td>
+          <td><b><nobr>0<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>1&nbsp;000<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>5&nbsp;000<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>500<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>45&nbsp;000<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+        </tr><tr>
+          <td colspan="7"><h3>&nbsp;</h3></td>
+        </tr><tr>
+          <td>
+            <h3>Ежемесячный тариф:</h3>
+          </td>
+          <td></td>
+          <td><b><nobr>0<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>300<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>1&nbsp;500<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>500<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>9&nbsp;000<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+        </tr><tr>
+          <td colspan="7"><h3>&nbsp;</h3></td>
+        </tr><tr>
+          <td>
+            <h3>Авансовый тариф за год:</h3>
+            <p><small>Тариф включает запуск и&nbsp;установку.</small></p>
+          </td>
+          <td></td>
+          <td><b><nobr>0<i class="glyphicon glyphicon-rub" aria-label="₽ (руб.)" title="₽ (руб.)"></i></nobr></b></td>
+          <td><b><nobr>2&nbsp;520<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i><sup class="badge">-30%</sup></nobr></b></td>
+          <td><b><nobr>13&nbsp;800<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i><sup class="badge">-40%</sup></nobr></b></td>
+          <td><b><nobr>5&nbsp;200<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i><sup class="badge">-20%</sup></nobr></b></td>
+          <td><b><nobr>70&nbsp;200<i class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></i><sup class="badge">-35%</sup></nobr></b></td>
+        </tr><tr>
+          <td colspan="7"><h3>&nbsp;</h3></td>
+        </tr><tr>
+          <td></td>
+          <td></td>
+          <td><a type="button" class="btn btn-info" data-toggle="modal" data-target="#Form_for_Feedback" onclick="$('#TARIFF').val(1);try{yaCounter32997984.reachGoal('LetsCooperate');}catch(e){}">Заказать {α}</a></td>
+          <td><a type="button" class="btn btn-info" data-toggle="modal" data-target="#Form_for_Feedback" onclick="$('#TARIFF').val(2);try{yaCounter32997984.reachGoal('LetsCooperate');}catch(e){}">Заказать {β}</a></td>
+          <td><a type="button" class="btn btn-info" data-toggle="modal" data-target="#Form_for_Feedback" onclick="$('#TARIFF').val(2);try{yaCounter32997984.reachGoal('LetsCooperate');}catch(e){}">Заказать {δ}</a></td>
+          <td><a type="button" class="btn btn-info" data-toggle="modal" data-target="#Form_for_Feedback" onclick="$('#TARIFF').val(3);try{yaCounter32997984.reachGoal('LetsCooperate');}catch(e){}">Заказать {μ}</a></td>
+          <td><a type="button" class="btn btn-info" data-toggle="modal" data-target="#Form_for_Feedback" onclick="$('#TARIFF').val(4);try{yaCounter32997984.reachGoal('LetsCooperate');}catch(e){}">Заказать {ω}</a></td>
+        </tr>
+      </tbody>
+    </table>
+    <P>&nbsp;</P>
+    <P>Мы открыты к сотрудничеству. Много идей в&nbsp;наших планах (в&nbsp;том числе универсальный калькулятор окон, виджет калькулятора, генератор смет и&nbsp;прейскурантов и&nbsp;еще много чего) и&nbsp;если у вас есть потребность в&nbsp;дополнительных разработках для рынка окон, будем рады обсудить возможные формы сотрудничества.</P>
+    </div>
+</div>
+
+<!-- Модальное окно обратной связи -->
+<div class="modal fade" id="Form_for_Feedback" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true" class="glyphicon glyphicon-remove" title="&times; (закрыть окно)"></span></button>
+        <h4 class="modal-title" id="myModalLabel">Форма обратной связи:</h4>
+      </div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="modal-body">
+          <!-- div class="input-group form-group">
+            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+            <input type="text" class="form-control" placeholder="Как к вам обратиться?">
+          </div>
+          <div class="input-group form-group">
+            <span class="input-group-addon">@</span>
+            <input type="email" class="form-control" placeholder="Укажите ваш email" id="email_" name="email_">
+          </div -->
+          <div class="form-group">
+            <label for="fio_" class="control-label">Как к вам обратиться:</label>
+            <input type="text" class="form-control" placeholder="Иван Иванович Иванов" id="fio_" name="fio_">
+          </div>
+          <div class="form-group">
+            <label for="email_" class="control-label">Ваш email<sup><small style="color:red;"><i class="glyphicon glyphicon-asterisk"></i></small></sup>:</label>
+            <input type="email" class="form-control" placeholder="mail@ваш.домен" id="email_" name="email_">
+          </div>
+          <div class="form-group">
+            <label for="email_" class="control-label">Ваш телефон:</label>
+            <input type="text" class="form-control" placeholder="+7 (XXX) XXX-XX-XX" id="tel_" name="tel_">
+          </div>
+          <div class="form-group">
+            <label for="TARIFF" class="control-label">Тема запроса:</label>
+            <select class="form-control" id="TARIFF" name="tariff">
+              <option value="1">{α} альфа — разместить цены на «Окнардии» (бесплатно)</option>
+              <option value="2">{β} бета — разместить цены на «Окнардии»</option>
+              <option value="3">{δ} дельта — разместить цены на «Окнардии»</option>
+              <option value="4">{μ} мю — медийный (баннеры и публикации в блог «Окнардии»)</option>
+              <option value="5">{ω} омега — виджет на сайт и размещение цен на «Окнардии»</option>
+              <option value="6">Другая форма сотрудничества и/или предложение</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message-text" class="control-label">Дополнительное сообщение:</label>
+            <textarea class="form-control" id="message-text" rows="5" name="accompanying_message" placeholder="Здесь вы можете задать любой вопрос или запросить дополнительную информацию."></textarea>
+          </div>
+          <p class="bg-warning"><i class="glyphicon glyphicon-asterisk" style="color:red;"></i> — поля обязательные к заполнению.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">ой…</button>
+          <button type="submit" class="btn btn-primary">Отправить запрос</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
+
+ {% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+
