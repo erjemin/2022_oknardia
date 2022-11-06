@@ -1,0 +1,477 @@
+/*!
+ * OKNARDIA v0.3β
+ * Copyright 2015-2017, Sergei Erjemin
+ *
+ * Даннаая cтилевая талицв предполаает наличие прееварительно подключенного
+ * Bootstrap v3.2.0 и является его расширением подготовленным специально
+ * для проекта OKNADRIA.
+ * https://oknardia.ru
+ */
+
+/* Оформление ссылок глобально */
+a { color: #414997; text-decoration: none !important; border-bottom: 1px dotted #414997;}
+a.not-ready { color: silver; text-decoration: none !important;  border-bottom: 1px dotted gray;}
+a:hover { color: #7a7fb6; transition: 0.5s; border-bottom: 1px solid #7a7fb6;}
+a.not-ready:hover { color:gray;transition: 0.5s; border-bottom: 1px solid black;}
+a:not(:hover) { transition: 1s; }
+a:active { color: orange; }
+/* Оформление ссылок в виде беджей */
+a.badge { text-decoration:none; border:solid 1px rgba(173,173,173,0) !important;}
+a.badge:hover { text-decoration:none; border-bottom:solid 1px gray !important;border-right:solid 1px gray !important;}
+
+/* Оформление логотипа */
+div.container-fluid div.navbar-header {text-wrap:none;}
+div.container-fluid div.navbar-header a {border-bottom:none;}
+div.container-fluid div.navbar-header a:hover {color: black;}
+div.container-fluid div.navbar-header a span {color:limegreen}
+div.container-fluid div.navbar-header a:hover span {color:yellowgreen;transition: 0.5s;}
+div.container-fluid div.navbar-header a:not(:hover) span {transition: 1s;}
+div.container-fluid div.navbar-header a.navbar-brand nobr img {margin-top: -7px;}
+#login-logout > ul {margin-right:1ex;}
+/* div.container-fluid div.navbar-header a.navbar-brand:hover nobr img {margin-top:-10px;height:150%;width:150%;} */
+
+/* настройка для выпадающего меню (верхнего и нижнего) */
+ul.navbar-nav a {border-bottom:none;}
+
+/* большая картинка схемы открывыания на страничке ценового педложения */
+div.win_discr div img {height:250px;width:auto;}
+
+/* примечание перд таблицей ценовой выдачи */
+#tab-note {font-size: small;padding-top:1ex }
+
+/* стили таблицы ценовой выдачи BEGIN */
+#price-list > thead > tr {background:silver;}
+#price-list > thead > tr > th {font-weight: 700;vertical-align:top;line-height: 90%;}
+#price-list > thead > tr > th > .glyphicon {font-size: x-small}
+#price-list > thead > tr > th > small {font-weight: 100;font-size: x-small;}
+#price-list tr th:first-of-type {padding-right:0;}
+#price-list > thead > tr > th:nth-child(3),
+#price-list > thead > tr > th:nth-child(5),
+#price-list > thead > tr > th:last-child {text-align:right;}
+#price-list > thead > tr > th:nth-child(6),
+#price-list > thead > tr > th:nth-child(7) {text-align:right;white-space:nowrap;}
+#price-list > tbody td {vertical-align:middle;border-right:none;border-left:none;}
+#price-list > tbody > tr > td:first-of-type {background-repeat:no-repeat; background-position:100% 3px;background-size:auto 25px;vertical-align:top;}
+#price-list > tbody > tr > th:nth-last-child(2) {text-align:center;vertical-align:middle;}
+#price-list > tbody > tr > th:last-child, .rnw {text-align:right;white-space:nowrap;vertical-align:middle !important;}
+#price-list > tbody > tr > td:last-child {text-align:right;vertical-align:top;}
+/* Красивые чекбоксы внутри ценовой выдачи START */
+#price-list > tbody > tr > th:first-of-type > .checkbox { margin:0; padding:0; }
+#price-list > tbody > tr > th:first-of-type > .checkbox > label > .cr {
+  position: relative;   display: inline-block;  border: 1px solid silver;
+  border-radius: .25em; width: 1.3em;           height: 1.3em;
+  float: left;          margin-left: -1.5em; }
+#price-list > tbody > tr > th:first-of-type > .checkbox .cr .cr-icon {
+  position: absolute; font-size: .8em; line-height: 0; top: 50%; left: 20%; }
+#price-list > tbody > tr > th:first-of-type > .checkbox > label > input[type="checkbox"] { display: none; }
+#price-list > tbody > tr > th:first-of-type > .checkbox > label > input[type="checkbox"] + .cr > .cr-icon {
+  transform:scale(6) rotateZ(-50deg);  opacity: 0; transition: all .3s ease-in; color: royalblue; }
+#price-list > tbody > tr > th:first-of-type > .checkbox > label > input[type="checkbox"]:checked + .cr > .cr-icon {
+  transform:scale(1) rotateZ(0deg); opacity:1; color:black; }
+#price-list > tbody > tr > th:first-of-type > .checkbox > label > input[type="checkbox"]:disabled + .cr { opacity:.6; }
+/* Красивые чекбоксы внутри ценовой выдачи END*/
+.color-bullet {padding:0 6px;}
+[id^=load_and_banner_] td:last-child { vertical-align: bottom !important; font-size: small; white-space:nowrap; }
+[id^=load_and_banner_] td:last-child .glyphicon-chevron-down{ top: 0.5ex; }
+[id^=tel].collapse glyphicon-phone-alt {color:grey;}
+[id^=tel].collapse small:last-child {color: #449d44;border: none;}
+#tmp {display:none;}
+/* стили таблицы ценовой выдачи END */
+/* Название набора в ценовой выдаче */
+.set-name {padding-right:50px;font-size:1.2em;font-weight:bold;margin-top:0;margin-bottom:5px;}
+.set-name a { border-bottom: dotted 2px; }
+.set-name a .glyphicon { top: 0.5ex; padding-left: 1ex; }
+.set-name a:hover { border-bottom: solid 2px deepskyblue;}
+.set-name a:hover .glyphicon { color: deepskyblue;border-bottom: solid 2px deepskyblue;}
+.set-name a:hover .shake-vertical { border-bottom: solid 2px rgba(255,255,255,0); }
+
+
+#ton, #box { position:absolute; }
+#map, #ton { height: 98vh; width:100vw; }
+#map { opacity:0.35; filter:alpha( Opacity=35 ); }
+#ton {
+  top:0;width:0;
+  background: #F4EED7;
+  z-index: 10000;
+  background: radial-gradient( ellipse closest-corner at 39% 33%, #F4EED7, #F1C17D );
+  opacity: 0.92;  filter: alpha( Opacity=12 );
+}
+#box {
+  background:#F4EED7; top:24vh;
+  border-radius: 6px;
+  box-shadow:  10px 15px 25px -15px #7a7fb6;, 0 0 40px rgba(241,193,125,0.2) inset;
+  -webkit-box-shadow: 10px 15px 25px -15px #7a7fb6, 0 0 40px rgba(241,193,125,0.2) inset;
+  -moz-box-shadow: 10px 15px 25px -15px #7a7fb6, 0 0 40px rgba(241,193,125,0.2) inset;
+}
+.stylish-input-group .input-group-addon{ border-left:0;	 background: white !important; }
+.stylish-input-group .input-group-btn{ background: white !important; }
+.stylish-input-group .form-control{	border-right:0;	box-shadow:0 0 0; border-color:#ccc; }
+
+#collapse_it {
+  font-size:small;
+}
+#collapse_it tbody {
+  width:100% !important;
+  display: table;
+}
+
+
+
+.collapse div small a {
+  text-decoration: none;
+  border-bottom: 1px dotted;
+  margin-left:10px;
+}
+.collapse div small a:hover {
+  color: cyan;
+  border-bottom: 1px solid;
+  transition: 2s;
+}
+.collapse div small a:not(:hover) {
+  transition: 2s;
+}
+
+#login-reg-restore-form .input-group, #logout-form .input-group {
+  width: 324px; /* ширина Google Captcha */
+  padding:5px 10px;
+}
+#pwd_comment, #pwd_commentA {
+  padding:2px 10px;
+  font-size: x-small;
+}
+#email, #username, #password, #password_repeat, #passwordA, #password_repeatA {
+  box-shadow: none;
+  outline:0 none;
+  border-right: none;
+  height: 35px;
+}
+#email, #username:focus, #password:focus, #password_repeat:focus, #passwordA:focus, #password_repeatA:focus {
+  border: 1px solid #cccccc;
+  border-right: none;
+}
+
+.pwdA { margin: 0 0 15px -15px;}
+
+#passwordA:focus { outline:10px red; }
+.check-it { background:white; color:white; border-left: none; font-size: smaller; }
+#logout-form .input-group { border-bottom: solid 1px lightgray; }
+.show_delayed { display: none;}
+
+/*!
+ * Стили для представления отчетов
+ */
+.win_discr {
+      display:inline-block;
+      padding: 0 0 0 2em;
+  }
+/* #seria .win_discr { padding: 0 3ex 0 1ex; } */
+.win_discr span, .table-condensed span {
+  display:inline-block;
+  width:1em;
+  height:1em;
+  }
+.win_discr div {
+  border-left:
+      solid 1px darkgray;
+  }
+.win_discr .caption {
+  font-size:x-small;
+  padding-left:0.5ex;
+  }
+
+.ap_list {
+  font-size: x-small;
+  border-left: dashed 1px;
+  }
+.ap_list ul { margin-left: -2em; list-style-type: square;}
+.ap_list h6 { font-size: small; }
+
+.href_d span {
+  display: inline-flex;
+  width: 19.5%;
+  padding: 2px 4px;
+}
+.href_d a {
+    text-decoration: none;
+    border-bottom: dotted 1px !important;
+}
+.href_d a:hover { border-bottom: solid 1px !important; text-decoration: none;}
+
+.header, .header3 {
+  background-color:cornsilk;
+  margin-top:1em;
+  padding: 0.5ex;
+}
+.header3 { margin-top:1ex; }
+
+#rambler img { padding-top: 9px; }
+
+.tr1 { background-color: #1c94c4;}
+.tr2 td {
+  border-bottom: dashed 1px gray;
+  padding: 1ex;
+}
+.tr2 td nobr {
+   display: block;
+   margin-top: 9px;
+}
+.cntr { text-align: center; }
+.tr2 td nobr span {
+  display: inline-block;
+  padding: 0 5px;
+}
+.trZ td { padding: 1ex; }
+.trZ td .badge, .tr2 td .badge {
+  margin: 1ex;
+  background-color:#adadad;
+}
+[id^=cc] {
+  padding-right:1em;
+}
+
+hr.dotted-black {
+  color:white; background-color:white; border-top:1px dotted black;
+  margin: 0; height:0; clear:both; /* для очистки, если тег идет после float елемента */
+}
+.blog-list-tizer { padding-top: 1ex;font-size:120%; padding-bottom: 4ex; }
+.blog-list-header > p:nth-child(2) {
+  font-size:x-small;color:darkgray;padding-top: 2ex;margin-bottom:-4px;
+  z-index:5;
+}
+.blog-list-header > p:nth-child(3) {
+   background-color:#eeeeee;padding:0 2ex 0 1em;z-index:50;position:relative;top:2px;display: inline;
+  z-index:7;
+}
+.blog-list-header > p:nth-child(3) > img {
+  vertical-align:baseline;border:solid 1px darkgrey;top:-2px;width:22px;height:22px;
+}
+.blog-list-header h2 {
+  margin:0 2ex 2ex -0.5ex;
+  top: -1ex;
+  background-color:cornsilk;
+  display:inline;
+  padding:0 1ex 0 1em;
+  z-index:-100;
+  line-height:1em;
+  font-weight: 100;
+}
+.header_blog > p > span {font-size:x-small;color:darkgray;background-color:cornsilk;margin-left:30px;padding:2px 1ex 20px;}
+.header_blog > p > small {background-color:#eeeeee;padding:0 2ex 0 1em;z-index:50;position:relative;}
+.header_blog > p > small > img {vertical-align:baseline;border:solid 1px darkgrey;width:22px;height:22px;}
+.header_blog h1 {
+margin-top:-.5ex;
+font-weight: 100;
+}
+[class^='pluso'] {text-align: right;}
+[class^='pluso'] a {border-bottom: none;}
+/* Таблица сравнения характеристик наборов */
+#compare_table  {border-top: solid 3px;}
+#compare_table td, #compare_table th {
+  border-right: 1px dotted !important;
+  border-left: 1px dotted !important;
+  border-top: none;
+  border-bottom: none;
+}
+#compare_table tbody {
+  border-bottom: double;
+  border-left: 1px dotted;
+}
+#compare_table thead {
+  border-bottom: double;
+  background-color:cornsilk;
+  border-left:  1px dotted;
+}
+#compare_table thead .centre {
+  text-align: center !important;
+}
+#compare_table thead th { vertical-align: text-bottom;}
+#compare_table thead th .url {  font-size: xx-small; padding-top: 1em; }
+#compare_table a .glyphicon-trash { /* color:black; */ text-decoration: none; }
+#compare_table a:hover .glyphicon-trash { color:red; transition: 0.5s; }
+#compare_table a:not(:hover) .glyphicon-trash { transition: 1s; }
+#compare_table .badge{
+  font-size:xx-small;
+  color:white;
+  vertical-align: text-top;
+  font-weight: 100;
+  padding:3px 7px 2px 6px;
+  /* display:inline-block; */
+}
+#compare_table .glyphicon-star-empty { color: silver; }
+#compare_table tr { border-right: solid 3px; border-left: solid 3px;}
+.rating {
+  background: whitesmoke;
+  border-bottom: double;
+  border-top: double;
+}
+
+/* Плашка на которой отрсовываются юольшие картинки с конами (верхняя) */
+.ShowBigFlapPictures { background-color:whitesmoke;padding: 1em 0;border-bottom:solid 1px darkgray;}
+
+#add2compare .glyphicon-plus-sign { padding: 0 1ex; color:lime;}
+#add2compare ul { list-style-type: none; margin-left: -5ex}
+#add2compare ul li a b.glyphicon-plus-sign { border-bottom: none !important; }
+#add2compare ul li a:hover  { color:lime; transition: 0.5s; border-bottom: 1px solid lime;}
+#add2compare ul li a:not(:hover) { transition: 1s; }
+
+.bullet-red { background:#ff7f7f; padding:0 0.5ex; }
+.bullet-green { background:#7fff7f; padding:0 0.5ex; }
+
+
+/* беджики в ценовой выдачи (звездочки, даты обновления, расстояние до офиса)*/
+.badge4price {font-weight:100;font-family: monospace;font-size:xx-small;color:white;}
+.badge4price .glyphicon-star-empty {color:lightgrey;}
+.badge4price .glyphicon-star {color:greenyellow;}
+.badge4price > a {color:ghostwhite;border-bottom: 1px dotted ghostwhite;font-size: x-small;}
+
+[id^=preloader] {
+  text-align: center;
+  display: none;
+  transition: 1s;
+}
+/* для "карусели" картинок внутри описаний серий домов и т.п. */
+#CAROUSEL {height:200px !important; overflow:hidden; white-space:nowrap; float:right;
+  background-color:#f0f0f0; margin-left:1em; margin-bottom:1ex; border:dotted 1px black;}
+#CAROUSEL img {height:200px !important; background-color: #f0f0f0; padding: 1ex;
+  opacity:0.7 !important; -moz-opacity: 0.7; filter: alpha(opacity=70) black; -khtml-opacity: 0.7;
+  border-right:dotted 1px silver; border-left:dotted 1px #f0f0f0;}
+#CAROUSEL img:hover {transition:1s; border-right:dotted 1px black;
+  opacity:1 !important; -moz-opacity:1; filter:alpha(opacity=100) black; -khtml-opacity:1;
+  border-left:dotted 1px black; background-color:#ffffff;}
+#CAROUSEL img:not(:hover) {transition: 2s;}
+/* для блока последние визиты в ценовой выдаче и других местах */
+.last_user_visit {background-color:#f0fff0;}
+.log_user_visit {background-color:#eee;margin-bottom:3em;}
+.last_user_visit h5 {padding-top:1em;}
+.log_user_visit h5 {color:#888;padding-top:1em;}
+.last_user_visit ul, .log_user_visit ul {list-style-type:square;font-size:small;padding-bottom:1em;}
+.log_user_visit ul {color: #777; }
+.log_user_visit ul li a {color:#889; border-bottom: 1px dotted #889;}
+.log_user_visit ul li a:hover {border-bottom: 1px solid #889;}
+.last_user_visit ul li a:hover, .log_user_visit ul li a:hover {background: white;transition: 0.5s;}
+.last_user_visit ul li a:not(:hover), .log_user_visit ul li a:not(:hover) { transition: 1s; }
+.last_user_visit ul li small, .log_user_visit ul li small {font-size:x-small;}
+/* для попапов с рейтингами */
+h3.popover-title {font-size: x-small;padding-top: 3px;padding-bottom: 3px;color:black;}
+.rating > td > nobr > a {cursor: pointer;font-size: small;vertical-align:top;}
+.popover {max-width:23em;min-width: 23em;}
+.popover > .popover-content {background: white;}
+.popover > .popover-content > table.pop-tab td:first-of-type {font-size:small;text-wrap:none;padding-right: 1ex;color: black;}
+.popover > .popover-content > table.pop-tab td {border: solid 1px white !important; padding-bottom: 1ex;}
+.popover > .popover-content > table.pop-tab > tr:last-of-type td {background:lightgrey;color: black;}
+#shadow_buffer {display: none;} /* блок в который подгружается что-то чтобы после удалить */
+/* для страницы с тарифами */
+.tariff > table { width: 100% !important; }
+.tariff > table thead { background: whitesmoke; }
+.tariff > table th {text-align: center; vertical-align:text-top;}
+.tariff > table th h2 { font-weight: 900;line-height: 60%;}
+.tariff > table th h2 { font-weight: 900;line-height: 60%;}
+.tariff > table td h3 { font-weight: 100; margin-bottom:0;}
+.tariff > table td h3 small { vertical-align: baseline; font-size:smaller;}
+.tariff > table td { font-weight: 100; font-size:x-large; line-height: 60%; vertical-align: text-top;}
+.tariff > table th small {font-size: xx-small; font-weight: 100; padding-bottom:10px; }
+.tariff > table td small {font-size: x-small; font-weight: 100; vertical-align: top;}
+.tariff > table td p small {font-size: small; font-weight: 100; vertical-align: top; line-height:150% !important;}
+.tariff > table td p small a {font-size: small; font-weight: 100; vertical-align: top;}
+.tariff > table td b {font-size:larger;vertical-align: baseline;}
+.tariff > table td b nobr {letter-spacing:-0.05ex}
+.tariff > table td b .badge {font-size:xx-small;vertical-align: top;background:lawngreen;color:black;margin-left:-1.5ex;z-index:100;box-shadow: 0.3ex 0.3ex 1ex rgba(0,0,0,0.3);transform: rotate(-15deg);-moz-transform: rotate(-15deg);-ms-transform: rotate(-15deg);-webkit-transform: rotate(-15deg);-o-transform: rotate(15deg);font-weight: 100;}
+.tariff > table td b i {font-size:smaller;vertical-align: baseline;}
+.tariff > table td b small {vertical-align: baseline;}
+.tariff > table td {text-align: center;}
+.tariff > table > tbody > tr > td:first-child {border-left: none !important;text-align: left;}
+.tariff > table .glyphicon-plus-sign {color:lawngreen;font-size:x-large;}
+.tariff > table .glyphicon-minus-sign {color:red;font-size:x-large;}
+/* для табличек и описания таблицы рейтингов */
+.rang {width: 100%}
+.rang > tbody > tr.NR > td {color: silver;}
+.rang > tbody > tr.NR > td > a {color: silver;border-bottom: none}
+.rang > tbody > tr.NR > td > a:hover {color: silver;border-bottom: 1px dotted gray}
+.rang > tbody > tr.NR > td > nobr > tt.badge {background: silver;}
+.rang > tbody > tr.NR > td > nobr > i.glyphicon-star-empty {color:silver;}
+.rang > tbody > tr > td > nobr > i.glyphicon-star-empty {color:gray;}
+.rang > thead > tr > th:first-of-type, .rang > tbody > tr > td:first-of-type {border-left: solid 2px black;}
+.rang > tbody > tr > td {white-space:nowrap;padding:2px 5px;text-overflow: ellipsis;overflow: hidden;border-right: dotted 1px black;}
+.rang > thead > tr > th {text-align:left !important;white-space:nowrap;padding: 1ex 3ex 1ex 5px;border-right: dotted 1px black;}
+.rang > tbody > tr > td.c {text-align:center !important;white-space:nowrap;}
+.rang > thead > tr > th { position: relative;cursor: pointer;}
+.rang > thead {border-bottom: double black !important;
+  border-top: solid 2px black !important; border-right: solid 2px black !important;}
+.rang > tbody {border-bottom: solid 2px black !important;
+  border-top: solid 2px black !important; border-right: solid 2px black !important;
+  }
+.rang > thead > tr > th.desc:after { border-top-color: gray; }
+.rang > thead > tr > th.asc:before { border-bottom-color: gray; }
+.rang > thead > tr > th:after, table.rang th:before {
+  content: '';display: block; position: absolute;
+  right: 1ex; border-color: transparent; border-style: solid;
+  border-width: 5px; width: 0; height: 0; }
+/* table.rang th:before { content: '↕'; } */
+.rang > thead > tr > th:after { border-top-color: #eee;top:2.6ex; }
+.rang > thead > tr > th:before {border-bottom-color: #eee;}
+div.kk {font-size: small}
+div.kk hr {border:0;height:1px;background:silver;width:100%}
+div.kk h2 {font-weight: 300;font-size:1.2em;}
+div.kk ul > li {list-style: square;margin-left:-2em;list-style-position: outside;}
+/* для каталога профилей */
+.catalog2, .catalog2-header {
+  -webkit-column-count: 2; -moz-column-count: 2; column-count: 2;
+  -webkit-column-gap: 25px; -moz-column-gap: 25px; column-gap: 25px;}
+.catalog2 { font-size: 120%; -webkit-column-rule: 1px dotted #ccc; -moz-column-rule: 1px dotted #ccc; column-rule: 1px dashed silver; padding-bottom: 2em;}
+.catalog2-header > ul {font-size: xx-small;padding: 2px 15px; list-style: none; background-color: #f5f5f5; border-radius: 4px;}
+.catalog2 > ul, .catalog2-header > ul { list-style: none; -webkit-padding-start: 15px; }
+.catalog2 > ul > li { font-size: large; font-weight:700; padding-bottom: 0.2ex }
+.catalog2 > ul > ul, .catalog2-header > ul > ul { list-style: none; -webkit-padding-start: 15px; }
+.catalog2 > ul > ul > li:last-of-type { padding-bottom: 1em; }
+.catalog > table {width: 100%;}
+.catalog > table > tbody > tr > td {padding: 5px 8px}
+.catalog > table > tbody > tr:last-of-type > td {padding: 5px 8px 10px;}
+.catalog > table > tbody > tr:first-of-type > td {padding: 10px 8px 5px;border-top: double black}
+.catalog > table > thead > tr > th {font-size:small;font-weight:500;}
+.catalog > table > thead > tr > th {padding: 3px 8px;}
+.catalog > table > tbody > tr > td:first-of-type > nobr > small.badge4price {margin-top:-1ex;}
+.catalog > table > tbody > tr > td:first-of-type > sup {color:red;}
+.catalog > table > tbody > tr > td:last-of-type > nobr > small.badge4price {margin-top:-1ex;}
+.catalog > table > tbody > tr > td, .catalog > table > thead > tr > th  {vertical-align: top;}
+.catalog > table > tbody > tr > td:last-of-type,
+.catalog > table > thead > tr > th:last-of-type  {text-align: right;}
+.catalog > table > tbody > tr > td > div.round-mark {
+  width:10px; height:10px; display:inline-block; float:right; margin-top:0.7ex;border: 1px solid silver;
+  -moz-border-radius:50%; -webkit-border-radius:50%; border-radius:50%;}
+.catalog > table > thead > tr > th:first-of-type  {text-align: left;}
+.catalog > table > thead {background: whitesmoke; border-top: 2px black solid;}
+.catalog > table > tbody {border-bottom: 2px black solid;}
+.catalog_footer {padding-top: 3em;}
+.catalog > p.catalog-logo > a {border: none;}
+.catalog > p.catalog-logo > a > img {height: 40px;width:auto;padding-right: 15px;padding-bottom: 8px;}
+.catalog > h4 {margin-top: 2ex;}
+.catalog > ul {-webkit-padding-start: 15px; list-style: square outside;}
+.catalog > p.small-note {font-size: x-small;float: right;}
+.catalog > table > thead > tr > th.c,
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(4),
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(5),
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(6){text-align: center;}
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(7),
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(8){font-size: small;}
+.catalog > table > thead > tr > th.b {vertical-align: bottom;}
+.catalog > table.flap-catalog > thead > tr > th.r,
+.catalog > table.flap-catalog > tbody > tr > td:first-of-type{padding-right:1px;text-align:right;}
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(3){padding-left:1px;}
+.catalog > table.flap-catalog > tbody > tr > td:nth-child(2),
+.catalog > table.flap-catalog > thead > tr > th.x {padding-right:0;padding-left:0;}
+.scrolled{margin-left:15px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;-ms-overflow-style:-ms-autohiding-scrollbar;}
+.scrolled > table {margin-left:-15px;padding-right: 150px;}
+a > .catalog-seria-img{background: whitesmoke;background-position:0 0;
+  height: 200px;background-size:cover;margin:8px 0;}
+a > .catalog-seria-img > h4 {position: absolute;right:7px;bottom:0;float:right;
+  margin: 8px;padding:0.5ex 1em 0.8ex 3ex;background:rgba(220,220,220,0.9);}
+a:hover > .catalog-seria-img > h4 {background:rgba(65,73,151,0.8);transition: 1s; }
+a:not(:hover) > .catalog-seria-img > h4 {transition: 3s;}
+a > .catalog-seria-img > h4 > span {border-bottom: 1px dotted royalblue;color: black;}
+a:hover > .catalog-seria-img > h4 > span {border-bottom: 1px solid whitesmoke;color: whitesmoke;transition: 1.5s;}
+a:not(:hover) > .catalog-seria-img > h4 > span {transition: 2s;}
+
+small.xx {font-size: xx-small}
+small.x {font-size: x-small}
+
+.panel-footer {margin-top: 0;}
