@@ -46,6 +46,7 @@ urlpatterns = [
     re_path(r'^blogpost/(?P<post_id>\d{1,})/\S*/*$', blog.blog_post),
     # САТИЧЕСКИЕ СТРАНИЦЫ
     re_path(r'^tariff$', views.tariff),
+    re_path(r'^contact', views.contact),
 
 ]
 

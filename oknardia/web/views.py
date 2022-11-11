@@ -92,3 +92,12 @@ def tariff(request: HttpRequest) -> HttpResponse:
                 to_template.update({'SENDER': "Error!"})
                 pass
     return render(request, template, to_template)
+
+
+def contact(request: HttpRequest) -> HttpResponse:
+    """ Показывает страничку с контактной информацией
+
+    :param request: входящий http-запрос
+    :return response: исходящий http-ответ
+    """
+    return render(request, "contact.html", {})

@@ -1,0 +1,87 @@
+{% extends "base.html" %}{% load static %}
+
+{% block Title %}Контакты{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Description %}Контактная информация маркетплейс-агрегатора «Окнардии»: адрес, телефоны и email для связи, персоны.{% endblock %}
+
+{% block Keywords %}Контакты, контактная информация, телефон для связи, email для связи, адрес, адрес офиса, персоны, Окнардия, маркетплейс-агрегатор «Окнардии»{% endblock %}
+
+{% block Top_JS1%}
+<script type="text/javascript">
+$(window).load(function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});
+</script>
+{% endblock %}
+
+{% block Main_Content %}<div class="container-fluid">
+<div class="row">
+  <div class="col-md-9"><h1>Контакты «Окнардия»</h1></div>
+</div>
+<style>
+dl {display: table}
+dl div {display: table-row}
+dt {display: table-cell; padding-left: 1em; text-align: left;}
+dd {display: table-cell; padding-left: 2em; text-align: left;}
+.col-md-3 {text-align: center; padding-top: 5ex;}
+img {background-color: whitesmoke;}
+</style>
+
+<div class="row">
+	<div class="col-md-7">
+    <P>Маркетплейс-агрегатор «Окнардия»&nbsp;— частная инициатива. Мы не аффилированы с&nbsp;компаниями поставщиками окон, производителями профилей, стеклопакетов, фурнитуры или агентствами; открыты для любых идей, рекомендаций, советов, критики; готовы идти навстречу любым предложениям сотрудничества. Связаться с&nbsp;организаторами проекта:</P>
+   </div>
+</div>
+
+<div class="row">
+	<div class="col-md-3" >
+    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/avatar_eserg_160x160.png" width="160" height="160" alt="Сергей Еремин — CEO/CTO «Окнардия», организационные вопросы, технические решения, партнерство" />
+    <h3>Сергей Еремин</h3>
+    <h4>CEO/CTO</h4>
+    <h5>организационные вопросы, технические решения, партнерство</h5>
+    <dl>
+      <div>
+        <dt>email:</dt>
+        <dd><script type="text/javascript">document.write("<a href='mailto:info" + String.fromCharCode(64) + "oknardia." + "ru?subject=ОКНАРДИЯ: организационные и технические вопросы, партнерство '>info&commat;"+"oknardia"+"&period;ru</a>");</script></dd>
+      </div><div>
+        <dt>тел:</dt>
+        <dd><script type="text/javascript">document.write("+7("+91+"6)11"+6+"-"+(98+1)+"-17" );</script></dd>
+      </div><div>
+        <dt>fb:</dt>
+        <dd><a href="https://www.facebook.com/erjemin" rel="nofollow">facebook.com/erjemin</a><br />
+          <a href="https://www.facebook.com/oknardia" rel="nofollow">facebook.com/oknardia</a></dd>
+      </div><div>
+        <dt>telegram:</dt>
+        <dd><a href="https://www.facebook.com/erjemin" rel="nofollow">@erjemin</a></dd>
+      </div>
+    </dl>
+  </div>
+  <div class="col-md-3" >
+    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/timofei_molodovanin.jpg" width="160" height="160" alt="Тимофей Молдованин — CFO/COO «Окнардия», финансовые и коммерческие вопросы" />
+    <h3>Тимофей Молдованин</h3>
+    <h4>CFO/COO</h4>
+    <h5>финансовые и коммерческие вопросы</h5>
+    <dl>
+      <div>
+        <dt>email:</dt>
+        <dd><script type="text/javascript">document.write("<a href='mailto:t" + "@" + "oknardia." + "ru?subject=ОКНАРДИЯ: финансовые и коммерческие вопросы'>t"+"&commat;oknardia&period;"+"ru</a>");</script></dd>
+      </div><div>
+        <dt>тел:</dt>
+        <dd><script type="text/javascript">document.write("+7("+91+"6)34"+1+"-"+(97+2)+"-36" );</script></dd>
+      </div>
+    </dl>
+  </div>
+  <p style="height:60em;">&nbsp;</p>
+</div>
+</div>{% endblock %}
+
+ {% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+
