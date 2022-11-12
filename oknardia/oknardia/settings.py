@@ -123,6 +123,8 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     STATICFILES_DIRS = [
         MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2,
     ]
+    # путь к каталогу static (в эту переменную использовать для указания пути где будут делаться кэш-блоки для шаблонов)
+    STATIC_BASE_PATH = MY_STATIC_BASE_PATH_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_BASE_PATH_DEV2
     DATABASES = {
         'default': {
             'ENGINE': "django.db.backends.mysql",
@@ -137,8 +139,10 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
     TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
 else:
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
-    STATIC_ROOT = MY_STATIC_ROOT_PROD
     # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]
+    STATIC_ROOT = MY_STATIC_ROOT_PROD
+    # путь к каталогу static (в эту переменную использовать для указания пути где будут делаться кэш-блоки для шаблонов)
+    STATIC_BASE_PATH = MY_STATIC_BASE_PATH_PROD
     DATABASES = {
         'default': {
             'ENGINE': "django.db.backends.mysql",

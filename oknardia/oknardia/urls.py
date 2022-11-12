@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog
+from web import views, autocomplete_addr, user_manager, blog, diagrams
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -47,6 +47,7 @@ urlpatterns = [
     # САТИЧЕСКИЕ СТРАНИЦЫ
     re_path(r'^tariff$', views.tariff),
     re_path(r'^contact', views.contact),
+    re_path(r'^stat_all$', diagrams.statistic_menu),
 
 ]
 
