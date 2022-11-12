@@ -76,20 +76,19 @@ def statistic_menu(request: HttpRequest) -> HttpResponse:
     to_template = {}
     seria_id, for_seria_nav = seria_nav(0)
     to_template.update(for_seria_nav)
-    # проверяем какой JS с картами и PieCharts: упакованные или нет.
+    # проверяем какой JS с картами и PieCharts: упакованные или нет (откуда берётся не упакованный -- не помню)
     path_name = f"{STATIC_BASE_PATH}/{PATH_FOR_JS_MAP}"
-    print(path_name)
+    # print(path_name)
     if os.path.isfile(f"{path_name}/_ALL{SUFFIX_FOR_MINI_JS_MAP}"):
         to_template.update({'MAP_JS': f"{PATH_FOR_JS_MAP}/_ALL{SUFFIX_FOR_MINI_JS_MAP}"})
     else:
         to_template.update({'MAP_JS': f"{PATH_FOR_JS_MAP}/_ALL{SUFFIX_FOR_JS_MAP}"})
-
     # строим диаграмму сколько каких серий и каковы их площади...
     q_seria_pie = Seria_Info.objects.raw(
         "SELECT"
         " oknardia_seria_info.kRoot_id as id,"
         "  COUNT(oknardia_building_info.id) AS num_building,"
-        "  SUM(oknardia_building_info.fTotal_Area) AS areaM2 "
+        "  SUM(oknardia_building_info.fTotal_Area) AS area_m2 "
         "FROM oknardia_building_info"
         "  INNER JOIN oknardia_seria_info"
         "    ON oknardia_building_info.kSeria_Link_id = oknardia_seria_info.id "
@@ -100,11 +99,10 @@ def statistic_menu(request: HttpRequest) -> HttpResponse:
     for count in q_seria_pie:
         data2pie.append({
             "ID": count.id,
-            "AREA_M2": count.areaM2,
+            "AREA_M2": count.area_m2,
             "NUM_BUILDING": count.num_building
         })
-    # print data2pie
+    # print(data2pie)
     to_template.update({'DATA2PIE': data2pie})
-
     to_template.update({'ticks': float(time()-time_start)})
     return render(request, template, to_template)
