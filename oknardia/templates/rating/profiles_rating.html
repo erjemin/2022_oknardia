@@ -1,0 +1,67 @@
+{% extends "base.html" %}{% load static %}
+
+{% block Title %}: Тарифы и услуги{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{# block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock #}
+
+{# block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock #}
+
+{% block Description %}Тарифы и услуги маркетплейс-агрегатора Окнардия. Размещение предложений пластиковых и деревянных окон, обновление цен на окна, рекламные баннеры и виджеты на сайт оконной компании.{% endblock %}
+
+{% block Keywords %}типовые проекты зданий, панельное строительство, {% for CountSeria in SERIA_NAV_DIM %}серия {{ CountSeria.SERIA_R }}, {{ CountSeria.SERIA_R }}, {% endfor %}, года постройки, регионы постройки, распространённость{% endblock %}
+
+{% block Top_JS5 %}
+  <script src="{% static 'js/sortable-table.js' %}" type="text/javascript"></script>{% endblock %}
+
+{% block Main_Content %}<div class="container-fluid">
+<div class="row">
+  <div class="col-md-9"><h1>Рейтинг оконных профилей базы «Окнардия»</h1></div>
+</div>
+<div class="row">
+	<div class="col-lg-10 col-sm-12">
+    <table class="rang table-hover table-responsive" id="for_including1" style="margin-bottom: 4em;">
+      <thead>
+      <tr>
+        <th>№</th>
+        <th>Производитель</th>
+        <th>Марка</th>
+        <th>Рейтинг</th>{% for k in KEYS %}
+        <th title="K{{ forloop.counter }}: {{ k }}">K{{ forloop.counter }}</th>{% endfor %}
+      </tr>
+      </thead>
+      <tbody>{% for i in TABLE %}
+        <tr {% if not i.R_REAL %} class="NR" {% endif %}>
+          <td data-sort="{{ forloop.counter }}">{{ forloop.counter }}.</td>
+          <td data-sort="{{ i.BRAND }}"><a href="/catalog/profile/{{ i.ID }}-{{ i.BRAND_URL }}">{{ i.BRAND }}</a></td>
+          <td data-sort="{{ i.NAME }}"><a href="/catalog/profile/{{ i.ID }}-{{ i.BRAND_URL }}/{{ i.ID }}-{{ i.NAME_URL }}">{{ i.NAME }}</a></td>
+          <td data-sort="{{ i.RATING_N|stringformat:".2f" }}" class="c" style="background:rgb({{ i.RATING_COLOR }});">
+            <nobr title="Рейтинг «Окнардии» для профиля {{ i.NAME }} компании {{ i.BRAND }} — {% if i.RATING_N >= 0 %}{{ i.RATING_N|stringformat:".2f" }}{% else %}не присвоен{% endif %}"><!-- НАЧАЛО звездочки рейтинга -->{% for Star in i.RATING_STAR %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"{% if i.RATING_COLOR2 %} style="color:rgb({{ i.RATING_COLOR2 }})"{% endif %}></i>{% else %}<b class="glyphicon glyphicon-star"{% if i.RATING_COLOR2 %} style="color:rgb({{ i.RATING_COLOR2 }})"{% endif %}></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if i.RATING_N >= 0 %}<tt class="badge"{% if i.RATING_COLOR2 %} style="background:rgb({{ i.RATING_COLOR2 }})"{% endif %}>{{ i.RATING_N|stringformat:".2f" }}</tt>{% endif %}<!-- КОНЕЦ бедж --></nobr></td>{% for j in i.K_ARR %}
+          <td data-sort="{{ j.VAL|stringformat:".4f" }}" style="background-color:rgb({{ j.COLOR }});">&nbsp;</td>{% endfor %}
+        </tr>{% endfor %}
+      </tbody>
+    <script src="{% static 'js/sortable-table.js' %}" type="text/javascript"></script>
+    </table>
+  </div>
+  <div class="col-lg-2 col-md-3 kk">
+    <p>Характеристики оконных профилей по которым производится ранжирование:</p>
+    <ul>{% for k in KEYS %}
+      <li><b>K{{ forloop.counter }}:</b> {{ k }}</li>{% endfor %}
+    </ul>
+    <hr />
+    <h2>Условные обозначения:</h2>
+    <p><span style="background:linear-gradient(to left,#0f0,#fff);border:1px solid grey;white-space:nowrap;">&emsp;&emsp;&emsp;</span> — Цвето&shy;вое коди&shy;ров&shy;ание окон&shy;ных про&shy;филей присут&shy;ству&shy;ющих в&nbsp;пред&shy;ложе&shy;ниях участ&shy;ников &laquo;Окнар&shy;дии&raquo; <em>(реаль&shy;ный рей&shy;тинг)</em>. Более насы&shy;щен&shy;ный зелё&shy;ный озна&shy;чает лучшую харак&shy;те&shy;ристику. Харак&shy;те&shy;рис&shy;тики профилей с&nbsp;реаль&shy;ным рей&shy;тингом предос&shy;тавлены <nobr>компа&shy;ниями-участ&shy;никами</nobr>.</p>
+    <p><span style="background:linear-gradient(to left,silver,#fff);border:1px solid grey;white-space:nowrap;">&emsp;&emsp;&emsp;</span> — Цвето&shy;вое коди&shy;рова&shy;ние окон&shy;ных про&shy;филей из&nbsp;базы &laquo;Окнар&shy;дии&raquo; по&nbsp;кото&shy;рым нет ком&shy;мерче&shy;ских пред&shy;лож&shy;ений участ&shy;ников <em>(вир&shy;туаль&shy;ный рей&shy;тинг)</em>. Более яркий цвет озна&shy;чает лучшую харак&shy;терис&shy;тику. Харак&shy;терис&shy;тики про&shy;филей с&nbsp;вир&shy;туаль&shy;ным рей&shy;тин&shy;гом взяты из&nbsp;незави&shy;симый источ&shy;ников.</p>
+    <hr />
+    <p>Методика формирования рейтинга &laquo;Окнардии&raquo;, порядок ранжирования и веса характеристик оконных профилей <a href="/blogpost/13/Rejting-Oknardii-i-kak-on-ustroen-(chast-2)">описаны в нашем блоге </a>.</p>
+  </div>
+</div>
+</div>{% endblock %}
+
+{% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+

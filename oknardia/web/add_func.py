@@ -9,8 +9,8 @@ import math
 def safe_html_spec_symbols(s: str) -> str:
     """ Очистка строки от HTML-разметки типографа
 
-        :param s:   строка которую надо очистить
-        :return: str:
+    :param s: str --  строка которую надо очистить
+    :return: str: str -- очищенная строка
     """
     # очистка строки от некоторых спец-символов HTML
     result = s.replace('&shy;', '­')
@@ -40,50 +40,60 @@ def safe_html_spec_symbols(s: str) -> str:
 #     ), "ru", reversed=True).replace(u" ", u"-").replace(u"'", u"").replace(u"/", u"~").replace(u"\\", u"~").replace(u"--", u"-")
 
 
-def Rus2Url (RusString):
-    return re.sub(r'^-|-$', '',
-                  re.sub(r'-{1,}', '-',
-                         re.sub(r'<[\s\S]*?>|&[\S]*?;|[\W]', '-',
-                                re.sub(r'\+', '-plus', translit(RusString, "ru", reversed=True))
-                                )
-                         )
-                  ).lower()
+# def Rus2Url (RusString):
+#     return re.sub(r'^-|-$', '',
+#                   re.sub(r'-{1,}', '-',
+#                          re.sub(r'<[\s\S]*?>|&[\S]*?;|[\W]', '-',
+#                                 re.sub(r'\+', '-plus', translit(RusString, "ru", reversed=True))
+#                                 )
+#                          )
+#                   ).lower()
+#
+#
+# # Суммирует все цифры в строке через произвольные (не цифровые) разделители
+# def SummThrought(StringWSlash):
+#     StringWSlash = re.sub( r"[^0-9]", u",", StringWSlash)
+#     ListTerms = StringWSlash.split(u',')
+#     Summ = 0
+#     for Count in ListTerms:
+#         try:
+#             Summ += int(Count)
+#         except:
+#             pass
+#     return Summ
+#
+#
+def get_rating_set_for_stars(rating: float = 0.) -> list:
+    """ Возвращает массив 1 и 0 для отрисовки звёздочек.
 
-
-# Суммирует все цифры в строке через произвольные (не цифровые) разделители
-def SummThrought(StringWSlash):
-    StringWSlash = re.sub( r"[^0-9]", u",", StringWSlash)
-    ListTerms = StringWSlash.split(u',')
-    Summ = 0
-    for Count in ListTerms:
-        try:
-            Summ += int(Count)
-        except:
-            pass
-    return Summ
-
-
-# возвращает массив 1 и 0 для отрисовки зввездочек.
-def GetRatingSet4Star ( fRating ):
+    :param rating: float -- рейтинг
+    :return: list: list -- массив 1 и 0 для отрисовки звёздочек
+    """
     # if fRating < 0.01:
     #     return []
-    RatingSet = []
+    rating_set = []
     for CountStar in range(RARING_STAR):
-        if RARING_SET_MIN+CountStar*(RARING_SET_MAX-RARING_SET_MIN)/RARING_STAR+1 <= fRating:
-            RatingSet.append(1)
+        if RARING_SET_MIN+CountStar * (RARING_SET_MAX - RARING_SET_MIN) / RARING_STAR + 1. <= rating:
+            rating_set.append(1)
         else:
-            RatingSet.append(0)
-    return RatingSet
+            rating_set.append(0)
+    return rating_set
+#
+#
+# # рассчитывает дистанцию в км. между двумя геокоординатами
+# def GetGeoDistance(lon1, lat1, lat2, lon2):
+#     lonA, latA, latB, lonB = map(math.radians, [lon1, lat1, lat2, lon2])
+#     distance = 2 * math.asin(math.sqrt(math.sin((latB - latA) / 2) ** 2 + math.cos(latA) * math.cos(latB) * math.sin(
+#         (lonB - lonA) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
+#     return distance
 
 
-# рассчитывает дистанцию в км. между двумя геокоординатами
-def GetGeoDistance(lon1, lat1, lat2, lon2):
-    lonA, latA, latB, lonB = map(math.radians, [lon1, lat1, lat2, lon2])
-    distance = 2 * math.asin(math.sqrt(math.sin((latB - latA) / 2) ** 2 + math.cos(latA) * math.cos(latB) * math.sin(
-        (lonB - lonA) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
-    return distance
+def normalize(val: float, val_max: float = 5., val_min: float = 0.) -> float:
+    """ Нормализация значения
 
-
-# нормализация
-def Normalize(Val, ValMax=5, ValMin=0):
-    return float(Val-ValMin)/float(ValMax-ValMin)
+    :param val: float -- значение которое надо нормализовать
+    :param val_max: float -- максимальное значение в нормализуемом диапазоне
+    :param val_min: float -- минимальное значение в нормализуемом диапазоне
+    :return: float: float -- нормализованное значение
+    """
+    return float(val - val_min) / float(val_max - val_min)

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report2
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -41,13 +41,15 @@ urlpatterns = [
     re_path(r'^change_password$', user_manager.change_password),
     # ОБРАБОТЧИКИ СПИСКА ПУБЛИКАЦИЙ И САМИХ ПУБЛИКАЦИЙ БЛОГА
     re_path(r'^blog/*$', blog.blog_list),
-    re_path(r'^blog/P(?P<page>\d{1,})/*$', blog.blog_list_posts),
-    re_path(r'^blogpost/(?P<post_id>\d{1,})/(?P<page_back>\d{1,})/\S*/*$', blog.blog_post),
-    re_path(r'^blogpost/(?P<post_id>\d{1,})/\S*/*$', blog.blog_post),
+    re_path(r'^blog/P(?P<page>\d+)/*$', blog.blog_list_posts),
+    re_path(r'^blogpost/(?P<post_id>\d+)/(?P<page_back>\d+)/\S*/*$', blog.blog_post),
+    re_path(r'^blogpost/(?P<post_id>\d+)/\S*/*$', blog.blog_post),
     # САТИЧЕСКИЕ СТРАНИЦЫ
-    re_path(r'^tariff$', views.tariff),
-    re_path(r'^contact', views.contact),
-    re_path(r'^stat_all$', diagrams.statistic_menu),
+    re_path(r'^tariff[/*]$', views.tariff),
+    re_path(r'^contact[/*]$', views.contact),
+    re_path(r'^stat_all[/*]$', diagrams.statistic_menu),
+    re_path(r'^stat/rating[/*]$', report2.ratings),
+    re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
 
 ]
 
