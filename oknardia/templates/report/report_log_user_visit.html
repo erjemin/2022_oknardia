@@ -1,0 +1,8 @@
+<!--- Информация об адресах просмотренных всеми --->{% load filters %}
+{% if LOG_VISIT and LOG_VISIT|length >= 1 %}<div class="col-xs-12">
+  <div class="col-md-11 col-xs-12 log_user_visit"><h5>Просмотры цен на окна другими пользователями:</h5>
+    <ul>{% for ITEM in LOG_VISIT %}
+      <li><a href="{{ ITEM.LogURL }}">Цены на окна для серии {{ ITEM.LogApart }} <small>({{ ITEM.LogAddress }})</small></a> <small>{{ ITEM.Time }}</small></li>{% endfor %}
+    </ul>
+  </div>
+</div>{% endif %}

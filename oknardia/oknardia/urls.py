@@ -18,7 +18,8 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams, report2
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report2, catalog
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -50,9 +51,10 @@ urlpatterns = [
     re_path(r'^stat_all[/*]$', diagrams.statistic_menu),
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
+    # КАТАЛОГ
+    re_path(r'^catalog[/*]$', catalog.catalog_root),
 
 ]
-
 
 if DEBUG:
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Title %} Каталог{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог «Окнардия»{% endblock %}
+
+{% block Keywords %}Каталог, каталог оконных профилей, каталог стеклопакетов, каталог фурнитуры, каталог серий домов, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Author4Meta %}: Каталог «Окнардия»{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
+  <meta itemprop="headline" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
+  <meta name="news_keywords" content="{{ HEADER }}" />
+  <link rel="canonical" href="https://oknardia.ru//catalog/" />
+  <link rel="standout"  href="https://oknardia.ru//catalog/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
+  <meta property="og:description" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="{{ HEADER }}"/>
+  <meta name="twitter:description" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li>Каталог</li>
+      </ol>
+      <h1>Каталог &laquo;Окнардия&raquo;</h1>
+    </div>
+</div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <dIv class="row -catalog2-">
+    {# ПЕРВЫЙ РАЗДЕЛ С РЕКЛАМОЙ СБОКУ #}<div class="col-md-9 col-xs-8">
+      {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/profile">Оконные и&nbsp;дверные профили</a></h2>
+        <p class="col-md-offset-1 col-xs-offset-1">Каталог систем оконных и&nbsp;дверных профилей и&nbsp;описание <nobr>компаний-производителей</nobr>. Каталог содержит детальные характеристики профилей: сопротивление теплопередаче <nobr><i>Ro</i>&nbsp;(<i>м&sup2;&times;&deg;C/Вт</i>)</nobr>, коэффициент звукоизоляции (<i>дБ</i>), число камер рамы и&nbsp;створки, тип и&nbsp;армирования, монтажная ширина и&nbsp;другие. Пластиковые (ПВХ), деревянные, комбинированные и&nbsp;другие системы профилей.</p>
+      {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/seria">Каталог серий домов</a></h2>
+      <p class="col-md-offset-1 col-xs-offset-1">Типовые проекты жилого строительства, вхождение стандартных оконных проёмов и&nbsp;балконных блоков в&nbsp;планировки типовых квартир серии, графики ввода в&nbsp;эксплуатацию зданий серии, география строительства, износ жилого фонда&hellip;</p>
+    </div>
+    {# реклама Oknardia 250x250 СБОКУ #}<div class="col-md-2 col-xs-3 float-right">{% include "ad/bannet-250x250.html" %}</div>
+    {# РАЗДЕЛИТЕЛЬНЫЙ РАЗДЕЛ #}<div class="col-md-10 col-xs-12">
+      {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/standard_opening">Стандартные оконные проёмы и&nbsp;балконные блоки</a></h2>
+      <p class="col-md-offset-1 col-xs-offset-1">Размеры и&nbsp;рекомендованные схемы открывания стандартных проёмов и&nbsp;балконных блоков базы &laquo;Окнардия&raquo;, коммерческие предложения партнёров агрегатора, условия поставки, комплектация, сопутствующие услуги и&nbsp;возможные скидки.</p>
+    </div>
+    {# И ОПЯТЬ РАЗДЕЛ С РЕКЛАМОЙ СБОКУ #}<div class="col-md-9 col-xs-8">
+      {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/company">Производители и&nbsp;поставщики окон</a> <small style="font-size:xx-small;">(в&nbsp;разработке)</small></h2>
+      <p class="col-md-offset-1 col-xs-offset-1">Компании-партнеры &laquo;Окнардии&raquo;, контатная информация, условия и скидки, конфигурации и рейтинги их оконных предложений.</p>
+    {# ВТОРОЙ РАЗДЕЛ #}
+      {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="javascript://" class="not-ready">Каталог стеклопакетов</a> <small style="font-size:xx-small;">(в&nbsp;разработке)</small></h2>
+      <p class="col-md-offset-1 col-xs-offset-1">Стеклопакеты и&nbsp;описание <nobr>компаний-производителей</nobr> стекла. Каталог содержит детальные характеристики: схемы стеклопакетов, наличие напыления k- и&nbsp;<nobr>i-микропленок</nobr>, тип <nobr>газа-заполнителя</nobr>, сопротивление теплопередаче <nobr><i>Ro</i>&nbsp;(<i>м&sup2;&times;&deg;C/Вт</i>)</nobr>, коэффициент звукоизоляции (<i>дБ</i>), число камер, тонирование&hellip;</p>
+    </div>
+    {# реклама Oknardia 250x250 СБОКУ #}<div class="col-md-2 col-xs-3 float-right">{% include "ad/bannet-250x250.html" %}</div>
+    {# РАЗДЕЛИТЕЛЬНЫЙ РАЗДЕЛ #}<div class="col-md-10 col-xs-12">
+      <h2 class="header"><a href="javascript://" class="not-ready">Оконная и&nbsp;дверная фурнитура</a> <small style="font-size:xx-small;">(в&nbsp;разработке)</small></h2>
+      <p class="col-md-offset-1 col-xs-offset-1">Петли и&nbsp;механизмы регулировок под разные схемы открывания, фиксаторы, ограничители, предохранители и&nbsp;блокировщики, ручки и&nbsp;системы запирания, микропроветривание и&nbsp;клапаны микроклимата&hellip;</p>
+    </div>
+    <DIV  class="col-xs-12" style="height:6em;"></DIV>
+  </dIv>
+
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12">{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+

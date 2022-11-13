@@ -1,0 +1,8 @@
+<!--- Информация об адресах просмотренных текущим пользователем --->{% load filters %}
+{% if LAST_VISIT and LAST_VISIT|length >= 1 %}<div class="col-xs-12">
+  <div class="col-md-11 col-xs-12 last_user_visit"><h5>Цены на окна просмотренные вами:</h5>
+    <ul>{% for ITEM in LAST_VISIT %}
+      <li><a href="{{ ITEM.LastURL }}">Цены на окна для серии {{ ITEM.LastApart }} <small>({{ ITEM.LastAddress }})</small></a> <small>{{ ITEM.Time }}</small></li>{% endfor %}
+    </ul>
+  </div>
+</div>{% endif %}
