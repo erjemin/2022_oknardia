@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Title %} Каталог оконных профилей{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог оконных профилей{% endblock %}
+
+{% block Keywords %}каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{{ CATALOG_LAST_UPDATE|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ CATALOG_LAST_UPDATE|date:"c" }}{% endblock %}
+
+{% block Author4Meta %}: Каталог{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог{% endblock %}
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/">Каталог</a></li>
+        <li>Оконные профили</li>
+      </ol>
+      <h1>Каталог оконных профилей</h1>
+      <p>Узнать о&nbsp;производителях, познакомиться с&nbsp;детальными характеристики и&nbsp;описаниями оконных профилей можно кликнув по&nbsp;ссылкам. Сейчас в&nbsp;каталоге &laquo;Окнардии&raquo; представлено {{ CATALOG_MANUFACT_NUM_W }} профилей ({{ CATALOG_PROFILE_NUM }} в&nbsp;базе). Последнее обновление {{ CATALOG_LAST_UPDATE_W }}.</p>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <div class="row">
+    <div class="col-md-11 col-xs-12 catalog2-header">
+      <ul><li>производитель</li><ul><li>название или марка профиля</li></ul></ul>
+      <ul><li>производитель</li><ul><li>название или марка профиля</li></ul></ul>
+    </div>
+    <div class="col-md-11 col-xs-12 catalog2">
+      <ul>{% for manuf in CATALOG_PROFILE_MAN1_NAME2 %}
+        <li><a href="/catalog/profile/{{ manuf.PROF_MAN_ID }}-{{ manuf.PROF_MAN_T }}/">{{ manuf.PROF_MAN }}</a></li>{% if manuf.PROF_MAN_LIST|length != 0 %}
+        <uL>{% for prof_name in  manuf.PROF_MAN_LIST %}
+          <lI><a href="/catalog/profile/{{ prof_name.PROF_NAME_ID }}{# manuf.PROF_MAN_ID #}-{{ manuf.PROF_MAN_T }}/{{ prof_name.PROF_NAME_ID }}-{{ prof_name.PROF_NAME_T }}/">{{ prof_name.PROF_NAME }}</a></lI>{% endfor %}
+        </uL>{%  endif %}{% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-11 col-xs-12 catalog_footer">
+      <p><small>Информация об&nbsp;оконных профилях для каталога &laquo;Окнардия&raquo; предоставлена производителями или собрана из&nbsp;открытых источников. Для исправления неточностей, уточнения характеристик, коррекции описаний и&nbsp;добавления информацию о&nbsp;новых производителях или моделях оконных профилей, пишите на <script type="text/javascript">document.write("<a href='mai"+"lto:in" + "fo@" + "oknardia." + "ru?subject=ОКНАРДИЯ: каталог профилей (уточнения, испраления, добавления)'>info@"+"oknardia.ru</a>");</script>. Размещение в&nbsp;каталоге &laquo;Окнардия&raquo; бесплатно.</small></p>
+    </div>
+  </div>
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+ {% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+

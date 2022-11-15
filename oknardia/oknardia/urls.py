@@ -53,6 +53,7 @@ urlpatterns = [
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
     # КАТАЛОГ
     re_path(r'^catalog[/*]$', catalog.catalog_root),
+    re_path(r'^catalog/profile[/*]$', catalog.catalog_profile),
 
 ]
 
