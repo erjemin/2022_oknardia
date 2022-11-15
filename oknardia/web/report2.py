@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# __author__ = 'Sergei Erjemin'
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.models import PVCprofiles

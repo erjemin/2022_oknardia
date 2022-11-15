@@ -49,14 +49,14 @@ def get_last_all_user_visit_list() -> list:
 
     :return: list -- список четырех последних посещений ценовых предложений всеми пользователями
     """
-    list_visit = []
-    id_fourth_visit = 0
+    result_list_visit = []
+    id_fourth_visit = 0   # id четвертого посещения??? Зачем??? Не помню хоть убей!!!
     try:
         q_log_visit = LogVisitPriceReport.objects.all().order_by('-dLogVisitTime')[:4]
         for i in q_log_visit:
             if id_fourth_visit == 0:
                 id_fourth_visit = i.id
-            list_visit.append({
+            result_list_visit.append({
                 "Time": pytils.dt.distance_of_time_in_words(int(format(i.dLogVisitTime, 'U'))),
                 "LogURL": i.sLogURL,
                 "LogAddress": i.sLogAddress,
@@ -65,4 +65,4 @@ def get_last_all_user_visit_list() -> list:
     except LogVisitPriceReport.DoesNotExist:
         pass
     # return id_fourth_visit+1, list_visit
-    return list_visit
+    return result_list_visit
