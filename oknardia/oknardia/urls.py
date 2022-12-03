@@ -54,6 +54,9 @@ urlpatterns = [
     # КАТАЛОГ
     re_path(r'^catalog[/*]$', catalog.catalog_root),
     re_path(r'^catalog/profile[/*]$', catalog.catalog_profile),
+    re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
+            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
+        catalog.catalog_profile_model),
 
 ]
 

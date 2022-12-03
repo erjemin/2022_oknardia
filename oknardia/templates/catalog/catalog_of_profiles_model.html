@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Title %} Каталог :: Оконные профили {{ CATALOG_MODEL.sProfileName }}{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}{% endblock %}
+
+{% block Keywords %}{{ CATALOG_MODEL.sProfileName }}, характеристики {{ CATALOG_MODEL.sProfileName }}, описание {{ CATALOG_MODEL.sProfileName }}, оконные профили {{ CATALOG_MODEL.sProfileName }}, {{ CATALOG_MODEL.sProfileManufacturer }}, производитель {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Author4Meta %}: Каталог{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог{% endblock %}
+
+{% block Top_Meta1 %}
+  <!-- Дополнительные Metatags -->
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"c" }}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»: оконные профили" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог «Окнардия»: оконные профили {{ CATALOG_MODEL.sProfileName }}" />
+  <meta itemprop="headline" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
+  <meta name="news_keywords" content="{{ CATALOG_MODEL.sProfileName }}, характеристики {{ CATALOG_MODEL.sProfileName }}, описание {{ CATALOG_MODEL.sProfileName }}, оконные профили {{ CATALOG_MODEL.sProfileName }}, {{ CATALOG_MODEL.sProfileManufacturer }}, производитель {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия" />
+  <link rel="canonical" href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}" />
+  <link rel="standout"  href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Оконные профили {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
+  <meta property="og:description" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Оконные профили {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
+  <meta name="twitter:description" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
+
+
+{% block Main_Content %}<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/">Каталог</a></li>
+        <li><a href="/catalog/profile/">Оконные профили</a></li>
+        <li><a href="/catalog/profile/{{ CATALOG_URL }}">{{ CATALOG_MODEL.sProfileManufacturer }}</a></li>
+        <li>{{ CATALOG_MODEL.sProfileName }}</li>
+      </ol>
+      <h1>Оконные профили {{ CATALOG_MODEL.sProfileName }} <small>({{ CATALOG_MODEL.sProfileManufacturer }})</small></h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <div class="row">
+    <div class="col-md-5 col-xs-12 catalog">
+      <table>
+        <thead>
+          <tr>
+            <th colspan="2">Характеристики оконного профиля {{ CATALOG_MODEL.sProfileName }}</th>
+            <th colspan="2"><nobr title="Рейтинг «Окнардии»{% if CATALOG_MODEL.fProfileRating > -0.1 %} — {{ CATALOG_MODEL.fProfileRating|stringformat:".2f" }} баллов{% endif %}"> {% for Star in PROFILE_RATING_STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if CATALOG_MODEL.fProfileRating > -0.1 %}<small class="badge badge4price">{{ CATALOG_MODEL.fProfileRating|stringformat:".2f" }}</small>{% endif %}</nobr></th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Производитель:</td>
+            <td colspan="3"><a href="/catalog/profile/{{ CATALOG_URL }}">{{ CATALOG_MODEL.sProfileManufacturer }}</a></td>
+          </tr><tr>
+            <td colspan="2">Сопротивление теплопередаче <nobr><i>Ro</i> (<i>м²×°C/Вт</i>):</nobr></td>
+            <td>{% if RANK_PVCP_HEAT_TRANSFER_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_HEAT_TRANSFER_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.fProfileHeatTransf > 0.1  %} title="Сопротивление теплопередаче (Ro) оконного профиля: {{ CATALOG_MODEL.fProfileHeatTransf|stringformat:".2f" }} м²×°C/Вт"{% endif %}>{{ CATALOG_MODEL.fProfileHeatTransf|stringformat:".2f" }}</td>
+          </tr><tr>
+            <td colspan="2">Коэффициент звукоизоляции, (<i>дБ</i>):</td>
+            <td>{% if RANK_PVCP_SOUNDPROOFING_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_SOUNDPROOFING_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.fProfileSoundproofing > 1  %} title="Коэффициент звукоизоляции оконного профиля: {{ CATALOG_MODEL.fProfileSoundproofing|stringformat:".1f" }} дБ"{% endif %}>{% if CATALOG_MODEL.fProfileSoundproofing > 1  %}{{ CATALOG_MODEL.fProfileSoundproofing|stringformat:".1f" }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Контуров уплотненения (<i>шт.</i>):</td>
+            <td>{% if RANK_PVCP_SEALS_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_SEALS_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.fProfileSeals > 0  %} title="Число контуров уплотнения створки к раме: {{ CATALOG_MODEL.fProfileSeals }} шт."{% endif %}>{% if CATALOG_MODEL.fProfileSeals > 0 %}{{ CATALOG_MODEL.fProfileSeals }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Высота в световом проеме, рама+створка (<i>мм</i>):</td>
+            <td>{% if RANK_PVCP_HEIGHT_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_HEIGHT_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.iProfileHeight > 15  %} title="Высота в световом проеме, рама+створка: {{ CATALOG_MODEL.iProfileHeight }} мм"{% endif %}>{% if CATALOG_MODEL.iProfileHeight > 15  %}{{ CATALOG_MODEL.iProfileHeight }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Максимальная толщина стеклопакета (<i>мм</i>):</td>
+            <td>{% if RANK_PVCP_G_THICKNESS_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_G_THICKNESS_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.iProfileGlazingThickness > 4  %} title="Максимальная толщина стеклопакета для уставноки с створку: {{ CATALOG_MODEL.iProfileGlazingThickness }} мм"{% endif %}>{% if CATALOG_MODEL.iProfileGlazingThickness > 4  %}{{ CATALOG_MODEL.iProfileGlazingThickness }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Монтажная ширина профиля (<i>мм</i>):</td>
+            <td>{% if RANK_PVCP_THICKNESS_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_THICKNESS_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.iProfileThickness > 5  %} title="Монтажная ширина оконного профиля: {{ CATALOG_MODEL.iProfileThickness }} мм."{% endif %}>{% if CATALOG_MODEL.iProfileThickness > 5  %}{{ CATALOG_MODEL.iProfileThickness }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Фальц рамы (<i>мм</i>):</td>
+            <td>{% if RANK_PVCP_RABBET_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_RABBET_COLOR }});"></div>{% endif %}</td>
+            <td{% if CATALOG_MODEL.iProfileRabbet > 1  %} title="Высота фальца рамы: {{ CATALOG_MODEL.iProfileRabbet }} мм."{% endif %}>{% if CATALOG_MODEL.iProfileRabbet > 1  %}{{ CATALOG_MODEL.iProfileRabbet }}{% else %}—{% endif %}</td>
+          </tr><tr>
+            <td colspan="2">Число камер рамы/створки (<i>шт.</i>):</td>
+            <td>{% if RANK_PVCP_CAMERAS_COLOR != "" %}<div class="round-mark" style="background:rgb({{ RANK_PVCP_CAMERAS_COLOR }});"></div> {% endif %}</td>
+            <td{% if CATALOG_MODEL.iProfileCameras != "—" %} title="Число камер профиля оконной рамы/створки: {{ CATALOG_MODEL.iProfileCameras }} шт."{% endif %}>{{  CATALOG_MODEL.iProfileCameras }}</td>
+          </tr><tr>
+            <td>Армирование:</td>
+            <td colspan="3"><small>{{  CATALOG_MODEL.sProfileReinforcement }}</small></td>
+          </tr><tr>
+            <td>Штапик:</td>
+            <td><div style="width:150px;"></div></td>
+            <td colspan="2"><small>{{  CATALOG_MODEL.sProfileFillet }}</small></td>
+          </tr><tr>
+            <td>Уплотнитель:</td>
+            <td colspan="3"><small>{{  CATALOG_MODEL.sProfileSealDescription }}</small></td>
+          <tr>
+            <td>Цвет:</td>
+            <td colspan="3" {% if not CATALOG_MODEL.sProfileColor == "" %} title="Цвет оконного профиля: {{ CATALOG_MODEL.sProfileColor|capfirst }}"{% endif %}>{% if CATALOG_MODEL.sProfileColor == "" %}—{% else %}<small>{{ CATALOG_MODEL.sProfileColor|capfirst }}{% endif %}</small></td>
+          </tr>
+        </tbody>
+      </table>{% if LIST_OTHER|length > 1 %}
+      <h4>Прочие характеристики профиля:</h4>
+      <ul>{% for LI_BULL in LIST_OTHER %}
+        <li>{{ LI_BULL|safe }}</li>{% endfor %}
+      </ul>{% elif CATALOG_MODEL.sProfileOther != ""  %}<p>Прочие характеристики рамы и створки: {{ CATALOG_MODEL.sProfileOther }}</p>{% endif %}{% if EXTRA_INFO %}
+      <h4>Дополнительная информация:</h4>
+      {{ EXTRA_INFO|safe }} {% endif %}{% if MERCHANTS|length > 0 %}
+      <h4>Партнёры &laquo;Окнардия&raquo; использующие профили {{ CATALOG_MODEL.sProfileName }} в&nbsp;своих предложениях:</h4>
+      <p class="catalog-logo">{% for i in MERCHANTS %}<a href="/catalog/company/{{ i.MERCHANT_ID }}-{{ i.MERCHANT_NAME_T }}/"><img src="/media/{{ i.MERCHANT_LOGO_URL }}" alt="{{ i.MERCHANT_NAME }}: коммерческий предложений {{ i.MERCHANT_OFFERS }}" title="{{ i.MERCHANT_NAME }}: коммерческий предложений {{ i.MERCHANT_OFFERS }}"></a>{% endfor %}</p>{% endif %}{% if PROFILES|length > 0 %}
+      <h4>Другие профили производства {{ CATALOG_MODEL.sProfileManufacturer }}:</h4>
+      <table>
+        <thead>
+          <tr><th>Марка профиля</th><th>рейтинг</th></tr>
+        </thead>
+        <tbody>{% for i in PROFILES %}
+        <tr>
+          <td><a href="/catalog/profile/{{ i.PROFILE_ID }}-{{ CATALOG_MAN2URL }}/{{ i.PROFILE_ID }}-{{ i.PROFILE_URL }}">{{ i.PROFILE_NAME }}</a></td>
+          <td><nobr title="Рейтинг «Окнардии»{% if i.PROFILE_RATING > -0.1 %} — {{ i.PROFILE_RATING|stringformat:".2f" }} баллов{% endif %}"> {% for Star in i.PROFILE_RATING_STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if i.PROFILE_RATING > -0.1 %}<small class="badge badge4price">{{ i.PROFILE_RATING|stringformat:".2f" }}</small>{% endif %}</nobr></td>
+        </tr>{% endfor %}
+        </tbody>
+      </table>
+      <p class="small-note">Сравнить компонеты рейтинга профилей можно в разделе <a href="/stat/rating/profiles_rank/">Ретинги</a>.</p>{% endif %}
+    </div>
+    <div class="col-md-6 col-xs-12">{# --- Описание производителя профилей :: начало --- #}{% if PROFILE_DETAIL|length > 0 %}{% for i in PROFILE_DETAIL %}
+{{ i.sPostContent|safe }}{% endfor %}{% else %}
+      <p style='background-color:#f0f0f0;color:silver;height:15em;padding:5ex 10ex'>Извините, описание и&nbsp;иллюстрации марки профилей подготавливаются.<br />&nbsp;<br />Зайдите позже.</p>{% endif %}
+    {# --- Описание производителя профилей :: конец ---  #}</div>
+    <div class="col-md-11 col-xs-12 catalog_footer">
+      <p><small>Информация о&nbsp;профиле {{ CATALOG_MODEL.sProfileBriefDescription }} ({{ CATALOG_MODEL.sProfileManufacturer }}) для каталога &laquo;Окнардия&raquo; предоставлена производителем или собрана из&nbsp;открытых источников. Для исправления неточностей, уточнения характеристик, коррекции описаний и&nbsp;добавления информацию о&nbsp;новых производителях или моделях оконных профилей, пишите на <script type="text/javascript">document.write("<a href='mai"+"lto:in" + "fo@" + "oknardia." + "ru?subject=ОКНАРДИЯ: каталог профилей (уточнения, испраления, добавления)'>info@"+"oknardia.ru</a>");</script>. Размещение в&nbsp;каталоге &laquo;Окнардия&raquo; бесплатно.</small></p>
+    </div>
+  </div>
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+  <div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+  </div>
+</div>{% endblock %}

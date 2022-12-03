@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
+from oknardia.settings import *
 from oknardia.models import PVCprofiles
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.add_func import normalize, get_rating_set_for_stars
 import time
+import json
+import random
 import pytils
 
 
@@ -27,8 +31,13 @@ def catalog_root(request: HttpRequest) -> HttpResponse:
     return response
 
 
-# Каталог профилей (первый уровень)
 def catalog_profile(request: HttpRequest) -> HttpResponse:
+    """
+    КАТАЛОГ ПРОФИЛЕЙ: страница со списком производителей и моделей (марками) профилей
+
+    :param request: HttpRequest -- входящий http-запрос
+    :return response: HttpResponse -- исходящий http-ответ
+    """
     template = "catalog/catalog_of_profiles.html"  # шаблон
     time_start = time.time()
     q_profile = PVCprofiles.objects.raw('SELECT'
@@ -102,5 +111,176 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.time() - time_start)
+    })
+    return render(request, template, to_template)
+
+
+def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture_name: str,
+                          model_id: id, model_name: str) -> HttpResponse:
+    """
+    КАТАЛОГ ПРОФИЛЕЙ: страница с описанием марки профиля
+
+    :param request: HttpRequest -- входящий http-запрос
+    :param manufacture_id: id профиля. Предполагается, что это первый id при сортировке по sProfileBriefDescription
+    :param manufacture_name: название производителя (транслитерированное pytils.translit.slugify())
+    :param model_id: id модели (марки) профиля
+    :param model_name: модель (марка) профиля (транслитерированное pytils.translit.slugify(sProfileName))
+    :return response: HttpResponse -- исходящий http-ответ
+    """
+    time_start = time.time()
+    template = "catalog/catalog_of_profiles_model.html"      # шаблон
+    manufacture_id = int(manufacture_id)
+    model_id = int(model_id)
+    q_pvc_by_id = PVCprofiles.objects.get(id=model_id)
+    if pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer) != manufacture_name \
+            or pytils.translit.slugify(q_pvc_by_id.sProfileName) != model_name \
+            or manufacture_id != model_id:
+        return redirect(f"/catalog/profile/{model_id}-{pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)}/"
+                        f"{model_id}-{pytils.translit.slugify(q_pvc_by_id.sProfileName)}")
+    to_template = {"CATALOG_MODEL": q_pvc_by_id,
+                   "CATALOG_MAN2URL": manufacture_name,
+                   "CATALOG_URL": f"{manufacture_id}-{manufacture_name}",
+                   "CATALOG_URL2": f"{manufacture_id}-{manufacture_name}/{model_id}-{model_name}",
+                   "PROFILE_RATING_STARS": get_rating_set_for_stars(q_pvc_by_id.fProfileRating)}
+    try:
+        getted_json = json.loads(q_pvc_by_id.sProfileDescription)
+        # раскрашиваем кружочки рейтинга напротив характеристик профиля
+        if KEY_RATING in getted_json:
+            # RatingReal = True     # Рейтинг реальный (профиль представлен в ценовых предложениях)
+            # кружочки зелёные
+            rating = getted_json[KEY_RATING]
+            color = int(255 - rating[RANK_PVCP_CAMERAS_NUM_NAME] * 255)
+            to_template.update({"RANK_PVCP_CAMERAS_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_SEALS_NAME] * 255)
+            to_template.update({"RANK_PVCP_SEALS_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_THICKNESS_NAME] * 255)
+            to_template.update({"RANK_PVCP_THICKNESS_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_G_THICKNESS_NAME] * 255)
+            to_template.update({"RANK_PVCP_G_THICKNESS_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_RABBET_NAME] * 255)
+            to_template.update({"RANK_PVCP_RABBET_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_HEAT_TRANSFER_NAME] * 255)
+            to_template.update({"RANK_PVCP_HEAT_TRANSFER_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_SOUNDPROOFING_NAME] * 255)
+            to_template.update({"RANK_PVCP_SOUNDPROOFING_COLOR": f"{color},255,{color}"})
+            color = int(255 - rating[RANK_PVCP_HEIGHT_NAME] * 255)
+            to_template.update({"RANK_PVCP_HEIGHT_COLOR": f"{color},255,{color}"})
+        elif KEY_RATING_VIRTUAL in getted_json:
+            # RatingReal = False     # Рейтинг виртуальный (профиль представлен в ценовых предложениях)
+            # кружочки серые
+            rating = getted_json[KEY_RATING_VIRTUAL]
+            color = int(255 - rating[RANK_PVCP_CAMERAS_NUM_NAME] * 64)
+            to_template.update({"RANK_PVCP_CAMERAS_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_SEALS_NAME] * 64)
+            to_template.update({"RANK_PVCP_SEALS_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_THICKNESS_NAME] * 64)
+            to_template.update({"RANK_PVCP_THICKNESS_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_G_THICKNESS_NAME] * 64)
+            to_template.update({"RANK_PVCP_G_THICKNESS_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_RABBET_NAME] * 64)
+            to_template.update({"RANK_PVCP_RABBET_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_HEAT_TRANSFER_NAME] * 64)
+            to_template.update({"RANK_PVCP_HEAT_TRANSFER_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_SOUNDPROOFING_NAME] * 64)
+            to_template.update({"RANK_PVCP_SOUNDPROOFING_COLOR": f"{color},{color},{color}"})
+            color = int(255 - rating[RANK_PVCP_HEIGHT_NAME] * 64)
+            to_template.update({"RANK_PVCP_HEIGHT_COLOR": f"{color},{color},{color}"})
+        else:
+            pass
+        if KEY_HTML in getted_json:
+            to_template.update({"EXTRA_INFO": getted_json[KEY_HTML]})
+    except (TypeError, ValueError, KeyError):
+        pass
+    list_other = []
+    for i in q_pvc_by_id.sProfileOther.split(";"):
+        j = i.find(":")
+        list_other.append(u"<b>" + i[:j+1] + u"</b>" + i[j+1:])
+    to_template.update({"LIST_OTHER": list_other})
+    q_merchant = PVCprofiles.objects.raw(f"SELECT"
+                                         f"  COUNT(oknardia_priceoffer.id) AS offers_by_merchant,"
+                                         f"  oknardia_merchantbrand.sMerchantName,"
+                                         f"  oknardia_merchantbrand.pMerchantLogo,"
+                                         f"  oknardia_merchantbrand.id "
+                                         f"FROM oknardia_priceoffer"
+                                         f"  INNER JOIN oknardia_setkit"
+                                         f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
+                                         f"  INNER JOIN oknardia_pvcprofiles"
+                                         f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
+                                         f"  INNER JOIN oknardia_ouruser"
+                                         f"    ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id"
+                                         f"  INNER JOIN oknardia_merchantoffice"
+                                         f"    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id"
+                                         f"  INNER JOIN oknardia_merchantbrand"
+                                         f"    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id "
+                                         f"WHERE oknardia_pvcprofiles.id = {model_id} "
+                                         f"GROUP BY oknardia_merchantbrand.sMerchantName,"
+                                         f"         oknardia_merchantbrand.pMerchantLogo,"
+                                         f"         oknardia_merchantbrand.id "
+                                         f"ORDER BY offers_by_merchant DESC;")
+    list_merchant = []
+    for i in q_merchant:
+        list_merchant.append({
+            "MERCHANT_ID": i.id,
+            "MERCHANT_NAME": i.sMerchantName,
+            "MERCHANT_NAME_T": pytils.translit.slugify(i.sMerchantName),
+            "MERCHANT_LOGO_URL": i.pMerchantLogo,
+            "MERCHANT_OFFERS": i.offers_by_merchant,
+        })
+    to_template.update({'MERCHANTS': list_merchant})
+    q_profiles = PVCprofiles.objects.raw(f"SELECT oknardia_pvcprofiles.id,"
+                                         f"  oknardia_pvcprofiles.fProfileRating,"
+                                         f"  oknardia_pvcprofiles.sProfileBriefDescription,"
+                                         f"  oknardia_pvcprofiles.sProfileName "
+                                         f"FROM oknardia_pvcprofiles "
+                                         f"WHERE oknardia_pvcprofiles.sProfileManufacturer ="
+                                         f"                                   '{q_pvc_by_id.sProfileManufacturer}' "
+                                         f"ORDER BY oknardia_pvcprofiles.fProfileRating;")
+    list_profiles = []
+    for i in q_profiles:
+        if i.id != model_id:
+            list_profiles.append({
+                "PROFILE_NAME": i.sProfileBriefDescription,
+                "PROFILE_ID": i.id,
+                "PROFILE_URL": pytils.translit.slugify(i.sProfileName).lower(),
+                "PROFILE_RATING": i.fProfileRating,
+                "PROFILE_RATING_STARS": get_rating_set_for_stars(i.fProfileRating),
+            })
+    to_template.update({'PROFILES': list_profiles})
+    q_profiles_detail = PVCprofiles.objects.raw(f"SELECT"
+                                                f"  oknardia_blogposts.*,"
+                                                f"  oknardia_pvcprofiles.id,"
+                                                f"  oknardia_catalog2profile.sCatalogCardType,"
+                                                f"  oknardia_blogposts.iCatalogSort "
+                                                f"FROM oknardia_catalog2profile"
+                                                f"  INNER JOIN oknardia_blogposts"
+                                                f"    ON oknardia_catalog2profile.kBlogCatalog_id=oknardia_blogposts.id"
+                                                f"  INNER JOIN oknardia_pvcprofiles"
+                                                f"    ON oknardia_catalog2profile.kProfile_id=oknardia_pvcprofiles.id "
+                                                f"WHERE oknardia_pvcprofiles.id = {model_id} "
+                                                f"AND oknardia_catalog2profile.sCatalogCardType ="
+                                                f"                                 {CATALOG_RECORD_FOR_PROFILE_MODEL} "
+                                                f"ORDER BY oknardia_blogposts.iCatalogSort;")
+    list_profiles_detail = list(q_profiles_detail)
+    to_template.update({'PROFILE_DETAIL': list_profiles_detail})
+    list_img_for_blog = []
+    for i in list_profiles_detail:
+        if i.sImgForBlogSocial != "":
+            list_img_for_blog.append(i.sImgForBlogSocial)
+    if len(list_profiles_detail) > 0:
+        random.shuffle(list_img_for_blog)
+        to_template.update({'IMG_FOR_BLOG': list_img_for_blog[0]})
+    to_template.update({'PUB_DAT': q_pvc_by_id.dProfileModify})
+    if len(list_profiles_detail) > 0:
+        pub_data = sorted(list_profiles_detail, key=lambda item: item.dPostDataModify)[0].dPostDataModify
+        print(pub_data, q_pvc_by_id.dProfileModify)
+        if pub_data.replace(tzinfo=None) < q_pvc_by_id.dProfileModify.replace(tzinfo=None):
+            to_template.update({'PUB_DAT': pub_data})
+    to_template.update({
+        # получаем последние визиты клиента через куки
+        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+        # получаем последние визиты всех посетителей из базы
+        # id2log, log_visit = get_last_all_user_visit_list()
+        'LOG_VISIT': get_last_all_user_visit_list(),
+        'ticks': float(time.time()-time_start)
     })
     return render(request, template, to_template)
