@@ -8,14 +8,14 @@
   <meta http-equiv="Last-Modified" content="{% block Last4Meta %}{% now "c" %}{% endblock %}" />
   <meta http-equiv="Expires" content="{% block Expires4Meta %}{% now "c" %}{% endblock %}" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="{% block Description %}{{ META_DESCRIPTION|default:"" }}Здесь вы можете узнать все цены и скидки на пластиковые окона для квартиры. Просто введите адрес, укажите планировку квартиры и узнайте размеры проёмов, актуальные предложения и цены на установку окон от ведущих поставщиков. Сравнивайте характеристики стеклопакетов, профилей, схем открывания, цены и условия установки, осблуживания и гарантии.{% endblock %}" />
+  <meta name="description" content="{% block Description %}{{ META_DESCRIPTION|default:"" }}Здесь вы можете узнать цены и скидки на пластиковые окна. Просто введите адрес, укажите планировку квартиры и узнайте размеры проёмов, актуальные предложения и стоимость установки окон. Сравнивайте характеристики стеклопакетов, оконных профилей, схем открывания, расценки, условия установки, обслуживания и гарантии.{% endblock %}" />
   <meta name="keywords" content="{% block Keywords %}цены на пластиковые окна, скидки на пластиковые окна, окна в квартиру, размеры окон в доме серии, скидки на пластиковые окна, характеристики пластиковых окон{{ META_KEYWORDS|default:"" }}{% endblock %}" />
-  <meta name="author" content="OKNARDIA.RU{% block Author4Meta %}{% endblock %}" />
-  <meta name="copyright" lang="ru" content="OKNARDIA.RU{% block CopyrightAuthor4Meta %}{% endblock %}" />
+  <meta name="author" content="{% block Author4Meta %}{% endblock %}OKNARDIA.RU" />
+  <meta name="copyright" lang="ru" content="{% block CopyrightAuthor4Meta %}{% endblock %}OKNARDIA.RU" />
   <meta name="robots" content="index,follow" />
   <meta name="document-state" content="{{ META_DOCUMENT_STATE|default:"Dynamic" }}" />
   <meta name="generator" content="OKNARDIA 0.3β by Python/Django" />
-  <title>ОКНАРДИЯ: {% block Title %}{% endblock %}</title>
+  <title>{% block Title %}{% endblock %} : ОКНАРДИЯ</title>
   <link rel="alternate" href="https://oknardia.ru" hreflang="ru-ru" />
   <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css" />{# <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"  rel="stylesheet" type="text/css" />#}
   <link href="{% static 'css/bootstrap-theme.min.css' %}" rel="stylesheet" type="text/css" />{#  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css"  />#}
