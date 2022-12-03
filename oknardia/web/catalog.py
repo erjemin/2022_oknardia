@@ -272,7 +272,6 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     to_template.update({'PUB_DAT': q_pvc_by_id.dProfileModify})
     if len(list_profiles_detail) > 0:
         pub_data = sorted(list_profiles_detail, key=lambda item: item.dPostDataModify)[0].dPostDataModify
-        print(pub_data, q_pvc_by_id.dProfileModify)
         if pub_data.replace(tzinfo=None) < q_pvc_by_id.dProfileModify.replace(tzinfo=None):
             to_template.update({'PUB_DAT': pub_data})
     to_template.update({
