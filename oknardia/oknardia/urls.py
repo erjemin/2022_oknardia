@@ -52,12 +52,15 @@ urlpatterns = [
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
     # --- Каталог
+    # --- --- Каталог профилей
     re_path(r'^catalog[/*]$', catalog.catalog_root),
     re_path(r'^catalog/profile[/*]$', catalog.catalog_profile),
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
             r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$', catalog.catalog_profile_model),
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
             catalog.catalog_profile_manufacture),
+    # --- --- Каталог серий типового строительства
+    re_path(r'^catalog/seria[/*]$', catalog.catalog_seria),
 
 ]
 

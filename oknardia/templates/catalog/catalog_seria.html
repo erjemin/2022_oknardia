@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Title %}Каталог серий домов{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог типовых серий домов | Каталог «Окнардия»{% endblock %}
+
+{% block Keywords %}Каталог, каталог серий, серии домов, серии зданий, типовые дома, типовые здания, каталог серий домов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Author4Meta %}: Каталог серий домов{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог серий домов{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"c" }}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
+  <meta itemprop="headline" content="Каталог типовых серий домов | oknardia.ru" />
+  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
+  <link rel="canonical" href="https://oknardia.ru//catalog/seria/" />
+  <link rel="standout"  href="https://oknardia.ru//catalog/seria/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/seria/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
+  <meta property="og:description" content="Типовые проекты жилого строительства, вхождение стандартных оконных проёмов и балконных блоков в планировки типовых квартир серии, графики ввода в эксплуатацию зданий серии, география строительства, износ жилого фонда..." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Каталог типовых серий домов | oknardia.ru" />
+  <meta name="twitter:description" content="Типовые проекты жилого строительства, вхождение стандартных оконных проёмов и балконных блоков в планировки типовых квартир серии, графики ввода в эксплуатацию зданий серии, география строительства, износ жилого фонда..." />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog">Каталог</a></li>
+        <li>Типовые серии зданий</li>
+      </ol>
+      <h1>Каталог типовых серий жилого строительства</h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <dIv class="row">
+    <div class="col-md-11 col-xs-12">
+      <p>Типовые проекты жилого строительства, вхождение стандартных оконных проёмов и&nbsp;балконных блоков в&nbsp;планировки типовых квартир серии, графики ввода в&nbsp;эксплуатацию зданий серии, география строительства, износ жилого фонда&hellip;</p>
+    </div>
+  </dIv>
+  <div class="row">{% for i in SERIAS %}
+    <div class="col--lg-2 col-md-3 col-sm-4 col-xs-6"><a href="/catalog/seria/{{ i.NAME_T }}/all{{ i.ID }}">
+      <div class="catalog-seria-img" style="background-image:url(/media/{{ i.URL }});">
+        <h4><span>Серия {{ i.NAME }}</span></h4>
+      </div></a>
+    </div>{% endfor %}
+
+    <DIV  class="col-xs-12" style="height:6em;"></DIV>
+  </dIv>
+
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+
+
+

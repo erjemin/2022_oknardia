@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from oknardia.settings import *
-from oknardia.models import PVCprofiles
+from oknardia.models import PVCprofiles, Seria_Info
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars
 import time
@@ -284,7 +284,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     return render(request, "catalog/catalog_of_profiles_model.html", to_template)
 
 
-def catalog_profile_manufacture (request: HttpRequest, manufacture_id: int, manufacture_name: str) -> HttpResponse:
+def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manufacture_name: str) -> HttpResponse:
     """
     КАТАЛОГ ПРОФИЛЕЙ: страница с описанием производителя профилей и списком марки производимых им профилей
 
@@ -421,3 +421,42 @@ def catalog_profile_manufacture (request: HttpRequest, manufacture_id: int, manu
         'ticks': float(time.time()-time_start)
     })
     return render(request, "catalog/catalog_of_profiles_manufacture.html", to_template)
+
+
+# Каталог типовый серий зданий (пока переадресация)
+def catalog_seria(request: HttpRequest) -> HttpResponse:
+    """
+    КАТАЛОГ ТИПОВЫЙ СЕРИЙ: страница со всеми сериями зданий в базе окнардии
+
+    :param request: HttpRequest -- входящий http-запрос
+    :return response: HttpResponse -- исходящий http-ответ
+    """
+    time_start = time.time()
+    try:
+        q_seria = Seria_Info.objects.raw('SELECT'
+                                         '  oknardia_seria_info.id,'
+                                         '  oknardia_seria_info.sURL2IMG,'
+                                         '  oknardia_seria_info.sName '
+                                         'FROM oknardia_seria_info '
+                                         'WHERE oknardia_seria_info.id = oknardia_seria_info.kRoot_id '
+                                         'ORDER BY oknardia_seria_info.sName;')
+        list_seria = []
+        for i in q_seria:
+            list_seria.append({
+                "ID": i.id,
+                "URL": i.sURL2IMG,
+                "NAME": i.sName,
+                "NAME_T": pytils.translit.slugify(i.sName)
+            })
+        to_template = {'SERIAS': list_seria}
+    except (ObjectDoesNotExist, ):
+        to_template = {}
+    to_template.update({
+        # получаем последние визиты клиента через куки
+        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+        # получаем последние визиты всех посетителей из базы
+        # id2log, log_visit = get_last_all_user_visit_list()
+        'LOG_VISIT': get_last_all_user_visit_list(),
+        'ticks': float(time.time() - time_start)
+    })
+    return render(request, "catalog/catalog_seria.html", to_template)
