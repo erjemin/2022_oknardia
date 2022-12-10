@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block Title %} Каталог :: Оконные профили производства {{ CATALOG_MANUFACT }}{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Оконные профили {{ CATALOG_MANUFACT }}{% endblock %}
+
+{% block Keywords %}{{ CATALOG_MANUFACT }}, оконные профили {{ CATALOG_MANUFACT }}, производитель {{ CATALOG_MANUFACT }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Author4Meta %}: Каталог{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог{% endblock %}
+
+{% block Top_Meta1 %}
+  <!-- Дополнительные Metatags -->
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"c" }}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»: оконные профили" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог «Окнардия»: оконные профили {{ CATALOG_MANUFACT }}" />
+  <meta itemprop="headline" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
+  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
+  <link rel="canonical" href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL }}" />
+  <link rel="standout"  href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL }}" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/profile/{{ CATALOG_URL }}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="{{ HEADER|striptags }} | oknardia.ru" />
+  <meta property="og:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="{{ HEADER|striptags }} | oknardia.ru" />
+  <meta name="twitter:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
+
+{% block Top_JS4 %}
+  <script type="text/javascript" src="//www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load("current", {packages: ["corechart"]});
+    google.charts.setOnLoadCallback(drawChart);
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable([
+        ['Доля', 'Число предложений'],
+        ['Предложения окон из профилей других производителей' , {{ OFFERS_OTHER }}],
+        ['Предложения окон из профилей {{ CATALOG_MANUFACT }}', {{ OFFERS_BY_MAUFACTURE }}]
+      ]);
+      var options = {
+        legend: {position: "none"},
+        backgroundColor: 'none',
+        pieHole: 0.38,
+        chartArea: {width: '90%', height: '90%'},
+        pieStartAngle: {{ OFFERS_ANGLE|stringformat:"0.f" }},
+        pieSliceTextStyle: {fontSize: 12},
+        // is3D: true,
+        slices: {1: {offset: 0.1}},
+        tooltip: {textStyle: {fontSize: 11, color: 'black', opacity: 0.8}, showColorCode: true}
+      };
+      var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
+      chart.draw(data, options);
+    }
+  </script>{% endblock %}
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/">Каталог</a></li>
+        <li><a href="/catalog/profile/">Оконные профили</a></li>
+        <li>{{ CATALOG_MANUFACT }}</li>
+      </ol>
+      <h1>Оконные профили производства {{ CATALOG_MANUFACT }}</h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <div class="row">
+    <div class="col-md-4 col-xs-12 catalog">
+      <table>
+        <thead>
+          <tr><th>Марки профилей {{ CATALOG_MANUFACT }}</th><th>рейтинг</th></tr>
+        </thead>
+        <tbody>{% for i in PROFILES %}
+        <tr>
+          <td><a href="/catalog/profile/{{ i.PROFILE_ID }}-{{ CATALOG_MAN2URL }}/{{ i.PROFILE_ID }}-{{ i.PROFILE_URL }}">{{ i.PROFILE_NAME }}</a></td>
+          <td><nobr title="Рейтинг «Окнардии»{% if i.PROFILE_RATING > -0.1 %} — {{ i.PROFILE_RATING|stringformat:".2f" }} баллов{% endif %}"> {% for Star in i.PROFILE_RATING_STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if i.PROFILE_RATING > -0.1 %}<small class="badge badge4price">{{ i.PROFILE_RATING|stringformat:".2f" }}</small>{% endif %}</nobr></td>
+        </tr>{% endfor %}
+        </tbody>
+      </table>
+      <p class="small-note">Сравнить компонеты рейтинга профилей можно в разделе <a href="/stat/rating/profiles_rank/">Ретинги</a>.</p>{% if not OFFERS_BY_MAUFACTURE == 0 %}
+      <h4>Доля предложений окон на&nbsp;основе профилей {{ CATALOG_MANUFACT }} в&nbsp;базе &laquo;Окнардия&raquo;</h4>
+      <div id="donutchart"></div>
+      <h5>Партнёры &laquo;Окнардия&raquo; использующие профили производства {{ CATALOG_MANUFACT }} в&nbsp;своих предложениях:</h5>
+      <p class="catalog-logo">{% for i in MERCHANTS %}<a href="/catalog/company/{{ i.MERCHANT_ID }}-{{ i.MERCHANT_NAME_T }}/"><img src="/media/{{ i.MERCHANT_LOGO_URL }}" alt="{{ i.MERCHANT_NAME }}: коммерческий предложений {{ i.MERCHANT_OFFERS }}" title="{{ i.MERCHANT_NAME }}: коммерческий предложений {{ i.MERCHANT_OFFERS }}"></a>{% endfor %}</p>
+    {% endif %}</div>
+    <div class="col-md-7 col-xs-12">{# --- Описание производителя профилей :: начало --- #}
+{{ CONTENT|safe|default:"<p style='background-color:#f0f0f0;color:silver;height:15em;padding:5ex 10ex'>Извините, описание производителя профилей ещё не&nbsp;готово.<br />&nbsp;<br />Зайдите позже.</p>" }}
+    {# --- Описание производителя профилей :: конец ---  #}</div>
+
+    <div class="col-md-11 col-xs-12 catalog_footer">
+      <p><small>Информация о&nbsp;компании {{ CATALOG_MANUFACT }} для каталога &laquo;Окнардия&raquo; и&nbsp;профилях её&nbsp;производства предоставлена производителями или собрана из&nbsp;открытых источников. Для исправления неточностей, уточнения характеристик, коррекции описаний и&nbsp;добавления информацию о&nbsp;новых производителях или моделях оконных профилей, пишите на <script type="text/javascript">document.write("<a href='mai"+"lto:in" + "fo@" + "oknardia." + "ru?subject=ОКНАРДИЯ: каталог профилей (уточнения, испраления, добавления)'>info@"+"oknardia.ru</a>");</script>. Размещение в&nbsp;каталоге &laquo;Окнардия&raquo; бесплатно.</small></p>
+    </div>
+  </div>
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+

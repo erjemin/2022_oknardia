@@ -40,7 +40,7 @@ urlpatterns = [
     # Ссылка, по которой пользователь может поменять пароль при утере. URL: /USER_%05d/RESTORE:%s
     re_path(r'^USER_(?P<user_id>\d{1,8})/RESTORE:(?P<hash_part_12>\S+)$', user_manager.restore_password),
     re_path(r'^change_password$', user_manager.change_password),
-    # ОБРАБОТЧИКИ СПИСКА ПУБЛИКАЦИЙ И САМИХ ПУБЛИКАЦИЙ БЛОГА
+    # БЛОГ
     re_path(r'^blog/*$', blog.blog_list),
     re_path(r'^blog/P(?P<page>\d+)/*$', blog.blog_list_posts),
     re_path(r'^blogpost/(?P<post_id>\d+)/(?P<page_back>\d+)/\S*/*$', blog.blog_post),
@@ -51,12 +51,13 @@ urlpatterns = [
     re_path(r'^stat_all[/*]$', diagrams.statistic_menu),
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
-    # КАТАЛОГ
+    # --- Каталог
     re_path(r'^catalog[/*]$', catalog.catalog_root),
     re_path(r'^catalog/profile[/*]$', catalog.catalog_profile),
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
-            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
-        catalog.catalog_profile_model),
+            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$', catalog.catalog_profile_model),
+    re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
+            catalog.catalog_profile_manufacture),
 
 ]
 
