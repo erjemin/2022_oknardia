@@ -28,10 +28,10 @@ SECRET_KEY = 'django-insecure-pd&1$j6z*1w#(j*16b+(@@#&2)+@x^^ot4)zqt-e67*1+$^qch
 # SECURITY WARNING: don't run with debug turned on in production!
 # ПРЕДУПРЕЖДЕНИЕ БЕЗОПАСНОСТИ: не работайте в режиме DEBUG в продашене!
 if socket.gethostname() in MY_HOST_DEV:
-    DEBUG = True
+    DEBUG = TEMPLATE_DEBUG = True
 else:
     # Все остальные хосты (подразумевается продакшн)
-    DEBUG = False
+    DEBUG = TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = MY_ALLOWED_HOSTS
 
@@ -181,11 +181,11 @@ OFFER_PER_FRAME = 5
 OFFER_PER_FRAME_FOR_ONE_FLAP = 10
 # папка для хранения изображений
 PATH_FOR_IMG = "img"
-PATH_FOR_IMG_BLOG = u"img_for_blog/"
-PATH_FOR_IMG_AVATAR = u"img_avatar/"
-PATH_FOR_IMG_LOGOS = u"logos_img/"
-PATH_FOR_IMG_APARTMENT = u"img_apart/"
-PATH_FOR_IMG_SERIA = u"img_seria/"
+PATH_FOR_IMG_BLOG = "img_for_blog/"
+PATH_FOR_IMG_AVATAR = "img_avatar/"
+PATH_FOR_IMG_LOGOS = "logos_img/"
+PATH_FOR_IMG_APARTMENT = "img_apart/"
+PATH_FOR_IMG_SERIA = "img_seria/"
 
 # папка для хранения мини-картинок со схемами открывания внутри PATH_FOR_IMG
 PATH_FOR_BIGIMGFLAPCONFIG = "_flap.cfg"
@@ -195,7 +195,7 @@ PATH_FOR_JS = "js"
 PATH_FOR_JS_MAP = "js/4maps"
 SUFFIX_FOR_JS_MAP = "_seria_on_map.js"
 SUFFIX_FOR_MINI_JS_MAP = "_seria_on_map.mini.js"
-PATH_FOR_SERIA_INFO_HTML_INCLUDE = "SeriaInfo/prepared/"
+PATH_FOR_SERIA_INFO_HTML_INCLUDE = "seria_info/prepared/"
 
 # переменные
 # высота картинки

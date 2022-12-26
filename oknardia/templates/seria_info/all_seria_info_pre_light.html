@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+{% load humanize %}
+
+{% block Title %}серия {{ THIS_SERIA_NAME }} — типовые проёмы, размеры окон, схемы открывания, планировки, здания на карте, история и статистика{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+
+{% block Description %}Информация по зданиям серии {{ THIS_SERIA_NAME }} и установке окон в них{% endblock %}
+
+{% block Keywords %}серии {{ THIS_SERIA_NAME }}, серия {{ THIS_SERIA_NAME }}, проект {{ THIS_SERIA_NAME }}, года	простойки, размеры окон, размеры проемов, оконные проемы, {{ THIS_SERIA_NAME }} на карте, установка окон, цены на пластиковые окна{% endblock %}
+
+{% block Top_JS1 %}
+	<script type="text/javascript">
+		$(window).load(function () {
+			var images = $('.half');
+			images.each(function (i) {
+				$(this).width($(this).width() / 2);
+			});
+		});
+	</script>{% endblock %}
+
+{% block Main_Content %}<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/">Каталог</a></li>
+        <li><a href="/catalog/seria/">Типовые серии домов</a></li>
+        <li>Серия {{ THIS_SERIA_NAME }}</li>
+      </ol>
+      <h1>СЕРИЯ {{ THIS_SERIA_NAME }}</h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+	<div class="row">
+    <div class="col-md-12">{{ THIS_SERIA_DESCRIPTION|safe }}</div>
+	</div>
+
+	<div class="row">
+    <div class="col-lg-10">
+      <h2 class="header">Окна <nobr>в серии {{ THIS_SERIA_NAME }}</nobr>: типовые размеры и схемы открывания</h2>
+    </div>
+    <div class="col-lg-12" style="padding:1em 0 0 0;margin-left:-1em">
+      {% include 'report/show_big_flap_pictures.html' %}
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-8 col-xs-12 col-md-offset-1">
+      <h3 class="header">Оконные проёмы в типовых квартирах <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
+    </div>
+    <div class="col-lg-8 col-xs-12 col-md-offset-1">
+      <!--- прешаблон начало ---><table style="padding:2px;">{% templatetag openblock %} for row in TABLE_OF_WINDOWS {% templatetag closeblock %}
+        <tr class="tr2">
+          <td>{% templatetag openvariable %} row.APART_NAME|safe {% templatetag closevariable %}</td>{% templatetag openblock %} for col in row.WIN_IN_APART {% templatetag closeblock %}
+          <td class="cntr">{% templatetag openblock %} if col.WIN_ID {% templatetag closeblock %}<nobr	title="{% templatetag openvariable %} col.WIN_Q {% templatetag closevariable %} × {% templatetag openvariable %} col.WIN_DESCRIPTION {% templatetag closevariable %}: {% templatetag openvariable %} col.WIN_WIDTH {% templatetag closevariable %}шт.: {% templatetag openvariable %} col.WIN_HEIGHT {% templatetag closevariable %} (Ш×В, см.). Схема открывания: {% templatetag openvariable %} col.WIN_FLAPCFG {% templatetag closevariable %}">{% templatetag openblock %} for I_II in col.WIN_NUM {% templatetag closeblock %}<span	style="background-image:url('{% static 'img/svg/mark' %}{% templatetag openvariable %} I_II {% templatetag closevariable %}.svg');">&nbsp;</span>{% templatetag openblock %} endfor {% templatetag closeblock %}</nobr>{% templatetag openblock %} else {% templatetag closeblock %}—{% templatetag openblock %} endif {% templatetag closeblock %}</td>{% templatetag openblock %} endfor {% templatetag closeblock %}
+          <td style="background:#f9f9f9;"><a href="#{% templatetag openvariable %} row.APART_ID {% templatetag closevariable %}" class="badge" title="Оконных предложений для квартиры: {% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}</a></td>
+        </tr>{% templatetag openblock %} endfor {% templatetag closeblock %}
+        <tr class="trZ">
+          <td style="font-size: xx-small;vertical-align:text-top">© 2015-{% now "Y" %}, данные: oknardia.ru</td>{% templatetag openblock %} for i in WIN_OFFER_AND_MERCHANT {% templatetag closeblock %}
+          <td class="cntr" style="background:#f9f9f9;"><a href="/tsena-odnogo-okna/{% templatetag openvariable %} i.WIN_W|floatformat:0 {% templatetag closevariable %}0x{% templatetag openvariable %} i.WIN_H|floatformat:0 {% templatetag closevariable %}0mm/tip{% templatetag openvariable %} i.WIN_ID {% templatetag closevariable %}" class="badge" title="Ценовых предложений для окна: {% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}</a></td>{% templatetag openblock %} endfor {% templatetag closeblock %}
+          <td></td>
+        </tr>
+      </table>
+    <!--- прешаблон конец  ---></div>
+  </div>
+
+	<div class="row">
+		<div class="col-md-9"><a name="s_graph"></a>
+			<h2 class="header">Серия {{ THIS_SERIA_NAME }}: ввод в эксплуатацию по годам</h2>
+    </div>
+		<div class="col-md-9 col-md-offset-1" style="height:300px;font-size:large;">
+			{% include 'seria_info/yaer_graph.html' %}
+		</div>
+		<div class="col-md-9 col-md-offset-1">
+			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-7"><a name="s_map"></a>
+      <h2 class="header">Серия {{ THIS_SERIA_NAME }}: жилой фонд проекта на карте</h2>
+    </div>
+		<div class="col-md-7 col-lg-offset-1">
+      <p><small>Чтобы посмотреть цены на&nbsp;установку и&nbsp;замену окон от&nbsp;партнёров &laquo;Окнардия&raquo; в&nbsp;своей квартире: найдите дом на&nbsp;карте; кликните на&nbsp;него; перейдите по&nbsp;ссылке &laquo;Смотреть коммерческие предложения&raquo;. При необходимости смените типовую планировку квартиры (на&nbsp;странице ценовой выдачи, справа от&nbsp;изображения типовых проёмов и&nbsp;схем открывания).</small></p>
+			<div style="height:350px;">{% include 'seria_info/geo_map.html' %}</div>
+			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
+		</div>
+
+		<diV class="col-md-4">
+			<h3  class="header">Статистика <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
+			<p>Совокупно во всех зданиях типового проекта:</p>
+			<ul>
+				<li><strong>{{ ACCOUNTS|price_format }}</strong> квартир.</li>
+				<li>Проживает <strong>{{ APARTMENTS|price_format }}</strong> семей <small>(<strong>{{ RESIDENTS|price_format }}</strong> человек)</small>.</li>
+				<li><strong>{{ RESIDENTIAL_M2|stringformat:".1f"|price_format }} м²</strong> жилых помещений.</li>
+				<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong> — муниципальное жильё.</li>
+				<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и городские	службы, учреждения бытового обслуживания, магазины, офисы и тому подобное.</li>
+				<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }} — <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный — <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
+			</ul>
+		</diV>
+	</div>
+
+	<div class="row">
+		<div class="col-md-4 col-lg-offset-8" style="margin-top: 1em;">{# <div class="col-md-4"> #}
+			<h5>Информация о&nbsp;других, отличных от&nbsp;{{ THIS_SERIA_NAME }}, типовых сериях в&nbsp;базе &laquo;Окнардия&raquo;, типовых планировках квартир и&nbsp;оконных проёмах в&nbsp;них, а также рекомендации по замене окон:</h5>
+			<div class="href_d">{% include 'seria_info/seria_nav.html' %}</div>
+		</div>
+	</div>
+  <div class="row">
+    {% templatetag openblock %}include "report/report_last_user_visit.html" {% templatetag closeblock %}
+    {% templatetag openblock %} include "report/report_log_user_visit.html" {% templatetag closeblock %}
+  </div>
+</div>
+{% endblock %}

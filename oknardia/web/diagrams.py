@@ -3,14 +3,15 @@ from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from django.core.exceptions import ObjectDoesNotExist
 from time import time
-from oknardia.models import Seria_Info
 from oknardia.settings import *
+from oknardia.models import Seria_Info
+# from oknardia.catalog import all_seria_nav
 import math
 import os
 import pytils       # вместо Rus2Lat(smth) --> pytils.translit.slugify(smth).lower()
 
 
-# возвращает корректный SeriaID и кортеж для построения навигации по сериям дома
+# возвращает корректный seria_id и кортеж для построения навигации по сериям дома
 def seria_nav(i_seria_id: int = 12) -> (int, dict):
     query_seria = Seria_Info.objects.raw(
         'SELECT  oknardia_seria_info.id,'
@@ -27,7 +28,7 @@ def seria_nav(i_seria_id: int = 12) -> (int, dict):
             error_seria = False
             break
     if error_seria:
-        # Ошибочный SeriaID. Такой базовой серии нет и надо ее найти.
+        # Ошибочный seria_id. Такой базовой серии нет и надо ее найти.
         try:
             query = Seria_Info.objects.get(id=int(i_seria_id))
             if query.kRoot_id is None:
@@ -45,21 +46,8 @@ def seria_nav(i_seria_id: int = 12) -> (int, dict):
                 i_seria_id = min_id
         except ObjectDoesNotExist:
             i_seria_id = query_seria[0].id
-    # print("-->", SeriaID, "<--")
-    seria_nav_dim = []
-    this_return = {}
-    for count_seria in query_seria:
-        one_seria = {}
-        one_seria.update({"SERIA_R": count_seria.sName, "ID2URL": count_seria.id})
-        if count_seria.id == i_seria_id:
-            this_return.update({"THIS_SERIA_NAME": count_seria.sName,
-                                "THIS_SERIA_DESCRIPTION": count_seria.sSeriaDescription})
-            one_seria.update({"SERIA_L": ""})
-        else:
-            one_seria.update({"SERIA_L": pytils.translit.slugify(count_seria.sName)})
-        seria_nav_dim.append(one_seria)
-    this_return.update({"SERIA_NAV_DIM": seria_nav_dim})
-    return i_seria_id, this_return
+    # print(f"-->{seria_id}<--")
+    return all_seria_nav(i_seria_id, query_seria)
 
 
 def statistic_menu(request: HttpRequest) -> HttpResponse:

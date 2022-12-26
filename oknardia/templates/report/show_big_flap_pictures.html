@@ -1,0 +1,18 @@
+{# Отрисовка больших картинок с проемами и схамаи открывания #}{% load static %}{% if WIN_DIM %}
+  {% for I_WIN_DIM in FLAP_DIM %}
+   <div class="win_discr pull-left" id="flap{{ forloop.counter0 }}">
+    <div><img src="{% static I_WIN_DIM.url2img %}" alt="{{ I_WIN_DIM.sDescription }}. Размер {{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0x{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0 (Ш х В, мм.). Типовая схема открывания." title="{{ I_WIN_DIM.sDescription }}. Размер {{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0x{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0 (Ш х В, мм.). Типовая схема открывания." itemprop="image" /></div>
+    <div class="caption" style="width:{{ I_WIN_DIM.W }}px;min-width:13ex;">
+     <nobr>{{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0×{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0&thinsp;мм.</nobr><br />{% if not I_WIN_DIM.iQuantity == 0 %}
+     <nobr><b>{{ I_WIN_DIM.iQuantity }}&thinsp;шт.</b>{% for I_II in I_WIN_DIM.qStr %}<span class="color-bullet" style="background-image:url('{% static 'img/svg/mark' %}{{ I_II }}.svg');"></span>{% endfor %}</nobr><br />{% endif %}
+     {{ I_WIN_DIM.sDescription }}{% if not I_WIN_DIM.iQuantity == 0 %}<br />
+     <a href="/tsena-odnogo-okna/{{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0x{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0mm/tip{{ I_WIN_DIM.id }}">цены только этого типового окна</a>{% endif %}
+    </div>
+   </div>{% endfor %}{% comment %}
+<script type="text/javascript">
+$(document).ready(function(){
+  var maxHeight = 0;
+  {% for I_WIN_DIM in FLAP_DIM %}if (maxHeight < $('#flap{{ forloop.counter0 }}').height()) maxHeight = $('#flap{{ forloop.counter0 }}').height();
+  {% endfor %}{% for I_WIN_DIM in FLAP_DIM %}$('#flap{{ forloop.counter0 }}').height(maxHeight-240);{% endfor %}
+});
+</script>{% endcomment %}{% else %}<h1>Нет данных о проемах и рекомендованных схемах открывания окон</h1>{% endif %}

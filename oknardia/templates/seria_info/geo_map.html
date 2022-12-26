@@ -1,0 +1,56 @@
+{# Скрипт Yandex.Chart для отображения клястеров на карте #}{% load static %}
+       {% block Top_JS5 %}<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+{% if MAP_JS %}<script src="{% static '' %}{{ MAP_JS }}"  charset="utf-8" type="text/javascript"></script>{% else %}<script type="text/javascript">
+let points = [{% for count in DATA4GEO %}{% if forloop.last %}[{{ count.LONGITUDE|stringformat:"f" }},{{ count.LATITUDE|stringformat:"f" }}]{% else %}[{{ count.LONGITUDE|stringformat:"f" }},{{ count.LATITUDE|stringformat:"f" }}],{% endif %}{% endfor %}];
+let forURL = [{% for count in DATA4GEO %}{{ count.ADDR_ID }}{# ,rus: '{{ count.ADDR_RUS }}',lat: '{{ count.ADDR_LAT }}' #}{% if not forloop.last %},{% endif %}{% endfor %}];
+
+
+ymaps.ready(function () {
+    var myMap = new ymaps.Map('SeriaMap', {
+        center: [55.75, 37.57],
+        zoom: 10,
+        behaviors: ['default', 'scrollZoom'],
+        controls: [ 'rulerControl', 'zoomControl', 'geolocationControl', 'fullscreenControl' ]
+        });
+    // Создадим кластеризатор, вызвав функцию-конструктор.
+    clusterer = new ymaps.Clusterer({
+        preset: 'islands#invertedGrayClusterIcons',
+        groupByCoordinates: false,
+        hasHint: false,
+        viewportMargin: 0,
+        zoomMargin: 16,
+        clusterDisableClickZoom: false,
+        gridSize: 80
+        });
+    geoObjects = [];
+    add_str1 = '<a href="/';
+    add_str2 = '/0/">Смотреть коммерческие предложения</a>';
+    add_str3 = '<b>Здание серии {{ THIS_SERIA_NAME }}</b>';
+    // Данные передаются в конструктор метки.
+    for(var i = 0, len = points.length; i < len; i++) {
+        geoObjects[i] = new ymaps.Placemark( points[i],
+		        { // Содержимое иконки, балуна и хинта.
+               balloonContent: add_str1 + forURL[i] + add_str2,
+               hintContent: add_str3
+            },
+		        { preset:'islands#circleIcon',iconColor: 'silver'} );
+	      geoObjects[i].events
+		      .add('mouseenter', function (e) {
+            e.get('target').options.set('preset', 'islands#yellowCircleIcon');
+          })
+	        .add('mouseleave', function (e) {
+            e.get('target').options.set('preset', 'islands#grayCircleIcon');
+          });
+	    }
+    // Добавляем метки в кластеризатор.
+    clusterer.add(geoObjects);
+    myMap.geoObjects.add(clusterer);
+    // позиционирование карты так, чтобы на ней были видны все объекты кластера.
+    myMap.setBounds(clusterer.getBounds(), { checkZoomRange: true });
+});
+</script>{% endif %}{% endblock %}
+<div id="SeriaMap" style="height:100%;width:100%;">
+  <noscript>
+    <p>Для отображения картографических данных по серии {{ THIS_SERIA_NAME }} с&nbsp;помощью &laquo;Яндекс.Карт&raquo; нужно включить поддержку JavaScript.</p>
+  </noscript>
+</div>

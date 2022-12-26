@@ -1,0 +1,1 @@
+{# Выводит навигацию по сериям домов #}{% for CountSeria in SERIA_NAV_DIM %}{% if CountSeria.SERIA_L == "" %}<span style="background-color:cornsilk;"><nobr>{{ CountSeria.SERIA_R }}</nobr></span>{% else %}<span><a href="/catalog/seria/{{ CountSeria.SERIA_L }}/all{{ CountSeria.ID2URL }}/"><nobr>{{ CountSeria.SERIA_R }}</nobr></a></span>{% endif %}{% endfor %}

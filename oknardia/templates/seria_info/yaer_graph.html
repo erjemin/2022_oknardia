@@ -1,0 +1,58 @@
+{# Скрипт Google.Chart для рисования графика #}{% block Top_JS3 %}
+<script type="text/javascript" src="https://www.google.com/jsapi" type="text/javascript"></script>{# <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js" type="text/javascript"></script> #}
+<script type="text/javascript">
+    // google.charts.load('current', {'packages':['bar']});
+    // google.charts.setOnLoadCallback(drawChart);
+    google.load("visualization", "1", {packages:["corechart"]});
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+      let data = google.visualization.arrayToDataTable([
+        ["Год",   "Введено в эксплуатацию", {role:'style'}],{% for row in DATA4GRAPH %}
+        ["{{ row.YEAR }}",{{ row.NUMS }},"color: #99{{ row.CLRS }}99"]{% if not forloop.last %},{% endif %}{% endfor %}
+      ]);
+      let view = new google.visualization.DataView(data);
+      view.setColumns([0, 1,
+                       { calc: "stringify",
+                         sourceColumn: 1,
+                         type: "string",
+                         role: "annotation" },
+                       2
+                       ]);
+      let options = {
+        animation:{
+            duration: 1500,
+            easing: 'in',
+            startup: true
+            },
+        backgroundColor: "#EEEEEE",
+        bar: {groupWidth: "76.4%"},
+        chartArea: {left: "2%", top: "5%", width: '96%', height: '85%'},
+        dataOpacity: 0.76,
+        explorer:{
+            maxZoomIn: 0.20,
+            maxZoomOut: 32 },
+        vAxis: {
+            baselineColor:'grey',
+            gridlines:{color: 'silver', count: 7},
+            minorGridlines:{color: '#dddddd', count: 3},
+            textPosition: 'in',
+            textStyle: {fontSize: 10}
+        },
+        hAxis: { textStyle: {fontSize: 10} },
+        isStacked: true,
+        tooltip: {
+            textStyle:{color: 'grey', fontSize: 10 },
+            trigger: 'selection'
+        },
+        annotations: {textStyle: { fontSize: 8, bold: true, color: 'black',  opacity: 0.8 }},
+        legend: { position: "none" }
+      };
+      let chart = new google.visualization.ColumnChart(document.getElementById("graph"));
+      chart.draw(data, options);
+  }
+</script>{% endblock %}
+<div id="graph" style="width:100%;height:100%">
+  <p>Для отображения гистограммы ввода в&nbsp;эксплуатацию зданий серии {{ THIS_SERIA_NAME }} нужна поддержка SVG.</p>
+  <noscript>
+    <p>Для визуализации отображения картографической информации с&nbsp;помощью Google.Charts нужно включить поддержку JavaScript.</p>
+  </noscript></div>

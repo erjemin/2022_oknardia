@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Sergei Erjemin'
 # from transliterate import translit
+from PIL import Image, ImageDraw
 from oknardia.settings import *
+
+import os
 import re
 import math
 
@@ -97,3 +100,298 @@ def normalize(val: float, val_max: int = 5, val_min: int = 0) -> float:
     :return: float: float -- нормализованное значение
     """
     return float(val - val_min) / float(val_max - val_min)
+
+
+def get_flaps_for_big_pictures(query_set) -> dict:
+    """ Возвращает словарь с размерами картинок для больших картинок.
+    
+    :param query_set: QuerySet -- QuerySet с объектами
+    :return: dict: dict -- словарь с размерами картинок для больших картинок
+    """
+    result = {}
+    mount_max_h = 0   # максимальная высота оконного проема в квартире
+    door_h = 0        # высота двери
+    for i in query_set:     # найдём максимальную высоту проёма окна и двери
+        if i.iWinHight >= mount_max_h:
+            mount_max_h = i.iWinHight
+        if i.bIsDoor >= door_h:
+            door_h = i.iWinHight
+    # Проверяем есть ли папка для хранения картинки конфигурации проема и схемы открывания для данной серии.
+    if not os.path.exists(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{PATH_FOR_BIGIMGFLAPCONFIG}"):
+        # создаем такую папку если ее нет
+        os.makedirs(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{PATH_FOR_BIGIMGFLAPCONFIG}")
+    flaps_dim = []   # список словарей, через который будут передаваться данные в шаблон
+    mount_bulk = 0   # размещение дверной перемычки
+    i_through = -1
+    for i in query_set:
+        img_file_name = "%03dx%03dH%03d" % (i.iWinWidth, i.iWinHight, mount_max_h)
+        # img_file_name = f"{i.iWinWidth:03d}x{i.iWinHight:03d}H{mount_max_h:03d}"
+        if i.bIsDoor:
+            img_file_name += u"D"       # добавляем букву D если это дверь
+        else:
+            img_file_name += u"W"       # добавляем букву W если это окно
+        if i.bIsNearDoor:
+            img_file_name += u"N"       # добавляем букву N если это окно рядом с дверью
+            mount_bulk = i.iWinHight    # размещение дверной перемычки
+        else:
+            img_file_name += u"-"       # добавляем символ отдельное окно (не рядом с дверью)
+        # маскируем символы схемы открывания, которые не допустимы в названии файлов
+        img_file_name += i.sFlapConfig
+        img_file_name = img_file_name.replace(">", "G")
+        img_file_name = img_file_name.replace("<", "L")
+        img_file_name = img_file_name.replace("[", "(")
+        img_file_name = img_file_name.replace("]", ")")
+        img_file_name = img_file_name.replace("|", "I")
+        img_file_name = f"{PATH_FOR_BIGIMGFLAPCONFIG}/{img_file_name}.png"
+        # проверяем, есть ли файл с нужной картинкой схемам открывания?
+        if not os.path.isfile(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{img_file_name}"):
+            # картинки нет, вызываем функцию для ее создания
+            make_big_img_win_flap(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{img_file_name}", i.iWinWidth, i.iWinHight,
+                                  i.bIsDoor, i.sFlapConfig, mount_max_h, mount_bulk, door_h)
+        # чтобы получить разноцветные маркеры меток количества проемов
+        # получаем последовательность тип: AB, CD, E, FG, H
+        q_local = ""
+        for i_local in range(0, i.iQuantity):
+            i_through += 1
+            q_local += chr(65 + i_through)  # 65 -- код "A"
+        flaps_dim.append({
+            'url2img': f"img/{img_file_name}",
+            'iWinWidth': i.iWinWidth,
+            'iWinHight': i.iWinHight,
+            'iWinDepth': i.iWinDepth,
+            'iQuantity': i.iQuantity,
+            'sDescription': i.sDescripion,
+            'id': i.id,
+            'qStr': q_local,
+            'W': int((i.iWinWidth*250) / mount_max_h)
+        })
+    result.update({'FLAP_DIM': flaps_dim,
+                   'WIN_DIM': query_set})
+    return result
+
+
+def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int, is_door: bool,
+                          flap_config: str, height_max: int, height_mount_bulk: int, height_door: int) -> None:
+    """
+    Функция создает png-картинку схемы открывания окна или двери
+    :param img_file_name_with_path: str -- полное имя файла картинки
+    :param width: int -- ширина окна или двери (см.)
+    :param height: int -- высота окна или двери
+    :param is_door: bool -- True - дверь, False - окно
+    :param flap_config: str -- схема открывания
+    :param height_max: int -- максимальная высота окна или двери (высота картинки)
+    :param height_mount_bulk: int -- высота расположения дверной перемычки
+    :param height_door: int -- высота дверного проема
+    :return: None
+    """
+    # создаем картинку с нужными размерами
+    img = Image.new("RGBA", (width * PICT_H / height_max, PICT_H), (255, 255, 255, 0))
+    # print(img_file_name_with_path)
+    # находим крайние точки периметра (если окно -- выравнено вверх; если дверь -- вниз)
+    top = 0
+    left = 0
+    bottom = img.size[1]
+    right = img.size[0]
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((left, top, right-1, bottom-1), fill=(200, 200, 200, 50), outline=None)
+    if is_door: # это дверь. Выравнивание по нижней кромке
+        top = bottom - (height * PICT_H / height_max)
+    else:   # это не дверь... Выравниваем по верхней кромке
+        if height < height_door:
+            top = bottom - (height_door * PICT_H / height_max)
+        bottom = top + (height * PICT_H / height_max)
+    flap_h = bottom - top
+    # рисуем внешнюю рамку
+    draw.line((left, bottom, right, bottom), fill=(125, 125, 125), width=25)
+    draw.line((left, top, right, top), fill=(125, 125, 125), width=25)
+    draw.line((left, top, left, bottom), fill=(125, 125, 125), width=25)
+    draw.line((right, top, right, bottom-6), fill=(125, 125, 125), width=25)
+
+    dim_flap = flap_analiz(flap_config)
+
+    ############################################################
+    # НАЧИНАЕМ ОТРИСОВКУ СТВОРОК ОКНА НА КРТИНКУ
+    ############################################################
+    v_ratio_max = 0               # число всех долей (частей) для построения пропорций по вертикали
+    for i in dim_flap:            # цикл по рядам створок
+        v_ratio_max += i["vRatio"]
+    local_top = top
+    local_bottom = top
+    for i in dim_flap:           # цикл по рядам створок
+        local_bottom += i["vRatio"]*flap_h/v_ratio_max
+        h_ratio_max = 0           # число всех долей (частей) для построения пропорций по горизонтали
+        for j in i["row"]:
+            h_ratio_max += j["hRatio"]
+        local_right = 0
+        local_left = 0
+        for j in i["row"]:
+            local_right += j["hRatio"] * right / h_ratio_max
+            # отрисовка схему открывания створки
+            if "M" in j["flap"] or "m" in j["flap"] or "м" in j["flap"] or "М" in j["flap"]:    # москитная сетка
+                for k in range(local_left + 3, local_right - 3, 12):
+                    draw.line((k, local_top + 7, k, local_bottom - 7), fill=(225, 225, 225, 255), width=2)
+                for k in range(local_top + 3, local_bottom - 3, 12):
+                    draw.line((local_left + 7, k, local_right - 7, k), fill=(225, 225, 225), width=2)
+            if is_door:         # Это дверь. Выравнивание по нижней кромке
+                top = bottom - (height * PICT_H / height_max)
+                # рисуем серединную перегородку =
+                draw.line((left, top + (height_mount_bulk * PICT_H / height_max) - 8,
+                           right - 2, top + (height_mount_bulk * PICT_H / height_max) - 8),
+                          fill=(125, 125, 125), width=8)
+                draw.line((left + 6, top + (height_mount_bulk * PICT_H / height_max) - 4,
+                           right - 12, bottom - 12), fill=(125, 125, 125), width=3)
+                draw.line((right - 6, top + (height_mount_bulk * PICT_H / height_max) - 4,
+                           left + 12, bottom - 12), fill=(125, 125, 125), width=3)
+            if "|" in j["flap"]:                            # вертикальная перегородка |
+                for k in range(j["flap"].count("|") + 1):
+                    draw.line((local_left + k * (local_right - local_left) / (j["flap"].count("|") + 1), local_top,
+                               local_left + k * (local_right - local_left) / (j["flap"].count("|") + 1), local_bottom),
+                              fill=(125, 125, 125), width=4)
+            if "=" in j["flap"]:                            # горизонтальная перегородка =
+                for k in range(j["flap"].count("=") + 1):
+                    draw.line((local_left, local_top + k * (local_bottom - local_top) / (j["flap"].count("=") + 1),
+                               local_right, local_top + k * (local_bottom - local_top) / (j["flap"].count("=") + 1)),
+                              fill=(125, 125, 125), width=4)
+            if "V" in j["flap"]:                            # откидное открывание V
+                draw.line((local_right - 12, local_bottom - 12, (local_right + local_left) / 2, local_top + 12),
+                          fill=(225, 125, 125), width=1)
+                draw.line((local_left + 12, local_bottom - 12, (local_right + local_left) / 2, local_top + 12),
+                          fill=(225, 125, 125), width=1)
+            if ">" in j["flap"] or "G" in j["flap"]:       # поворотное влево >
+                draw.line((local_left + 12, local_top + 12, local_right - 12, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+                draw.line((local_left + 12, local_bottom - 12, local_right - 12, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+            if "<" in j["flap"] or "L" in j["flap"]:       # поворотное вправо <
+                draw.line((local_right - 12, local_bottom - 12, local_left + 12, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+                draw.line((local_right - 12, local_top + 12, local_left + 12, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+            if "X" in j["flap"] or "x" in j["flap"] or "х" in j["flap"] or "Х" in j["flap"] or \
+                    "+" in j["flap"]:                       # глухое окно +
+                draw.line(((local_right + local_left) / 2 - 11, (local_bottom + local_top) / 2,
+                           (local_right + local_left) / 2 + 11, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=2)
+                draw.line(((local_right + local_left) / 2, (local_bottom + local_top) / 2 - 11,
+                           (local_right + local_left) / 2, (local_bottom + local_top) / 2 + 11),
+                          fill=(225, 125, 125), width=2)
+            if u"Z" in j["flap"] or "z" in j["flap"] or "S" in j["flap"] or "s" in j["flap"]:   # РАСШИРИТЕЛЬ (спейсер)
+                draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
+                           (local_right * 3 - local_left) / 4, (local_top * 3 + local_bottom) / 4),
+                          fill=(225, 125, 125), width=4)
+                draw.line(((local_left * 3 + local_right) / 4, (local_bottom * 3 + local_top) / 4,
+                           (local_right * 3 - local_left) / 4, (local_bottom * 3 + local_top) / 4),
+                          fill=(225, 125, 125), width=4)
+                draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
+                           (local_right * 3 - local_left) / 4, (local_bottom * 3 + local_top) / 4),
+                          fill=(225, 125, 125), width=4)
+            # Отрисовка створки. ПЕРИМЕТР.
+            draw.line((local_left, local_bottom, local_right, local_bottom), fill=(125, 125, 125), width=18)
+            draw.line((local_left, local_top, local_right, local_top), fill=(125, 125, 125), width=18)
+            draw.line((local_left, local_top, local_left, local_bottom), fill=(125, 125, 125), width=18)
+            draw.line((local_right, local_top, local_right, local_bottom), fill=(125, 125, 125), width=18)
+
+            local_left = local_right
+        local_top = local_bottom
+    # второй проход -- рисуем тоненькую рамочку внутри толстых линий
+    local_top = top
+    local_bottom = top
+    for i in dim_flap:            # цикл по рядам створок
+        local_bottom += i["vRatio"] * flap_h / v_ratio_max
+        h_ratio_max = 0           # число всех долей (частей) для построения пропорций по горизонтали
+        for j in i["row"]:
+            h_ratio_max += j["hRatio"]
+        local_right = 0
+        local_left = 0
+        for j in i["row"]:
+            local_right += j["hRatio"]*right/h_ratio_max
+            # Отрисовка створки. ПЕРИМЕТР
+            draw.rectangle((local_left, local_top, local_right, local_bottom), fill=None, outline=(0, 0, 0))
+            local_left = local_right
+        local_top = local_bottom
+    # рисуем крест-на-крест перечеркивание всего проема (просто так, для отладки)
+    # draw.line((left+6, top+6, right-6, bottom-6), fill=(200,200,200), width=1)
+    # draw.line((left+6, bottom-6, right-6, top+6), fill=(200,200,200), width=1)
+    # для оконо ниже чем самый высокий проем рисуем прямоугольник под подоконником
+    draw.rectangle((left, top + (height * PICT_H / height_max), right - 1, PICT_H),
+                   fill=(255, 255, 255, 0), outline=None)
+    # для окон ниже чем дверь рисуем прямоугольник над проемом
+    draw.rectangle((left, 0, right - 1, top), fill=(255, 255, 255, 0), outline=None)
+    if is_door:     # Это дверь. Надо нарисовать сверху прямоугольник, на случай если есть очень высокое окно
+        draw.rectangle((left, 0, right - 1, (height_max - height) * PICT_H / height_max),
+                       fill=(255, 255, 255, 0), outline=None)
+    # рисуем внешнюю тоненькую окантовку
+    draw.rectangle((left, top, right-1, bottom-1), fill=None, outline=(0, 0, 0))
+    del draw
+    # сохраняем картинку
+    # img.info = {"Comment": "123456"}
+    img.save(img_file_name_with_path)
+    return
+
+
+def flap_analiz(flap_config: str) -> list:
+    # анализ схем открывания.
+    dim_flap = []   # массив для хранения полной схемы открывания
+    i_end = len(flap_config)
+    j = -1          # счётчик горизонтальных рядов (формула, оконный блок)
+    k = -1          # счётчик вертикальных рядов внутри горизонтальных (створки)
+    in_flap = False     # признак, где идёт разбор: внутри ли сворки или снаружи (схемы открывания или описания рядов)
+    # начинаем разбор
+    for i in range(0, i_end):
+        # посимвольный разбор строки
+        if i == 0 or flap_config[i - 1] == ".":
+            dim_flap.append({})     # надо создать новый ряд (фрамуги или ряд створок)
+            j += 1
+            k = -1
+            dim_flap[j].update({"row": []})     # добавляем в ряд пустой список створок
+            dim_flap[j].update({"vRatio": 1})   # добавляем число характеризующее пропорцию ряда относительно других
+        if not in_flap and (flap_config[i].isdigit() and flap_config[i - 1].isdigit()):
+            dim_flap[j].update({"vRatio": dim_flap[j]["vRatio"] * 10 + int(flap_config[i])})
+            continue
+        if not in_flap and flap_config[i].isdigit():
+            dim_flap[j].update({"vRatio": int(flap_config[i])})
+            continue
+        # получен символ начала описания створки
+        if flap_config[i] == "[" and not in_flap:
+            in_flap = True
+            dim_flap[j]["row"].append({})
+            k += 1
+            dim_flap[j]["row"][k].update({"flap": ""})
+            dim_flap[j]["row"][k].update({"hRatio": 1})
+            continue
+        # получен символ окончание описания створки
+        if in_flap and flap_config[i] == "]":
+            in_flap = False
+            continue
+        # символ увеличения пропорции
+        if in_flap and (flap_config[i] == "-" or flap_config[i] == "_"):    # для управления пропорциями створок
+            dim_flap[j]["row"][k]["hRatio"] += 1
+            continue
+        if in_flap and (flap_config[i].isdigit() and flap_config[i - 1].isdigit()):
+            dim_flap[j]["row"][k].update({"hRatio": dim_flap[j]["row"][k]["hRatio"]*10 + int(flap_config[i])})
+            continue
+        if in_flap and flap_config[i].isdigit():
+            dim_flap[j]["row"][k].update({"hRatio": int(flap_config[i])})
+            continue
+        if in_flap and (flap_config[i] == "V"           # откидное открывание
+                        or flap_config[i] == ">"        # поворотное влево
+                        or flap_config[i] == "G"        # ^
+                        or flap_config[i] == "L"        # поворотное вправо
+                        or flap_config[i] == "<"        # ^
+                        or flap_config[i] == "|"        # вертикальная перегородка
+                        or flap_config[i] == "="        # горизонтальная перегородка
+                        or flap_config[i] == "X"        # глухое окно
+                        or flap_config[i] == "x"        # ^
+                        or flap_config[i] == u"х"       # ^
+                        or flap_config[i] == u"Х"       # ^
+                        or flap_config[i] == "+"        # ^
+                        or flap_config[i] == "M"        # москитная сетка
+                        or flap_config[i] == "m"        # ^
+                        or flap_config[i] == "м"       # ^
+                        or flap_config[i] == "М"       # ^
+                        or flap_config[i] == "Z"       # расширитель (спейсер)
+                        or flap_config[i] == "S"       # ^
+                        or flap_config[i] == "z"       # ^
+                        or flap_config[i] == "s"):     # ^
+            dim_flap[j]["row"][k].update({"flap": dim_flap[j]["row"][k]["flap"] + flap_config[i]})
+    return dim_flap
