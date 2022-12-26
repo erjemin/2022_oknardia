@@ -258,7 +258,7 @@ class Migration(migrations.Migration):
                 ('iWinWidth', models.DecimalField(decimal_places=1, help_text='Ширина, см.', max_digits=5, verbose_name='Ширина')),
                 ('iWinHight', models.DecimalField(decimal_places=1, help_text='Высота, см.', max_digits=5, verbose_name='Высота')),
                 ('iWinDepth', models.DecimalField(decimal_places=1, help_text='Глубина, см.', max_digits=3, verbose_name='Глубина')),
-                ('sFlapConfig', models.CharField(help_text='Рекомендуемая гор.архитектурой конфигурации открывания (МЕТАЯЗЫК)', max_length=32, verbose_name='Открывание')),
+                ('flap_config', models.CharField(help_text='Рекомендуемая гор.архитектурой конфигурации открывания (МЕТАЯЗЫК)', max_length=32, verbose_name='Открывание')),
                 ('sDescripion', models.CharField(blank=True, help_text='Описание для простоты последующего поиска и SEO', max_length=64, null=True, verbose_name='Описание')),
                 ('bIsDoor', models.BooleanField(default=False, help_text='Это Дверь', verbose_name='Дверь')),
                 ('bIsNearDoor', models.BooleanField(default=False, help_text='Это окно рядом с дверью (может быть глухим)', verbose_name='Глухое')),
