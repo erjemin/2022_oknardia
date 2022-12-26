@@ -6,7 +6,7 @@ let forURL = [{% for count in DATA4GEO %}{{ count.ADDR_ID }}{# ,rus: '{{ count.A
 
 
 ymaps.ready(function () {
-    var myMap = new ymaps.Map('SeriaMap', {
+    let myMap = new ymaps.Map('SeriaMap', {
         center: [55.75, 37.57],
         zoom: 10,
         behaviors: ['default', 'scrollZoom'],

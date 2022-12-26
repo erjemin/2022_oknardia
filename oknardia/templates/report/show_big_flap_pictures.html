@@ -11,7 +11,7 @@
    </div>{% endfor %}{% comment %}
 <script type="text/javascript">
 $(document).ready(function(){
-  var maxHeight = 0;
+  let maxHeight = 0;
   {% for I_WIN_DIM in FLAP_DIM %}if (maxHeight < $('#flap{{ forloop.counter0 }}').height()) maxHeight = $('#flap{{ forloop.counter0 }}').height();
   {% endfor %}{% for I_WIN_DIM in FLAP_DIM %}$('#flap{{ forloop.counter0 }}').height(maxHeight-240);{% endfor %}
 });
