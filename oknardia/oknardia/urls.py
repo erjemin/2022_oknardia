@@ -62,6 +62,7 @@ urlpatterns = [
     # --- --- Каталог серий типового строительства
     re_path(r'^catalog/seria[/*]$', catalog.catalog_seria),
     re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$', catalog.catalog_seria_info),
+    re_path(r'^catalog/standard_opening[/*]$', catalog.standard_opening),
 
 ]
 

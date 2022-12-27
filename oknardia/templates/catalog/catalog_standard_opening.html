@@ -1,0 +1,121 @@
+{% extends "base.html" %}{% load static %}
+
+{% block Title %} Каталог :: стандартные оконные проёмы типовых серий домов...{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов...{% endblock %}
+
+{% block Keywords %}Каталог, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+
+{% block Author4Meta %}: Каталог «Окнардия»{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"c" }}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
+  <meta itemprop="headline" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
+  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
+  <link rel="canonical" href="https://oknardia.ru//catalog/" />
+  <link rel="standout"  href="https://oknardia.ru//catalog/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
+  <meta property="og:description" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов... | oknardia.ru"/>
+  <meta name="twitter:description" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog">Каталог</a></li>
+        <li>Оконные проёмы и балконные блоки</li>
+      </ol>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <dIv class="row">
+    {# ПЕРВЫЙ РАЗДЕЛ #}<div class="col-md-9 col-xs-8">
+      <h1>Cтандартные оконные проёмы и&nbsp;балконные блоки</h1>
+      <p>Ценовая выдача «Окнардии» основана на базе стандартных оконных проёмов в типовых сериях домов. Для каждого проёма существуют рекомендованные организациями-проектировщиками схемы открывание, но парнёры «Окнардии» могут предложить свои, более расширенные или наоборот сокращенные. В таблице приведены параметры стандартных проёмов базы.</p>
+    </div>
+    {# реклама Oknardia 250x250 СБОКУ #}<div class="col-md-3 col-xs-4 float-right">{% include "ad/bannet-250x250.html" %}</div>
+    <div class="col-md-11 col-xs-12 catalog scrolled">
+      <table class="table-striped table-hover table-responsive flap-catalog">
+        <thead>
+        <tr>
+          <th colspan="3" class="c">Размеры (мм)</th>
+          <th rowspan="2" class="b c">Стандартная<br>схема<br>открывания</th>
+          <th colspan="2" class="c">Балконный блок</th>
+          <th rowspan="2">Описание окна</th>
+          <th rowspan="2">Типовые серии домов где встречается данный окный проём</th>
+          <th rowspan="2"></th>
+        </tr>
+        <tr>
+          <th class="r b">Ш</th>
+          <th class="x b">&times;</th>
+          <th class="x b">В</th>
+          <th class="c b">Окно</th>
+          <th class="c b">Дверь</th>
+        </tr>
+        </thead>
+        <tbody>{% for i in LIST_WIN_OPENING %}
+        <tr>
+          <td data-sort="{{ i.W|stringformat:".0f" }}">{{ i.W|stringformat:".0f" }}</td>
+          <td>&times;</td>
+          <td data-sort="{{ i.H|stringformat:".0f" }}">{{ i.H|stringformat:".0f" }}</td>
+          <td data-sort="{{ i.FLAP_CONFIG }}"><img src="{% static i.URL2IMG %}" title="{{ i.DESCRIPTION_L }}" alt="{{ i.DESCRIPTION_L }}" /></td>
+          <td data-sort="{% if i.IS_NEAR_DOOR %}1{% else %}0{% endif %}">{% if i.IS_NEAR_DOOR %}да{% else %}—{% endif %}</td>
+          <td data-sort="{% if i.IS_DOOR %}1{% else %}0{% endif %}">{% if i.IS_DOOR %}да{% else %}—{% endif %}</td>
+          <td>{{ i.DESCRIPTION }}</td>
+          <td>{% for j in i.INCLUDING_IN_SERIA  %}<a href="/catalog/seria/{{ j.NAME_T }}/all{{ j.ID }}">{{ j.NAME }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+          <td><a class="btn btn-default btn-xs" href="/tsena-odnogo-okna/{{ i.W|stringformat:".0f" }}x{{ i.H|stringformat:".0f" }}mm/tip{{ i.ID }}">цены</a></td>
+{#          {% for j in SERIAS %}#}
+{#          <td>{% if j.id in i.INCLUDING_IN_SERIA %}#{% endif %}</td>{% endfor %}#}
+        </tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+
+    <DIV  class="col-xs-12" style="height:6em;"></DIV>
+  </dIv>
+
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+
