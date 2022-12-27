@@ -382,8 +382,8 @@ def flap_analiz(flap_config: str) -> list:
                         or flap_config[i] == "="        # горизонтальная перегородка
                         or flap_config[i] == "X"        # глухое окно
                         or flap_config[i] == "x"        # ^
-                        or flap_config[i] == u"х"       # ^
-                        or flap_config[i] == u"Х"       # ^
+                        or flap_config[i] == "х"        # ^
+                        or flap_config[i] == "Х"        # ^
                         or flap_config[i] == "+"        # ^
                         or flap_config[i] == "M"        # москитная сетка
                         or flap_config[i] == "m"        # ^
@@ -395,3 +395,86 @@ def flap_analiz(flap_config: str) -> list:
                         or flap_config[i] == "s"):     # ^
             dim_flap[j]["row"][k].update({"flap": dim_flap[j]["row"][k]["flap"] + flap_config[i]})
     return dim_flap
+
+
+def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str, is_door: bool = False) -> None:
+    """  Функция создает файл мини-картинки схем открывания окна
+
+    :param path_to_img_file: путь к файлу с изображением
+    :param str_flap_config: строка с описанием схемы открывания
+    :param is_door:
+    :return:
+    """
+    # print(path_to_img_file, str_flap_config, is_door)
+    dim_flap = flap_analiz(str_flap_config)
+    v_ratio_max = 0               # число всех долей (частей) для построения пропорций по вертикали
+    h_ratio_max = 0               # число всех долей (частей) для построения пропорций по горизонтали
+    for i in dim_flap:
+        local_h_ratio_max = 0
+        v_ratio_max += i["vRatio"]
+        for j in i["row"]:
+            local_h_ratio_max += j["hRatio"]
+        if local_h_ratio_max > h_ratio_max:
+            h_ratio_max = local_h_ratio_max
+    img = Image.new("RGBA", (h_ratio_max*PICT_MINWI+(h_ratio_max+1)*3, PICT_MINIH+6), (255, 255, 255, 0))
+    top = 0
+    left = 0
+    bottom = img.size[1]
+    right = img.size[0]
+    flap_h = bottom - top
+    draw = ImageDraw.Draw(img)
+    draw.rectangle((left, top, right, bottom), fill=(200, 200, 200, 50), outline=None)
+    # рисуем внешнюю рамку
+    draw.line((left, bottom-1, right, bottom-1), fill=(125, 125, 125), width=5)   # нижняя
+    draw.line((left, top, right, top), fill=(125, 125, 125), width=5)             # верхняя
+    draw.line((left, top, left, bottom), fill=(125, 125, 125), width=5)           # левая
+    draw.line((right-1, top, right-1, bottom), fill=(125, 125, 125), width=5)     # правая
+
+    ############################################################
+    # НАЧИНАЕМ ОТРИСОВКУ СТВОРОК ОКНА НА КРТИНКУ
+    ############################################################
+    local_top = top
+    local_bottom = top
+    for i in dim_flap:           # цикл по рядам створок
+        local_bottom += i["vRatio"]*flap_h/v_ratio_max
+        local_right = 0
+        local_left = 0
+        for j in i["row"]:
+            local_right += j["hRatio"]*right/h_ratio_max
+            # отрисовка схему открывания створки
+            if "X" in j["flap"] or "x" in j["flap"] or "х" in j["flap"] or "Х" in j["flap"] or "+" in j["flap"]:
+                # глухое окно (рисуем крестик)
+                draw.line(((local_right + local_left) / 2 - 5, (local_bottom + local_top) / 2,
+                           (local_right + local_left) / 2 + 5, (local_bottom + local_top)/2),
+                          fill=(105, 105, 225), width=1)
+                draw.line(((local_right + local_left) / 2, (local_bottom + local_top) / 2 - 5,
+                           (local_right + local_left) / 2, (local_bottom + local_top) / 2 + 5),
+                          fill=(105, 105, 225), width=1)
+            if "V" in j["flap"]:   # откидное открывание
+                draw.line((local_right - 3, local_bottom - 4, (local_right + local_left) / 2, local_top + 3),
+                          fill=(125, 225, 125), width=1)
+                draw.line((local_left + 3, local_bottom - 4, (local_right + local_left) / 2, local_top + 3),
+                          fill=(125, 225, 125), width=1)
+            if ">" in j["flap"] or "G" in j["flap"]:    # поворотное влево
+                draw.line((local_left + 3, local_top + 3, local_right - 3, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+                draw.line((local_left + 3, local_bottom - 3, local_right - 3, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+            if "<" in j["flap"] or "L" in j["flap"]:    # поворотное вправо
+                draw.line((local_right - 3, local_bottom - 3, local_left + 3, (local_bottom + local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+                draw.line((local_right - 3, local_top + 3, local_left + 3, (local_bottom+local_top) / 2),
+                          fill=(225, 125, 125), width=1)
+
+            # Отрисовка створки. ПЕРИМЕТР
+            draw.line((local_left, local_bottom, local_right, local_bottom), fill=(125, 125, 125), width=3)
+            draw.line((local_left, local_top, local_right, local_top), fill=(125, 125, 125), width=3)
+            draw.line((local_left, local_top, local_left, local_bottom), fill=(125, 125, 125), width=3)
+            draw.line((local_right, local_top, local_right, local_bottom), fill=(125, 125, 125), width=3)
+            local_left = local_right
+        local_top = local_bottom
+    del draw
+    # сохраняем картинку
+    img.save(path_to_img_file)
+    return
+
