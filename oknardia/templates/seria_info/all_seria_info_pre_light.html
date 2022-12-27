@@ -68,7 +68,7 @@
 
 	<div class="row">
 		<div class="col-md-9"><a name="s_graph"></a>
-			<h2 class="header">Здания серия {{ THIS_SERIA_NAME }}: ввод в эксплуатацию по годам</h2>
+			<h2 class="header">Здания серия {{ THIS_SERIA_NAME }}: ввод в&nbsp;эксплуатацию по&nbsp;годам</h2>
     </div>
 		<div class="col-md-9 col-md-offset-1" style="height:300px;font-size:large;">
 			{% include 'seria_info/yaer_graph.html' %}
@@ -80,7 +80,7 @@
 
 	<div class="row">
 		<div class="col-md-7"><a name="s_map"></a>
-      <h2 class="header">Строения серии {{ THIS_SERIA_NAME }} на карте</h2>
+      <h2 class="header">Строения серии {{ THIS_SERIA_NAME }} на&nbsp;карте</h2>
     </div>
 		<div class="col-md-7 col-lg-offset-1">
       <p><small>Чтобы посмотреть цены на&nbsp;установку и&nbsp;замену окон от&nbsp;партнёров &laquo;Окнардия&raquo; в&nbsp;своей квартире: найдите дом на&nbsp;карте; кликните на&nbsp;него; перейдите по&nbsp;ссылке &laquo;Смотреть коммерческие предложения&raquo;. При необходимости смените типовую планировку квартиры (на&nbsp;странице ценовой выдачи, справа от&nbsp;изображения типовых проёмов и&nbsp;схем открывания).</small></p>
@@ -90,22 +90,23 @@
 
 		<diV class="col-md-4">
 			<h3  class="header">Статистика <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
-			<p>Совокупно во всех зданиях типового проекта:</p>
+			<p>Совокупно во&nbsp;всех зданиях типового проекта:</p>
 			<ul>
 				<li><strong>{{ ACCOUNTS|price_format }}</strong> квартир.</li>
 				<li>Проживает <strong>{{ APARTMENTS|price_format }}</strong> семей <small>(<strong>{{ RESIDENTS|price_format }}</strong> человек)</small>.</li>
 				<li><strong>{{ RESIDENTIAL_M2|stringformat:".1f"|price_format }} м²</strong> жилых помещений.</li>
-				<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong> — муниципальное жильё.</li>
-				<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и городские	службы, учреждения бытового обслуживания, магазины, офисы и тому подобное.</li>
-				<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }} — <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный — <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
+				<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong>&nbsp;— муниципальное жильё.</li>
+				<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и&nbsp;городские	службы, учреждения бытового обслуживания, магазины, офисы и&nbsp;тому подобное.</li>
+				<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }}&nbsp;— <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный&nbsp;— <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
 			</ul>
 		</diV>
 	</div>
 
 	<div class="row">
 		<div class="col-md-4 col-lg-offset-8" style="margin-top: 1em;">{# <div class="col-md-4"> #}
-			<h5>Информация о&nbsp;других, отличных от&nbsp;{{ THIS_SERIA_NAME }}, типовых сериях в&nbsp;базе &laquo;Окнардия&raquo;, типовых планировках квартир и&nbsp;оконных проёмах в&nbsp;них, а также рекомендации по замене окон:</h5>
+			<h5>Информация о&nbsp;других, отличных от&nbsp;{{ THIS_SERIA_NAME }}, типовых сериях в&nbsp;базе &laquo;Окнардия&raquo;, типовых планировках квартир и&nbsp;оконных проёмах в&nbsp;них, а&nbsp;также рекомендации по&nbsp;замене&nbsp;окон:</h5>
 			<div class="href_d">{% include 'seria_info/seria_nav.html' %}</div>
+      <p style="text-align:right;padding-top:1em;padding-bottom:1em;"><a href="/stat_all/">Агрегированная информация<br />по&nbsp;типовым сериям домов<br />в&nbsp;базе &laquo;Окнардия&raquo;</a>.</p>
 		</div>
 	</div>
   <div class="row">
