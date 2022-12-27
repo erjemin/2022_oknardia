@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %} Каталог :: стандартные оконные проёмы типовых серий домов...{% endblock %}
+{% block Title %} Стандартные оконные проёмы типовых серий домов :: каталог{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
 {% block Description %}Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов...{% endblock %}
 
-{% block Keywords %}Каталог, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}оконные проёмы, стандартные окна, стандартные оконные проемы, каталог, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
 
 {% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
 
@@ -64,8 +64,8 @@
   </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
   <dIv class="row">
     {# ПЕРВЫЙ РАЗДЕЛ #}<div class="col-md-9 col-xs-8">
-      <h1>Cтандартные оконные проёмы и&nbsp;балконные блоки</h1>
-      <p>Ценовая выдача «Окнардии» основана на базе стандартных оконных проёмов в типовых сериях домов. Для каждого проёма существуют рекомендованные организациями-проектировщиками схемы открывание, но парнёры «Окнардии» могут предложить свои, более расширенные или наоборот сокращенные. В таблице приведены параметры стандартных проёмов базы.</p>
+      <h1>Стандартные оконные проёмы и&nbsp;балконные блоки</h1>
+      <p>Ценовая выдача «Окнардии» основана на базе стандартных оконных проёмов в типовых сериях домов. Для каждого проёма существуют рекомендованные организациями-проектировщиками схемы открывание, но партнёры «Окнардии» могут предложить свои, более расширенные или наоборот сокращенные. В таблице приведены параметры стандартных проёмов базы.</p>
     </div>
     {# реклама Oknardia 250x250 СБОКУ #}<div class="col-md-3 col-xs-4 float-right">{% include "ad/bannet-250x250.html" %}</div>
     <div class="col-md-11 col-xs-12 catalog scrolled">
@@ -76,7 +76,7 @@
           <th rowspan="2" class="b c">Стандартная<br>схема<br>открывания</th>
           <th colspan="2" class="c">Балконный блок</th>
           <th rowspan="2">Описание окна</th>
-          <th rowspan="2">Типовые серии домов где встречается данный окный проём</th>
+          <th rowspan="2">Типовые серии домов где встречается данный оконный проём</th>
           <th rowspan="2"></th>
         </tr>
         <tr>
@@ -92,7 +92,7 @@
           <td data-sort="{{ i.W|stringformat:".0f" }}">{{ i.W|stringformat:".0f" }}</td>
           <td>&times;</td>
           <td data-sort="{{ i.H|stringformat:".0f" }}">{{ i.H|stringformat:".0f" }}</td>
-          <td data-sort="{{ i.FLAP_CONFIG }}"><img src="{% static i.URL2IMG %}" title="{{ i.DESCRIPTION_L }}" alt="{{ i.DESCRIPTION_L }}" /></td>
+          <td data-sort="{{ i.FLAP_CONFIG }}"><img src="{% static i.URL2IMG %}" title="{{ i.DESCRIPTION_L }}, {{ i.W|stringformat:".0f" }}×{{ i.H|stringformat:".0f" }} мм." alt="{{ i.DESCRIPTION_L }}, {{ i.W|stringformat:".0f" }}×{{ i.H|stringformat:".0f" }} мм." /></td>
           <td data-sort="{% if i.IS_NEAR_DOOR %}1{% else %}0{% endif %}">{% if i.IS_NEAR_DOOR %}да{% else %}—{% endif %}</td>
           <td data-sort="{% if i.IS_DOOR %}1{% else %}0{% endif %}">{% if i.IS_DOOR %}да{% else %}—{% endif %}</td>
           <td>{{ i.DESCRIPTION }}</td>
