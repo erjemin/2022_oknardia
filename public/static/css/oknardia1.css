@@ -458,7 +458,7 @@ div.kk ul > li {list-style: square;margin-left:-2em;list-style-position: outside
 .catalog > table.flap-catalog > tbody > tr > td:first-of-type{padding-right:1px;text-align:right;}
 .catalog > table.flap-catalog > tbody > tr > td:nth-child(3){padding-left:1px;}
 .catalog > table.flap-catalog > tbody > tr > td:nth-child(2),
-.catalog > table.flap-catalog > thead > tr > th.x {padding-right:0;padding-left:0;}
+.catalog > table.flap-catalog > thead > tr > th.x {padding-right:0;padding-left:4px; margin: auto}
 .scrolled{margin-left:15px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;-ms-overflow-style:-ms-autohiding-scrollbar;}
 .scrolled > table {margin-left:-15px;padding-right: 150px;}
 a > .catalog-seria-img{background: whitesmoke;background-position:0 0;
