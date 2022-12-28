@@ -936,8 +936,8 @@ def catalog_company(request: HttpRequest) -> HttpResponse:
         i.NumOffers = pytils.numeral.get_plural(i.NumOffers, u"вариант, варианта, вариантов")
         i.lastUpdate = pytils.dt.distance_of_time_in_words(int(django.utils.dateformat.format(i.lastUpdate, 'U')))
         i.sMerchantMainURL = pytils.translit.slugify(i.sMerchantName)
-        print("NAME:", i.sMerchantName, "\tNumSets:", i.NumSets, "\tNumOffers:", i.NumOffers,
-             "\t:AverageRating:", i.RatingAVG, "\tAveragePrice:", i.PriceAVG, "\tSTARS:", i.STARS)
+        # print("NAME:", i.sMerchantName, "\tNumSets:", i.NumSets, "\tNumOffers:", i.NumOffers,
+        #      "\t:AverageRating:", i.RatingAVG, "\tAveragePrice:", i.PriceAVG, "\tSTARS:", i.STARS)
     to_template.update({
         'COMPANIES': list_company,
         # получаем последние визиты клиента через куки
