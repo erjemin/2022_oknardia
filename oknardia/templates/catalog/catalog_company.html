@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}{% load filters %}
+
+{% block Title %}Каталог изготовителей и поставщиков окон{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог изготовителей окон, партнёры «Окнардия», рейтинг, {% for i in COMPANIES %}{{ i.sMerchantName }}, {% endfor %}  средняя цена окна{% endblock %}
+
+{% block Keywords %}Оконные компании, {% for i in COMPANIES %}{{ i.sMerchantName }}, {% endfor %} изготовители окон, производители окон, постащики окон, партнёры, каталог компаний, каталог оконных компаний, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Author4Meta %}: Каталог изготовителей окон{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог изготовителей окон{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог производителей окон" />
+  <meta itemprop="headline" content="Компании-партнёры «Окнардии», их рейтинг, число оконных наборов и вариантов расчёта цен для типовых проёмов, средняя цена окна..." />
+  <meta name="news_keywords" content="{{ HEADER }}" />
+  <link rel="canonical" href="https://oknardia.ru/catalog/company/" />
+  <link rel="standout"  href="https://oknardia.ru/catalog/company/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/company/" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Каталог производителей окон | oknardia.ru" />
+  <meta property="og:description" content="Компании-партнеры «Окнардии», их средний рейтинг, число оконных наборов и вариантов расчета цен для типовых проёмов, средняя цена окна..." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Каталог производителей окон | oknardia.ru" />
+  <meta name="twitter:description" content="Компании-партнеры «Окнардии», их средний рейтинг, число оконных наборов и вариантов расчета цен для типовых проёмов, средняя цена окна..." />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog">Каталог</a></li>
+        <li>Производители и&nbsp;поставщики окон</li>
+      </ol>
+      <h1>Производители и&nbsp;поставщики окон</h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <dIv class="row">
+    <div class="col-md-11 col-xs-12">
+      <p>Компании-партнёры &laquo;Окнардии&raquo;, их средний рейтинг, число оконных наборов и&nbsp;вариантов расчёта цен для типовых проёмов, средняя цена окна:</p>
+    </div>
+  </dIv>
+  <div class="row">{% for i in COMPANIES %}
+    <div class="col-lg--2 col-md-3 col-sm-4 col-xs-6">
+      <h2>{{ i.sMerchantName }}</h2>
+      <p><img src="/media/{{ i.pMerchantLogo }}" style="height:40px;width:auto;" /></p>
+      <p><nobr class="badge badge4price" title="Средний Рейтинг «Окнардии» для оконных наборов компании «{{ i.sMerchantName }}»{% if i.RatingAVG > -0.01 %} — {{ i.RatingAVG|stringformat:".2f" }} баллов{% endif %}"><small class="xx">Средний рейтинг наборов:</small> {% for Star in i.STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if i.RatingAVG > -0.01 %} {{ i.RatingAVG|stringformat:".2f" }}{% endif %}</nobr></p>
+      <p>В ценовом агрегаторе {{ i.NumSets }}. Размещено {{ i.NumOffers }} цен типовых проёмов. Средняя цена предложения: <nobr><strong>{{ i.PriceAVG|stringformat:".2f"|price_format }} <small class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></small></strong></nobr> <small>(без учета скидок)</small></p>
+      <p><a href="/catalog/company/{{ i.id }}-{{ i.sMerchantMainURL }}" class="btn btn-info btn-sm">Подробнее&hellip;</a><br />
+      <small class="xx">Последнее обновление цен: {{ i.lastUpdate }}</small></p>
+    </div>{% endfor %}
+    <DIV  class="col-xs-12" style="height:6em;"></DIV>
+  </dIv>
+
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+  <div class="row">
+  {% include "report/report_last_user_visit.html" %}
+  {% include "report/report_log_user_visit.html" %}
+  </div>
+</div>{% endblock %}
+
+
+
+
