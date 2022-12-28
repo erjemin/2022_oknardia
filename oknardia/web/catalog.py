@@ -5,9 +5,10 @@ from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from oknardia.settings import *
-from oknardia.models import PVCprofiles, Seria_Info, Win_MountDim, Building_Info
+from oknardia.models import PVCprofiles, Seria_Info, Win_MountDim, Building_Info, MerchantBrand
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, make_flap_mini_pictures
+import django.utils.dateformat
 import time
 import json
 import random
@@ -891,3 +892,61 @@ def standard_opening(request: HttpRequest) -> HttpResponse:
         'ticks': float(time.time() - time_start)
     })
     return render(request, "catalog/catalog_standard_opening.html", to_template)
+
+
+def catalog_company(request: HttpRequest) -> HttpResponse:
+    time_start = time.time()
+    to_template = {}   # словарь, для передачи шаблону
+    q_company = MerchantBrand.objects.raw('SELECT'
+                                          '  oknardia_merchantbrand.id,'
+                                          '  oknardia_merchantbrand.sMerchantName,'
+                                          '  oknardia_merchantbrand.pMerchantLogo,'
+                                          '  oknardia_merchantbrand.sMerchantMainURL,'
+                                          '  COUNT(oknardia_priceoffer.id) AS NumOffers,'
+                                          '  AVG(oknardia_priceoffer.fOfferPrice) AS PriceAVG,'
+                                          '  MAX(oknardia_priceoffer.dOfferModify) AS lastUpdate,'
+                                          '  Q.NumSets,'
+                                          '  Q.RatingAVG,'
+                                          '  1 AS STARS '
+                                          'FROM (SELECT'
+                                          '  COUNT(oknardia_setkit.sSetName) AS NumSets,'
+                                          '  oknardia_merchantoffice.kMerchantName_id AS Q_ID,'
+                                          '  AVG(oknardia_setkit.fSetRating) AS RatingAVG'
+                                          '  FROM oknardia_merchantoffice'
+                                          '    INNER JOIN oknardia_ouruser'
+                                          '      ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id'
+                                          '    INNER JOIN oknardia_setkit'
+                                          '      ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id'
+                                          '    GROUP BY oknardia_merchantoffice.id,'
+                                          '         oknardia_merchantoffice.kMerchantName_id) AS Q,'
+                                          '  oknardia_ouruser'
+                                          '  INNER JOIN oknardia_merchantoffice'
+                                          '    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id'
+                                          '  INNER JOIN oknardia_priceoffer'
+                                          '    ON oknardia_priceoffer.kOfferFromUser_id = oknardia_ouruser.id'
+                                          '  INNER JOIN oknardia_merchantbrand'
+                                          '    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id'
+                                          '  WHERE Q_ID = oknardia_merchantoffice.kMerchantName_id '
+                                          'GROUP BY oknardia_merchantoffice.kMerchantName_id '
+                                          'ORDER BY Q.RatingAVG DESC;')
+    list_company = list(q_company)
+    for i in list_company:
+        i.STARS = get_rating_set_for_stars(i.RatingAVG)
+        i.NumSets = pytils.numeral.get_plural(i.NumSets, u"оконный набор, оконных набора, оконных наборов")
+        i.NumOffers = pytils.numeral.get_plural(i.NumOffers, u"вариант, варианта, вариантов")
+        i.lastUpdate = pytils.dt.distance_of_time_in_words(int(django.utils.dateformat.format(i.lastUpdate, 'U')))
+        i.sMerchantMainURL = pytils.translit.slugify(i.sMerchantName)
+        print("NAME:", i.sMerchantName, "\tNumSets:", i.NumSets, "\tNumOffers:", i.NumOffers,
+             "\t:AverageRating:", i.RatingAVG, "\tAveragePrice:", i.PriceAVG, "\tSTARS:", i.STARS)
+    to_template.update({
+        'COMPANIES': list_company,
+        # получаем последние визиты клиента через куки
+        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+        # получаем последние визиты всех посетителей из базы
+        # id2log, log_visit = get_last_all_user_visit_list()
+        'LOG_VISIT': get_last_all_user_visit_list(),
+        'ticks': float(time.time() - time_start)
+    })
+    return render(request, "catalog/catalog_company.html", to_template)
+
+# qwzxcvbnm,./890-=12345
