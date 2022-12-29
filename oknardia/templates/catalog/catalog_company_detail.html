@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% load static %}{% load filters %}
+
+{% block Title %}Окна «{{ COMPANY }}» : Каталог производителей окон{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}«{{ COMPANY }}», описание компании «{{ COMPANY }}», оконные наборы от «{{ COMPANY }}» и их состав, характеристики «{{ COMPANY }}», рейтинг «{{ COMPANY }}», средние цены и отклонение цен «{{ COMPANY }}».{% endblock %}
+
+{% block Keywords %}{{ COMPANY }}, компания {{ COMPANY }}, окна {{ COMPANY }}, изготовитель окон {{ COMPANY }}, производитель окон {{ COMPANY }}, поставщик окон {{ COMPANY }}, партнёр, каталог компаний, каталог оконных компаний, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+
+{% block Author4Meta %}: Каталог изготовителей окон{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Каталог изготовителей окон{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
+  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
+  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
+  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
+  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
+  <meta itemprop="articleSection" content="Каталог производителей окон" />
+  <meta itemprop="headline" content="Изготовитель окон «{{ COMPANY }}», описание, производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
+  <link rel="canonical" href="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <link rel="standout"  href="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="https://oknardia.ru//catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:title" content="Окна «{{ COMPANY }}» | oknardia.ru" />
+  <meta property="og:description" content="Окна «{{ COMPANY }}», описание окон «{{ COMPANY }}», производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Производителей окон «{{ COMPANY }}» | oknardia.ru" />
+  <meta name="twitter:description" content="Изготовитель окон «{{ COMPANY }}», описание, производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:domain" content="oknardia.ru" />
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+
+{% block Main_Content %}
+<div class="container-fluid">
+  {# <!--- Хлебные крошки: НАЧАЛО --> #}<div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog">Каталог</a></li>
+        <li><a href="/catalog/company">Производители и поставщики окон</a></li>
+        <li>{{ COMPANY }}</li>
+      </ol>
+      <h1>{{ COMPANY }}</h1>
+    </div>
+  </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
+  <dIV class="row">{% for i in SETS %}
+    {# ЛЕВАЯ КОЛОНКА: НАЧАЛО #}<div class="col-md-5 col-xs-12 catalog">{% if forloop.first %}
+      <p><img src="/media/{{ i.pMerchantLogo }}" style="height:40px;width:auto;" /></p>{% if i.sMerchantDescription %}
+      <p>{{ i.sMerchantDescription|safe }}</p>{% endif %}
+      <table>
+        <thead>
+        <tr><th colspan="2"><big>Контактная информация:</big></th></tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>телефоны:</td>
+          <td>{{ i.sOfficePhones|safe }}</td>
+        </tr>{% if i.sOfficeDescription %}<tr>
+          <td>часы&nbsp;работы:</td>
+          <td>{{ i.sOfficeDescription|safe }}</td>
+        </tr>{% endif %}<tr>
+          <td>email:</td>
+          <td><script type="text/javascript">document.write("<a href='mailto:{% for j in i.sOfficeEmails %}{% if not forloop.first %}"{% endif %}{{ j }}{% if not forloop.last %}"+{% endif %}{% endfor %}?subject=Запрос через «Окнардия»: - '>{% for j in i.sOfficeEmails %}{% if not forloop.first %}"{% endif %}{{ j }}{% if not forloop.last %}"+{% endif %}{% endfor %}</a>");</script></td>
+        </tr><tr>
+          <td>сайт:</td>
+          <td><a href="{{ i.sMerchantMainURL.URL }}" target="_blank" rel="nofollow">{{ i.sMerchantMainURL.URL_VIEW }}</a></td>
+        </tr><tr>
+          <td>офис<sup>*</sup>:</td>
+          <td>{{ i.sOfficeName }}</td>
+        </tr><tr>
+          <td>адрес:</td>
+          <td><a data-toggle="collapse" href="#collapse_it" aria-expanded="false" aria-controls="collapse_it">{{ i.sOfficeAddress }}</a></td>
+        </tr><tr class="collapse" id="collapse_it">
+          <td colspan="2"><script type="text/javascript">ymaps.ready(init);var myMap,myPlacemark;function init(){myMap=new ymaps.Map("office-map",{center:[{{ i.fOfficeGeoCode_Latitude|stringformat:".7f" }},{{ i.fOfficeGeoCode_Longitude|stringformat:".7f" }}],zoom:16,controls:['zoomControl', 'typeSelector']});myMap.behaviors.disable('scrollZoom');myPlacemark=new ymaps.Placemark([{{ i.fOfficeGeoCode_Latitude|stringformat:".7f" }},{{ i.fOfficeGeoCode_Longitude|stringformat:".7f" }}],{balloonContentHeader:'{{ i.sOfficeName }}',balloonContentBody:'{{ i.sOfficeAddress }}.<br>тел.: {{ i.sOfficePhones }}',hintContent:'{{ i.sOfficeName }} — {{ i.sOfficeAddress }}'},{preset:"islands#dotIcon",iconColor:'#414997'});myMap.geoObjects.add(myPlacemark);}</script><div id="office-map" style="width:100%;height:300px"></div></td>
+        </tr>
+        </tbody>
+      </table>
+      <p class="small-note"><big style="color:red">*</big>  — Офис предоставивший расчеты для оконного агрегатора &laquo;Окнардия&raquo;.</p>
+    {% endif %}</div>{# ЛЕВАЯ КОЛОНКА: КОНЕЦ #}
+    <style>
+      table.head3{width: 100%;}
+      table.head3 tr > td:first-of-type {padding: 0;padding-right: 1ex;}
+      table.head3 tr > td:last-of-type {padding-left: 1ex;vertical-align: baseline;}
+      table.head3 tr > td:last-of-type > nobr.badge4price {margin-top: 24px;font-size: small}
+    </style>
+    {# ПРАВАЯ КОЛОНКА: НАЧАЛО #}<div class="col-md-6 col-xs-12">
+      <table class="head3">
+        <tr>
+          <td><h3>Оконный набор: &laquo;{{ i.sSetName|safe }}&raquo;</h3></td>
+          <td align="right"><nobr class="badge badge4price" title="Рейтинг «Окнардии» для оконного набора «{{ i.sSetName }}»{% if i.fSetRating.RATING > -0.01 %} — {{ i.fSetRating.RATING|stringformat:".2f" }} баллов{% endif %}">{% for Star in i.fSetRating.STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if i.fSetRating.RATING > -0.01 %} {{ i.fSetRating.RATING|stringformat:".2f" }}{% endif %}</nobr></td>
+        </tr>
+      </table>
+
+      <P>В этом наборе применен {% if i.iProfileCameras != "—" %}профиль <a href="/catalog/profile/{{ i.idPVC }}-{{ i.sProfileManufacturer.NAME_T }}/{{ i.idPVC }}-{{ i.sProfileName.NAME_T }}/">{{ i.sProfileBriefDescription }}</a>{% else %} <a href="catalog/profile/{{ i.idPVC }}-{{ i.sProfileManufacturer.NAME_T }}/{{ i.idPVC }}-{{ i.sProfileName.NAME_T }}/">{{ i.sProfileBriefDescription|lower }}</a>{% endif %} производства <a href="/catalog/profile/{{ i.idPVC }}-{{ i.sProfileManufacturer.NAME_T }}/">{{ i.sProfileManufacturer.NAME }}</a>. {% if i.iProfileCameras != "—"%} Число камер рамы и&nbsp;створки —&nbsp;{{ i.iProfileCameras }}.{% endif %} {{ i.fProfileSeals|capfirst  }} уплотнения. {% if i.iProfileCameras in LIST_NOT %}Основа: {% else %}Армирование {% endif %} {{ i.sProfileReinforcement }}. Цвет профиля: {{ i.sProfileColor|lower }}. Устанавливается {{ i.sGlazingBriefDescription|lower|safe }}{% if i.sGlazingManufacturer != "—//—" %}{% if i.sGlazingManufacturer not in LIST_NOT %}, производства {{ i.sGlazingManufacturer }}{% endif %}{% endif %}. {% if  i.sGlazingToning|lower == "нет" %}Без тонирования{% else %}Тонирование: {{ i.sGlazingToning|lower }}{% endif %}. Формула стеклопакета: <nobr>{{ i.sGlazingMark }}.</nobr> Цвет уплотнителя контуров и&nbsp;стеклопакета {{ i.sProfileSealDescription }}. Используется фурнитура {{ i.sSetImplementAll }}{% if i.sSetImplementHandles != "" %}, ручки {{ i.sSetImplementHandles }}{% endif %}{% if i.sSetImplementCatch != "" %}, фиксатор открывания {{ i.sSetImplementCatch }}{% endif %}. {% if i.sSetClimateControl != "" %} Каждое окно оборудовано системой климат-контроля —&nbsp;{{ i.sSetClimateControl }}.{% endif %}</P>
+      <P>{% if i.sSetSill|lower not in LIST_NOT %}Оконный подоконник {{ i.sSetSill|safe }}.{% endif %} {% if i.sSetPanes|lower not in LIST_NOT %}Внешний водоотлив {{ i.sSetPanes|safe }}.{% endif %} {% if i.sSetSlope|lower not in LIST_NOT %}Внутренй откос {{ i.sSetSlope|safe }}.{% endif %}{% if i.sSetSill|lower in LIST_NOT and i.sSetPanes|lower in LIST_NOT and i.sSetSlope|lower in LIST_NOT %}Подоконники, внешние водоотливы и&nbsp;внутренние откосы не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetSill|lower in LIST_NOT and i.sSetPanes|lower in LIST_NOT %}Подоконники и&nbsp;внешние водоотливы не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetSill|lower in LIST_NOT and i.sSetSlope|lower in LIST_NOT %}Внешние водоотливы и&nbsp;внутренние откосы не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetPanes|lower in LIST_NOT and i.sSetSlope|lower in LIST_NOT %}Подоконники и&nbsp;внутренние откосы не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetPanes|lower in LIST_NOT %}Внешние оконные водоотливы не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetSlope|lower in LIST_NOT %}Внутренние откосы и&nbsp;их&nbsp;отделка не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% elif i.sSetSill|lower in LIST_NOT %}Оконные подоконники не&nbsp;включены в&nbsp;набор. Производитель &laquo;{{ COMPANY }}&raquo; предполагает, что закзчик этого набора закупит их&nbsp;отдельно у&nbsp;него или&nbsp;других поставщиков.{% endif %}</P>
+      <P>{% if i.bSetUninstallInstall %}Установка новых и&nbsp;демонтаж старых оконых конструкций {{ i.sSetUninstallInstall|safe }}. {% endif %}{% if i.bSetDelivery %}Доставка {{ i.sSetDelivery|safe }}. {% endif %}{% if not i.bSetDelivery and not i.bSetUninstallInstall %}В&nbsp;стоимость набора не&nbsp;входит демонтаж и&nbsp;установка. Эти услуги оплачиваются отдельно. {% if i.sSetUninstallInstall not in LIST_NOT %}Примерно {{ i.sSetUninstallInstall|safe }}, или заказчик может провести все работы самостоятельно. {% endif %}Доставка тоже не&nbsp;входит в&nbsp;стоимость, осуществляется заказчиком самостоятельно или оплачивается отдельно. {% if i.sSetUninstallInstall not in LIST_NOT %}{{ i.sSetDelivery|safe|capfirst }}. {% endif %}{% elif not i.bSetDelivery %}Доставка&nbsp;не входит в&nbsp;стоимость, осуществляется заказчиком самостоятельно или оплачивается отдельно. {% if i.sSetUninstallInstall not in LIST_NOT %}{{ i.sSetDelivery|safe|capfirst }}. {% endif %}{% elif not i.bSetUninstallInstall %}В&nbsp;стоимость набора не&nbsp;входит демонтаж и&nbsp;установка. Эти услуги оплачиваются отдельно.{% if i.sSetUninstallInstall not in LIST_NOT %} Примерно {{ i.sSetUninstallInstall|safe }}. Или заказчик может провести все работы самостоятельно.{% endif %}{% endif %}</P>{% if i.sSetOtherConditions not in LIST_NOT %}
+      <P>Прочие условия —&nbsp;{{ i.sSetOtherConditions|safe }}</P>{% endif %}
+{#      Скидки --  {{ i.sOfficeDiscountMetaFormula }}<br>#}
+
+      <p style='background-color:#f0f0f0;color:silver;padding:5ex 10ex;'>Извините, графики ценового распределения для оконного набора &laquo;{{ i.sSetName|safe }}&raquo; компании &laquo;{{ i.sMerchantName }}&raquo; подготавливаются.<br />&nbsp;<br />Зайдите позже.</p>
+      <p><small class="xx">Оконный набор создан {{ i.earlyCreation }}, последнее обновление цен {{ i.lastUpdate }}</small></p>
+
+    </div>{# ПРАВАЯ КОЛОНКА: КОНЕЦ #}{% endfor %}
+    {# РАСПОРКА: начало #}<DIV  class="col-xs-12" style="height:6em;"></DIV>{# РАСПОРКА: конец #}
+  </dIV>
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+<div class="row">
+{% include "report/report_last_user_visit.html" %}
+{% include "report/report_log_user_visit.html" %}
+</div>
+</div>{% endblock %}
+
+
+
+

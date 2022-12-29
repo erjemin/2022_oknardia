@@ -66,6 +66,7 @@ urlpatterns = [
     re_path(r'^catalog/standard_opening[/*]$', catalog.standard_opening),
     # --- --- Каталог производителей окон
     re_path(r'^catalog/company[/*]$', catalog.catalog_company),
+    re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$', catalog.catalog_company_detail),
 
 
 ]
