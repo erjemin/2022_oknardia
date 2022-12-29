@@ -1038,5 +1038,4 @@ def catalog_company_detail(request: HttpRequest, company_id: str, company_name_s
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.time() - time_start)
     })
-    response = render (request, "catalog/catalog_company_detail.html", to_template)
-    return response
+    return render(request, "catalog/catalog_company_detail.html", to_template)
