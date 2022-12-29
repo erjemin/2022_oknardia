@@ -7,7 +7,7 @@ from django.utils import timezone
 from oknardia.settings import *
 from oknardia.models import PVCprofiles, Seria_Info, Win_MountDim, Building_Info, MerchantBrand
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
-from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, make_flap_mini_pictures
+from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures
 import django.utils.dateformat
 import time
 import json
@@ -847,18 +847,7 @@ def standard_opening(request: HttpRequest) -> HttpResponse:
     for i in q_win_opening:
         if tmp_id != i.id:
             tmp_id = i.id
-            image_file_name = i.sFlapConfig
-            image_file_name = image_file_name.replace(">", u"G")
-            image_file_name = image_file_name.replace("<", "L")
-            image_file_name = image_file_name.replace("|", "I")
-            image_file_name = image_file_name.replace("[", "(")
-            image_file_name = image_file_name.replace("]", ")")
-            image_file_name = image_file_name.replace("/", "-")
-            image_file_name = image_file_name.replace("\\", "-")
-            image_file_name = image_file_name.replace(".", "-") + u".png"
-            image_file_name = f"{PATH_FOR_IMG}/{PATH_FOR_IMGFLAPCONFIG}/{image_file_name}"
-            if not os.path.isfile(f"{STATIC_BASE_PATH}/{image_file_name}"):
-                make_flap_mini_pictures(f"{STATIC_BASE_PATH}/{image_file_name}", i.sFlapConfig, i.bIsDoor)
+            image_file_name = get_flaps_for_mini_pictures(i.sFlapConfig)
             list_windows_opening.append({
                 "ID": i.id,
                 "INCLUDING_IN_SERIA": [{
