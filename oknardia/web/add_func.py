@@ -397,7 +397,7 @@ def flap_analiz(flap_config: str) -> list:
     return dim_flap
 
 
-def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str, is_door: bool = False) -> None:
+def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str) -> None:
     """  Функция создает файл мини-картинки схем открывания окна
 
     :param path_to_img_file: путь к файлу с изображением
@@ -465,7 +465,18 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str, is_door
                           fill=(225, 125, 125), width=1)
                 draw.line((local_right - 3, local_top + 3, local_left + 3, (local_bottom+local_top) / 2),
                           fill=(225, 125, 125), width=1)
-
+            if "Z" in j["flap"] or "S" in j["flap"] or "z" in j["flap"] or "s" in j["flap"]:   # расширитель (спейсер)
+                draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
+                           (local_right * 3 - local_left) / 4, (local_top * 3 + local_bottom) / 4),
+                          fill=(225, 125, 125), width=1)
+                draw.line(((local_left * 3 + local_right) / 4, (local_bottom * 3 + local_top) / 4,
+                           (local_right * 3 - local_left) / 4, (local_bottom * 3 + local_top) / 4),
+                          fill=(225, 125, 125), width=1)
+                draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
+                           (local_right * 3 - local_left) / 4, (local_bottom * 3 + local_top) / 4),
+                          fill=(225, 125, 125), width=1)
+            if "M" in j["flap"] or "m" in j["flap"] or "м" in j["flap"] or "М" in j["flap"]:  # москитная сетка
+                draw.rectangle((local_left, local_top, local_right, local_bottom), fill=(16, 125, 16, 50), outline=None)
             # Отрисовка створки. ПЕРИМЕТР
             draw.line((local_left, local_bottom, local_right, local_bottom), fill=(125, 125, 125), width=3)
             draw.line((local_left, local_top, local_right, local_top), fill=(125, 125, 125), width=3)
@@ -478,3 +489,18 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str, is_door
     img.save(path_to_img_file)
     return
 
+
+def get_flaps_for_mini_pictures(flap_cofig: str) -> str:
+    image_file_name = flap_cofig
+    image_file_name = image_file_name.replace(">", u"G")
+    image_file_name = image_file_name.replace("<", "L")
+    image_file_name = image_file_name.replace("|", "I")
+    image_file_name = image_file_name.replace("[", "(")
+    image_file_name = image_file_name.replace("]", ")")
+    image_file_name = image_file_name.replace("/", "-")
+    image_file_name = image_file_name.replace("\\", "-")
+    image_file_name = image_file_name.replace(".", "-") + u".png"
+    image_file_name = f"{PATH_FOR_IMG}/{PATH_FOR_IMGFLAPCONFIG}/{image_file_name}"
+    if not os.path.isfile(f"{STATIC_BASE_PATH}/{image_file_name}"):
+        make_flap_mini_pictures(f"{STATIC_BASE_PATH}/{image_file_name}", flap_cofig)
+    return image_file_name
