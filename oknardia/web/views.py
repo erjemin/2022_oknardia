@@ -151,9 +151,9 @@ def get_address(request: HttpRequest) -> HttpResponse:
         if q.R2 > 0.67:     # Если расстояние между точками больше 670 метров, то не показываем результат
             to_template.update({'ticks': float(time.time()-time_start)})
             to_template.update({'addr': addr})
-            return render(request, "popup_incorrect_address.html", to_template)
+            return render(request, "popup/popup_incorrect_address.html", to_template)
     addr = q.sAddress
-    print("addr", addr)
+    # print("addr", addr)
     to_template.update({'ADDRESS_ID': q.id,
                         'SERIA': q.sSerias_Project})
     if q.fTotal_Area < 0:
@@ -293,4 +293,4 @@ def get_address(request: HttpRequest) -> HttpResponse:
                         'addr': addr,
                         'addr_T': pytils.translit.slugify(addr),
                         'ticks': float(time.time()-time_start)})
-    return render(request, "popup_1.html", to_template)
+    return render(request, "popup/popup_show_apartment_variants.html", to_template)
