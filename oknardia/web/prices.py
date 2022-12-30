@@ -237,7 +237,7 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 #                           address_latitude)
             else:
                 distance = -1
-            print(discount)
+            #p rint(discount)
             if discount > 99 or discount < 0.1:
                 discount_color1 = ""
                 discount_color2 = ""
@@ -245,7 +245,7 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 color_ratio = (discount + 0.) / 100
                 discount_color1 = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
                 discount_color2 = f"#{255 - int(color_ratio * 255):02x}ff{255 - int(color_ratio * 255):02x}"
-                print(discount_color1, discount_color2)
+                #p rint(discount_color1, discount_color2)
             price_frame.append({
                 'DISTANCE': distance,
                 'DIM': dim_in_offer,
