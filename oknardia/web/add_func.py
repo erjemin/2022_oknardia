@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Sergei Erjemin'
-# from transliterate import translit
+
 from PIL import Image, ImageDraw
 from oknardia.settings import *
-
 import os
-import re
 import math
+import urllib3
+import xml.dom.minidom
 
 
 def safe_html_spec_symbols(s: str) -> str:
@@ -36,6 +36,7 @@ def safe_html_spec_symbols(s: str) -> str:
     result = result.replace('<br />', ' ')
     result = result.replace('<br>', ' ')
     return result
+
 
 # def Rus2Lat(RusString):
 #     return translit(re.sub(
@@ -76,11 +77,13 @@ def get_rating_set_for_stars(rating: float = 0.) -> list:
     #     return []
     rating_set = []
     for CountStar in range(RARING_STAR):
-        if RARING_SET_MIN+CountStar * (RARING_SET_MAX - RARING_SET_MIN) / RARING_STAR + 1. <= rating:
+        if RARING_SET_MIN + CountStar * (RARING_SET_MAX - RARING_SET_MIN) / RARING_STAR + 1. <= rating:
             rating_set.append(1)
         else:
             rating_set.append(0)
     return rating_set
+
+
 #
 #
 # # рассчитывает дистанцию в км. между двумя геокоординатами
@@ -109,9 +112,9 @@ def get_flaps_for_big_pictures(query_set) -> dict:
     :return: dict: dict -- словарь с размерами картинок для больших картинок
     """
     result = {}
-    mount_max_h = 0   # максимальная высота оконного проема в квартире
-    door_h = 0        # высота двери
-    for i in query_set:     # найдём максимальную высоту проёма окна и двери
+    mount_max_h = 0  # максимальная высота оконного проема в квартире
+    door_h = 0  # высота двери
+    for i in query_set:  # найдём максимальную высоту проёма окна и двери
         if i.iWinHight >= mount_max_h:
             mount_max_h = i.iWinHight
         if i.bIsDoor >= door_h:
@@ -120,21 +123,21 @@ def get_flaps_for_big_pictures(query_set) -> dict:
     if not os.path.exists(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{PATH_FOR_BIGIMGFLAPCONFIG}"):
         # создаем такую папку если ее нет
         os.makedirs(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{PATH_FOR_BIGIMGFLAPCONFIG}")
-    flaps_dim = []   # список словарей, через который будут передаваться данные в шаблон
-    mount_bulk = 0   # размещение дверной перемычки
+    flaps_dim = []  # список словарей, через который будут передаваться данные в шаблон
+    mount_bulk = 0  # размещение дверной перемычки
     i_through = -1
     for i in query_set:
         img_file_name = "%03dx%03dH%03d" % (i.iWinWidth, i.iWinHight, mount_max_h)
         # img_file_name = f"{i.iWinWidth:03d}x{i.iWinHight:03d}H{mount_max_h:03d}"
         if i.bIsDoor:
-            img_file_name += u"D"       # добавляем букву D если это дверь
+            img_file_name += u"D"  # добавляем букву D если это дверь
         else:
-            img_file_name += u"W"       # добавляем букву W если это окно
+            img_file_name += u"W"  # добавляем букву W если это окно
         if i.bIsNearDoor:
-            img_file_name += u"N"       # добавляем букву N если это окно рядом с дверью
-            mount_bulk = i.iWinHight    # размещение дверной перемычки
+            img_file_name += u"N"  # добавляем букву N если это окно рядом с дверью
+            mount_bulk = i.iWinHight  # размещение дверной перемычки
         else:
-            img_file_name += u"-"       # добавляем символ отдельное окно (не рядом с дверью)
+            img_file_name += u"-"  # добавляем символ отдельное окно (не рядом с дверью)
         # маскируем символы схемы открывания, которые не допустимы в названии файлов
         img_file_name += i.sFlapConfig
         img_file_name = img_file_name.replace(">", "G")
@@ -163,7 +166,7 @@ def get_flaps_for_big_pictures(query_set) -> dict:
             'sDescription': i.sDescripion,
             'id': i.id,
             'qStr': q_local,
-            'W': int((i.iWinWidth*250) / mount_max_h)
+            'W': int((i.iWinWidth * 250) / mount_max_h)
         })
     result.update({'FLAP_DIM': flaps_dim,
                    'WIN_DIM': query_set})
@@ -193,10 +196,10 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     bottom = img.size[1]
     right = img.size[0]
     draw = ImageDraw.Draw(img)
-    draw.rectangle((left, top, right-1, bottom-1), fill=(200, 200, 200, 50), outline=None)
-    if is_door: # это дверь. Выравнивание по нижней кромке
+    draw.rectangle((left, top, right - 1, bottom - 1), fill=(200, 200, 200, 50), outline=None)
+    if is_door:  # это дверь. Выравнивание по нижней кромке
         top = bottom - (height * PICT_H / height_max)
-    else:   # это не дверь... Выравниваем по верхней кромке
+    else:  # это не дверь... Выравниваем по верхней кромке
         if height < height_door:
             top = bottom - (height_door * PICT_H / height_max)
         bottom = top + (height * PICT_H / height_max)
@@ -205,21 +208,21 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     draw.line((left, bottom, right, bottom), fill=(125, 125, 125), width=25)
     draw.line((left, top, right, top), fill=(125, 125, 125), width=25)
     draw.line((left, top, left, bottom), fill=(125, 125, 125), width=25)
-    draw.line((right, top, right, bottom-6), fill=(125, 125, 125), width=25)
+    draw.line((right, top, right, bottom - 6), fill=(125, 125, 125), width=25)
 
     dim_flap = flap_analiz(flap_config)
 
     ############################################################
     # НАЧИНАЕМ ОТРИСОВКУ СТВОРОК ОКНА НА КРТИНКУ
     ############################################################
-    v_ratio_max = 0               # число всех долей (частей) для построения пропорций по вертикали
-    for i in dim_flap:            # цикл по рядам створок
+    v_ratio_max = 0  # число всех долей (частей) для построения пропорций по вертикали
+    for i in dim_flap:  # цикл по рядам створок
         v_ratio_max += i["vRatio"]
     local_top = top
     local_bottom = top
-    for i in dim_flap:           # цикл по рядам створок
-        local_bottom += i["vRatio"]*flap_h/v_ratio_max
-        h_ratio_max = 0           # число всех долей (частей) для построения пропорций по горизонтали
+    for i in dim_flap:  # цикл по рядам створок
+        local_bottom += i["vRatio"] * flap_h / v_ratio_max
+        h_ratio_max = 0  # число всех долей (частей) для построения пропорций по горизонтали
         for j in i["row"]:
             h_ratio_max += j["hRatio"]
         local_right = 0
@@ -227,12 +230,12 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
         for j in i["row"]:
             local_right += j["hRatio"] * right / h_ratio_max
             # отрисовка схему открывания створки
-            if "M" in j["flap"] or "m" in j["flap"] or "м" in j["flap"] or "М" in j["flap"]:    # москитная сетка
+            if "M" in j["flap"] or "m" in j["flap"] or "м" in j["flap"] or "М" in j["flap"]:  # москитная сетка
                 for k in range(local_left + 3, local_right - 3, 12):
                     draw.line((k, local_top + 7, k, local_bottom - 7), fill=(225, 225, 225, 255), width=2)
                 for k in range(local_top + 3, local_bottom - 3, 12):
                     draw.line((local_left + 7, k, local_right - 7, k), fill=(225, 225, 225), width=2)
-            if is_door:         # Это дверь. Выравнивание по нижней кромке
+            if is_door:  # Это дверь. Выравнивание по нижней кромке
                 top = bottom - (height * PICT_H / height_max)
                 # рисуем серединную перегородку =
                 draw.line((left, top + (height_mount_bulk * PICT_H / height_max) - 8,
@@ -242,40 +245,40 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
                            right - 12, bottom - 12), fill=(125, 125, 125), width=3)
                 draw.line((right - 6, top + (height_mount_bulk * PICT_H / height_max) - 4,
                            left + 12, bottom - 12), fill=(125, 125, 125), width=3)
-            if "|" in j["flap"]:                            # вертикальная перегородка |
+            if "|" in j["flap"]:  # вертикальная перегородка |
                 for k in range(j["flap"].count("|") + 1):
                     draw.line((local_left + k * (local_right - local_left) / (j["flap"].count("|") + 1), local_top,
                                local_left + k * (local_right - local_left) / (j["flap"].count("|") + 1), local_bottom),
                               fill=(125, 125, 125), width=4)
-            if "=" in j["flap"]:                            # горизонтальная перегородка =
+            if "=" in j["flap"]:  # горизонтальная перегородка =
                 for k in range(j["flap"].count("=") + 1):
                     draw.line((local_left, local_top + k * (local_bottom - local_top) / (j["flap"].count("=") + 1),
                                local_right, local_top + k * (local_bottom - local_top) / (j["flap"].count("=") + 1)),
                               fill=(125, 125, 125), width=4)
-            if "V" in j["flap"]:                            # откидное открывание V
+            if "V" in j["flap"]:  # откидное открывание V
                 draw.line((local_right - 12, local_bottom - 12, (local_right + local_left) / 2, local_top + 12),
                           fill=(225, 125, 125), width=1)
                 draw.line((local_left + 12, local_bottom - 12, (local_right + local_left) / 2, local_top + 12),
                           fill=(225, 125, 125), width=1)
-            if ">" in j["flap"] or "G" in j["flap"]:       # поворотное влево >
+            if ">" in j["flap"] or "G" in j["flap"]:  # поворотное влево >
                 draw.line((local_left + 12, local_top + 12, local_right - 12, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
                 draw.line((local_left + 12, local_bottom - 12, local_right - 12, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
-            if "<" in j["flap"] or "L" in j["flap"]:       # поворотное вправо <
+            if "<" in j["flap"] or "L" in j["flap"]:  # поворотное вправо <
                 draw.line((local_right - 12, local_bottom - 12, local_left + 12, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
                 draw.line((local_right - 12, local_top + 12, local_left + 12, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
             if "X" in j["flap"] or "x" in j["flap"] or "х" in j["flap"] or "Х" in j["flap"] or \
-                    "+" in j["flap"]:                       # глухое окно +
+                    "+" in j["flap"]:  # глухое окно +
                 draw.line(((local_right + local_left) / 2 - 11, (local_bottom + local_top) / 2,
                            (local_right + local_left) / 2 + 11, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=2)
                 draw.line(((local_right + local_left) / 2, (local_bottom + local_top) / 2 - 11,
                            (local_right + local_left) / 2, (local_bottom + local_top) / 2 + 11),
                           fill=(225, 125, 125), width=2)
-            if u"Z" in j["flap"] or "z" in j["flap"] or "S" in j["flap"] or "s" in j["flap"]:   # РАСШИРИТЕЛЬ (спейсер)
+            if u"Z" in j["flap"] or "z" in j["flap"] or "S" in j["flap"] or "s" in j["flap"]:  # РАСШИРИТЕЛЬ (спейсер)
                 draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
                            (local_right * 3 - local_left) / 4, (local_top * 3 + local_bottom) / 4),
                           fill=(225, 125, 125), width=4)
@@ -296,15 +299,15 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     # второй проход -- рисуем тоненькую рамочку внутри толстых линий
     local_top = top
     local_bottom = top
-    for i in dim_flap:            # цикл по рядам створок
+    for i in dim_flap:  # цикл по рядам створок
         local_bottom += i["vRatio"] * flap_h / v_ratio_max
-        h_ratio_max = 0           # число всех долей (частей) для построения пропорций по горизонтали
+        h_ratio_max = 0  # число всех долей (частей) для построения пропорций по горизонтали
         for j in i["row"]:
             h_ratio_max += j["hRatio"]
         local_right = 0
         local_left = 0
         for j in i["row"]:
-            local_right += j["hRatio"]*right/h_ratio_max
+            local_right += j["hRatio"] * right / h_ratio_max
             # Отрисовка створки. ПЕРИМЕТР
             draw.rectangle((local_left, local_top, local_right, local_bottom), fill=None, outline=(0, 0, 0))
             local_left = local_right
@@ -317,11 +320,11 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
                    fill=(255, 255, 255, 0), outline=None)
     # для окон ниже чем дверь рисуем прямоугольник над проемом
     draw.rectangle((left, 0, right - 1, top), fill=(255, 255, 255, 0), outline=None)
-    if is_door:     # Это дверь. Надо нарисовать сверху прямоугольник, на случай если есть очень высокое окно
+    if is_door:  # Это дверь. Надо нарисовать сверху прямоугольник, на случай если есть очень высокое окно
         draw.rectangle((left, 0, right - 1, (height_max - height) * PICT_H / height_max),
                        fill=(255, 255, 255, 0), outline=None)
     # рисуем внешнюю тоненькую окантовку
-    draw.rectangle((left, top, right-1, bottom-1), fill=None, outline=(0, 0, 0))
+    draw.rectangle((left, top, right - 1, bottom - 1), fill=None, outline=(0, 0, 0))
     del draw
     # сохраняем картинку
     # img.info = {"Comment": "123456"}
@@ -331,20 +334,20 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
 
 def flap_analiz(flap_config: str) -> list:
     # анализ схем открывания.
-    dim_flap = []   # массив для хранения полной схемы открывания
+    dim_flap = []  # массив для хранения полной схемы открывания
     i_end = len(flap_config)
-    j = -1          # счётчик горизонтальных рядов (формула, оконный блок)
-    k = -1          # счётчик вертикальных рядов внутри горизонтальных (створки)
-    in_flap = False     # признак, где идёт разбор: внутри ли сворки или снаружи (схемы открывания или описания рядов)
+    j = -1  # счётчик горизонтальных рядов (формула, оконный блок)
+    k = -1  # счётчик вертикальных рядов внутри горизонтальных (створки)
+    in_flap = False  # признак, где идёт разбор: внутри ли сворки или снаружи (схемы открывания или описания рядов)
     # начинаем разбор
     for i in range(0, i_end):
         # посимвольный разбор строки
         if i == 0 or flap_config[i - 1] == ".":
-            dim_flap.append({})     # надо создать новый ряд (фрамуги или ряд створок)
+            dim_flap.append({})  # надо создать новый ряд (фрамуги или ряд створок)
             j += 1
             k = -1
-            dim_flap[j].update({"row": []})     # добавляем в ряд пустой список створок
-            dim_flap[j].update({"vRatio": 1})   # добавляем число характеризующее пропорцию ряда относительно других
+            dim_flap[j].update({"row": []})  # добавляем в ряд пустой список створок
+            dim_flap[j].update({"vRatio": 1})  # добавляем число характеризующее пропорцию ряда относительно других
         if not in_flap and (flap_config[i].isdigit() and flap_config[i - 1].isdigit()):
             dim_flap[j].update({"vRatio": dim_flap[j]["vRatio"] * 10 + int(flap_config[i])})
             continue
@@ -364,35 +367,35 @@ def flap_analiz(flap_config: str) -> list:
             in_flap = False
             continue
         # символ увеличения пропорции
-        if in_flap and (flap_config[i] == "-" or flap_config[i] == "_"):    # для управления пропорциями створок
+        if in_flap and (flap_config[i] == "-" or flap_config[i] == "_"):  # для управления пропорциями створок
             dim_flap[j]["row"][k]["hRatio"] += 1
             continue
         if in_flap and (flap_config[i].isdigit() and flap_config[i - 1].isdigit()):
-            dim_flap[j]["row"][k].update({"hRatio": dim_flap[j]["row"][k]["hRatio"]*10 + int(flap_config[i])})
+            dim_flap[j]["row"][k].update({"hRatio": dim_flap[j]["row"][k]["hRatio"] * 10 + int(flap_config[i])})
             continue
         if in_flap and flap_config[i].isdigit():
             dim_flap[j]["row"][k].update({"hRatio": int(flap_config[i])})
             continue
-        if in_flap and (flap_config[i] == "V"           # откидное открывание
-                        or flap_config[i] == ">"        # поворотное влево
-                        or flap_config[i] == "G"        # ^
-                        or flap_config[i] == "L"        # поворотное вправо
-                        or flap_config[i] == "<"        # ^
-                        or flap_config[i] == "|"        # вертикальная перегородка
-                        or flap_config[i] == "="        # горизонтальная перегородка
-                        or flap_config[i] == "X"        # глухое окно
-                        or flap_config[i] == "x"        # ^
-                        or flap_config[i] == "х"        # ^
-                        or flap_config[i] == "Х"        # ^
-                        or flap_config[i] == "+"        # ^
-                        or flap_config[i] == "M"        # москитная сетка
-                        or flap_config[i] == "m"        # ^
-                        or flap_config[i] == "м"       # ^
-                        or flap_config[i] == "М"       # ^
-                        or flap_config[i] == "Z"       # расширитель (спейсер)
-                        or flap_config[i] == "S"       # ^
-                        or flap_config[i] == "z"       # ^
-                        or flap_config[i] == "s"):     # ^
+        if in_flap and (flap_config[i] == "V"  # откидное открывание
+                        or flap_config[i] == ">"  # поворотное влево
+                        or flap_config[i] == "G"  # ^
+                        or flap_config[i] == "L"  # поворотное вправо
+                        or flap_config[i] == "<"  # ^
+                        or flap_config[i] == "|"  # вертикальная перегородка
+                        or flap_config[i] == "="  # горизонтальная перегородка
+                        or flap_config[i] == "X"  # глухое окно
+                        or flap_config[i] == "x"  # ^
+                        or flap_config[i] == "х"  # ^
+                        or flap_config[i] == "Х"  # ^
+                        or flap_config[i] == "+"  # ^
+                        or flap_config[i] == "M"  # москитная сетка
+                        or flap_config[i] == "m"  # ^
+                        or flap_config[i] == "м"  # ^
+                        or flap_config[i] == "М"  # ^
+                        or flap_config[i] == "Z"  # расширитель (спейсер)
+                        or flap_config[i] == "S"  # ^
+                        or flap_config[i] == "z"  # ^
+                        or flap_config[i] == "s"):  # ^
             dim_flap[j]["row"][k].update({"flap": dim_flap[j]["row"][k]["flap"] + flap_config[i]})
     return dim_flap
 
@@ -407,8 +410,8 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str) -> None
     """
     # print(path_to_img_file, str_flap_config, is_door)
     dim_flap = flap_analiz(str_flap_config)
-    v_ratio_max = 0               # число всех долей (частей) для построения пропорций по вертикали
-    h_ratio_max = 0               # число всех долей (частей) для построения пропорций по горизонтали
+    v_ratio_max = 0  # число всех долей (частей) для построения пропорций по вертикали
+    h_ratio_max = 0  # число всех долей (частей) для построения пропорций по горизонтали
     for i in dim_flap:
         local_h_ratio_max = 0
         v_ratio_max += i["vRatio"]
@@ -425,47 +428,47 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str) -> None
     draw = ImageDraw.Draw(img)
     draw.rectangle((left, top, right, bottom), fill=(200, 200, 200, 50), outline=None)
     # рисуем внешнюю рамку
-    draw.line((left, bottom-1, right, bottom-1), fill=(125, 125, 125), width=5)   # нижняя
-    draw.line((left, top, right, top), fill=(125, 125, 125), width=5)             # верхняя
-    draw.line((left, top, left, bottom), fill=(125, 125, 125), width=5)           # левая
-    draw.line((right-1, top, right-1, bottom), fill=(125, 125, 125), width=5)     # правая
+    draw.line((left, bottom - 1, right, bottom - 1), fill=(125, 125, 125), width=5)  # нижняя
+    draw.line((left, top, right, top), fill=(125, 125, 125), width=5)  # верхняя
+    draw.line((left, top, left, bottom), fill=(125, 125, 125), width=5)  # левая
+    draw.line((right - 1, top, right - 1, bottom), fill=(125, 125, 125), width=5)  # правая
 
     ############################################################
     # НАЧИНАЕМ ОТРИСОВКУ СТВОРОК ОКНА НА КРТИНКУ
     ############################################################
     local_top = top
     local_bottom = top
-    for i in dim_flap:           # цикл по рядам створок
-        local_bottom += i["vRatio"]*flap_h/v_ratio_max
+    for i in dim_flap:  # цикл по рядам створок
+        local_bottom += i["vRatio"] * flap_h / v_ratio_max
         local_right = 0
         local_left = 0
         for j in i["row"]:
-            local_right += j["hRatio"]*right/h_ratio_max
+            local_right += j["hRatio"] * right / h_ratio_max
             # отрисовка схему открывания створки
             if "X" in j["flap"] or "x" in j["flap"] or "х" in j["flap"] or "Х" in j["flap"] or "+" in j["flap"]:
                 # глухое окно (рисуем крестик)
                 draw.line(((local_right + local_left) / 2 - 5, (local_bottom + local_top) / 2,
-                           (local_right + local_left) / 2 + 5, (local_bottom + local_top)/2),
+                           (local_right + local_left) / 2 + 5, (local_bottom + local_top) / 2),
                           fill=(105, 105, 225), width=1)
                 draw.line(((local_right + local_left) / 2, (local_bottom + local_top) / 2 - 5,
                            (local_right + local_left) / 2, (local_bottom + local_top) / 2 + 5),
                           fill=(105, 105, 225), width=1)
-            if "V" in j["flap"]:   # откидное открывание
+            if "V" in j["flap"]:  # откидное открывание
                 draw.line((local_right - 3, local_bottom - 4, (local_right + local_left) / 2, local_top + 3),
                           fill=(125, 225, 125), width=1)
                 draw.line((local_left + 3, local_bottom - 4, (local_right + local_left) / 2, local_top + 3),
                           fill=(125, 225, 125), width=1)
-            if ">" in j["flap"] or "G" in j["flap"]:    # поворотное влево
+            if ">" in j["flap"] or "G" in j["flap"]:  # поворотное влево
                 draw.line((local_left + 3, local_top + 3, local_right - 3, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
                 draw.line((local_left + 3, local_bottom - 3, local_right - 3, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
-            if "<" in j["flap"] or "L" in j["flap"]:    # поворотное вправо
+            if "<" in j["flap"] or "L" in j["flap"]:  # поворотное вправо
                 draw.line((local_right - 3, local_bottom - 3, local_left + 3, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
-                draw.line((local_right - 3, local_top + 3, local_left + 3, (local_bottom+local_top) / 2),
+                draw.line((local_right - 3, local_top + 3, local_left + 3, (local_bottom + local_top) / 2),
                           fill=(225, 125, 125), width=1)
-            if "Z" in j["flap"] or "S" in j["flap"] or "z" in j["flap"] or "s" in j["flap"]:   # расширитель (спейсер)
+            if "Z" in j["flap"] or "S" in j["flap"] or "z" in j["flap"] or "s" in j["flap"]:  # расширитель (спейсер)
                 draw.line(((local_left * 3 + local_right) / 4, (local_top * 3 + local_bottom) / 4,
                            (local_right * 3 - local_left) / 4, (local_top * 3 + local_bottom) / 4),
                           fill=(225, 125, 125), width=1)
@@ -525,3 +528,30 @@ def get_geo_distance(lon1: float, lat1: float, lat2: float, lon2: float) -> floa
     distance = 2 * math.asin(math.sqrt(math.sin((lat_b - lat_a) / 2) ** 2 + math.cos(lat_a) * math.cos(lat_b)
                                        * math.sin((lon_b - lon_a) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
     return distance
+
+
+def get_yandex_geocode_by_address(address_string: str) -> list:
+    """ Функция получает от Яндекс-Карт геокоординаты соответсвующее адресу.
+
+    :param address_string: str -- строка с адресом (utf-8)
+    :return: geocode: list -- [Долгота (longitude), Широта (latitude)]
+    """
+    geocode = [0, 0]
+    http = urllib3.PoolManager()
+    response_api = http.request('GET', f"http://geocode-maps.yandex.ru/1.x/?apikey={YANDEX_MAPS_API_KEY}"
+                                       f"&geocode={address_string}")
+    # print(response_api.data.decode('utf-8'))
+    try:
+        data = xml.dom.minidom.parseString(response_api.data.decode('utf-8'))
+        data = data.getElementsByTagName('pos')[0]
+        data = data.childNodes[0].data
+        data = tuple(data.split())
+        geocode[0] = float(data[0])  # Долгота (longitude): Восточная + (E) // Западная - (W)
+        geocode[1] = float(data[1])  # Широта (latitude):  Северная + (N)  // Южная - (S)
+        # print(geocode)
+        return geocode
+    except:
+        # Тут может быть много разных типов ошибок urllub3 связанных с получением данных от Яндекс-Карт
+        # Перечень исключений: https://urllib3.readthedocs.io/en/stable/reference/urllib3.exceptions.html
+        # Возвращаем нулевые координаты, как признак, что данные не получены.
+        return [0, 0]

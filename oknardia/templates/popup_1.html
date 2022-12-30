@@ -1,0 +1,71 @@
+{% load static %}{% load filters %}
+<script type="text/javascript">
+  if (document.getElementById("box") == null) window.location.replace("/"); // проверяем, а не вызвали-ли этот popup отдельно
+  myMap.setCenter([{{ LONGITUDE|default:"37.77" }}, {{ LATITUDE|default:"55.68" }}], 15);
+  $(document).ready(function () {
+    $(".collapse").on("shown.bs.collapse", function () {
+      $("#box").css({
+        "top": "15%"
+      });
+    });
+    $(".collapse").on("hidden.bs.collapse", function () {
+      $("#box").css({
+        "top": "20%"
+      });
+    });
+  });
+</script>
+    <div class="panel-heading">
+      <button type="button" class="close" data-dismiss="modal" onmouseout="window.location.href='/';"><span aria-hidden="true">&times;</span><span class="sr-only">Неверный адрес</span></button>
+      Здание по адресу: {{ addr }} <span class="text-muted" style="font-size:x-small;">(id:{{ ADDRESS_ID }})</span>
+    </div>
+    {% if LIST_APART %}<h1>Укажите типовую планировку вашей квартиры:</h1>
+    <div class="btn-toolbar" style="width:80%">{% for I_APART in LIST_APART %}
+      <button type="button" class="btn btn-default" style="margin:1ex"
+              accesskey="{{ I_APART.id }}"
+              onclick="window.location.href='/{{ ADDRESS_ID }}/{{ I_APART.id }}/{{ addr_T }}';try{yaCounter32997984.reachGoal('CHOICE_APP');}catch(e){}">
+              {{ I_APART.sNameApartment|safe }}
+      </button>{% endfor %}
+    </div>
+    {% else %}
+    <script type="text/javascript">
+    function uClick( i ) {
+      try {
+          yaCounter32997984.reachGoal('FIND');
+          ga('send', 'event', 'CLICK', 'ClickSearch', 'SearchAddress');
+          _tmr.push({id: '2018432', type: 'reachGoal', goal: 'ClcSrh'});
+        }
+      catch (e) {
+        }
+      $.ajax({
+        url: "/get_address", //Адрес подгружаемой страницы
+        type: "POST",        //Тип запроса
+        dataType: "html",    //Тип данных
+        data: "csrfmiddlewaretoken={{ csrf_token }}&address="+$('#a'+i).html(),
+        success: function (html) {
+          $("#box").html(html)
+        }
+      });
+      return false;
+
+    }
+  </script>
+      <h1>Нет данных по этому дому</h1>
+     <div style="width:80%">
+        <p>К&nbsp;сожалению база &laquo;Окнардии&raquo; только формируется. Пока у&nbsp;нас нет данных по&nbsp;типовым квартирам для дома по этому адресу. Ближащие адреса, по которым есть информация:</p>
+        <ul style="list-style:none;">{% for i in NEAR_KNOWN_ADDRESS %}
+          <li>
+            <!-- Расстояние до дома -->
+            <nobr class="badge badge4price" title="Удалённость — {{ i.R2|stringformat:"0.2f" }} км."><b class="glyphicon glyphicon-map-marker"></b> {{ i.R2|stringformat:"0.2f"|price_format }}&thinsp;км.</nobr> &nbsp; <a href="#" onclick="uClick({{ forloop.counter0 }})" id="a{{ forloop.counter0 }}">{{ i.sAddress }}</a>
+          </li>
+        {% endfor %}</ul>
+       <p>С небольшой погрешностью (±6%) мы&nbsp;можем дать ценовые предложения под ваши требования, но потребуется самостоятельный замер проёмов.</p>
+        <button type="button" class="btn btn-default" style="margin:1ex"
+            accesskey="1" onclick="window.location.href='/order_by_dim'">
+          Подобрать предложения по&nbsp;предварительным замерам <span class="glyphicon glyphicon-search"></span>
+        </button>
+        <p style="font-size:xx-small;width:80%"><small>Сделав замер, и сообщив его нам, вы&nbsp;поможете наполнению базы &laquo;Окнардии&raquo;, вашим соседям и&nbsp;сотням людей проживающих в&nbsp;домах таких&nbsp;же серий или проектов. В&nbsp;благодарность за&nbsp;содействие мы&nbsp;подготовим и&nbsp;вышлем самые актуальные предложения по&nbsp;email, а&nbsp;также предоставим купон, предоставляющий скидку на&nbsp;сумму <b>500&nbsp;рублей</b> при установке окон любым из&nbsp;наших партнёров. Если согласны <a href="/send_order_and_info">перейдите по&nbsp;ссылке</small>:<br /></a>.</p>
+     </div>{% endif %}
+
+    <a class="text-muted" data-toggle="collapse" href="#collapse_it" onclick="yaCounter32997984.reachGoal('ClickBuildingDetails');" style="float:right;margin-bottom:1ex;">Подробная информация по зданию <small class="glyphicon-chevron-down glyphicon"></small></a>
+{% include "report/build_info_in_table.html" %}

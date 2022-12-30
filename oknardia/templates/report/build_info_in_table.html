@@ -1,0 +1,83 @@
+<!--- Информация о строении --->{% load filters %}
+<table id="collapse_it" class="table table-condensed collapse">
+	<tbody>{% if ADDRESS %}
+		<tr>
+			<td colspan="8" style="background:whitesmoke;border-top:double;">Дом по адресу: <strong>{{ ADDRESS }}</strong></td>
+		</tr>{% endif %}<tr>
+			<td>Проект:</td>
+			<td>{{ SERIA|safe }}</td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>Площадь участка, м²:</td>
+			<td><nobr>{{ LAND|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+			<td>&nbsp;&nbsp;&nbsp;</td>
+			<td>Кадастровый номер участка:</td>
+			<td><nobr>{{ CADASTRE_NUM|capfirst }}</nobr></td>
+		</tr><tr>
+			<td>Типовая серия:</td>
+			<td><nobr>{{ SERIA_BASE|safe|default:"Нет данных" }}</nobr></td>
+			<td></td>
+			<td>Общаяя площадь помещений, м²:</td>
+			<td><nobr>{{ TOTAL_AREA|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+			<td></td>
+			<td>Инвентарный номер:</td>
+			<td><nobr>{{ INVENTORY_NUM|capfirst|default:"Нет данных" }}</nobr></td>
+		</tr><tr>
+			<td>Число квартир:</td>
+			<td><nobr>{{ NUM_APARTMENTS|capfirst|default:"Нет данных" }}</nobr></td>
+			<td></td>
+			<td colspan="2">из них:</td>
+			<td></td>
+			<td>Тип здания:</td>
+			<td><nobr>{{ TYPE_BUILDING|capfirst|default:"Нет данных" }}</nobr></td>
+		</tr><tr>
+			<td>Этажей:</td>
+			<td>{{ STOREYS|capfirst|default:"Нет данных" }}</td>
+			<td></td>
+			<td><nobr>• помещений общего пользования, м²:</nobr></td>
+			<td><nobr>{{ COMMON_AREA|default:"Нет данных"|price_format }}</nobr></td>
+			<td></td>
+			<td>Класс энергоэффективности:</td>
+			<td><nobr>{{ ENERGY_EFFICIENCY|capfirst|default:"Нет данных" }}</nobr></td>
+		</tr><tr>
+			<td>Подъездов:</td>
+			<td>{{ NUM_ENTERANCES|capfirst|default:"Нет данных" }}</td>
+			<td></td>
+			<td>• нежилых помещений, м²:</td>
+			<td><nobr>{{ UNINHABITED_AREA|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+			<td></td>
+			<td>Число счетов:</td>
+			<td>{{ NUM_ACCOUNTS|capfirst|default:"Нет данных"|price_format }}</td>
+		</tr><tr>
+			<td>Лифтов:</td>
+			<td>{{ NUM_ELEVATORS|capfirst|default:"Нет данных" }}</td>
+			<td></td>
+			<td>• жилых помещений, м²:</td>
+			<td>{{ RESIDENTIAL_AREA|capfirst|default:"Нет данных"|price_format }}</td>
+			<td></td>
+			<td>Число жителей:</td>
+			<td>{{ NUM_RESIDENTS|capfirst|default:"Нет данных"|price_format }}</td>
+		</tr><tr>
+			<td><nobr>Грузовых лифтов:</nobr></td>
+			<td><nobr>Нет данных</nobr></td>
+			<td></td>
+			<td>• приватизированных помещений, м²:</td>
+			<td><nobr>{{ PRIVATE_AREA|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+			<td></td>
+			<td rowspan="3">Управляющая компания:</td>
+			<td rowspan="3">{{ MANAGEMENT_CO|safe|default:"Нет данных" }}</td>
+		</tr><tr>
+			<td>Год постройки:</td>
+			<td>{{ COMMISSIONING_YEAR|capfirst|default:"Нет данных" }}</td>
+			<td></td>
+			<td>• государственных помещений, м²:</td>
+			<td><nobr>{{ GOVERNMENT_AREA|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+			<td rowspan="2" style="border-top:none;"></td>
+		</tr><tr>
+			<td>Cтепень износа:</td>
+			<td title="Износ фундамента: {{ CONDITION_FOUNDATION|capfirst|default:"—" }} // Износ несущих конструкций: {{ CONDITION_WALL|capfirst|default:"—" }} // Износ перекрытий: {{ CONDITION_OVERLAP|capfirst|default:"—" }}">{{ CONDITION_HOUSE|capfirst|default:"Нет данных" }}</td>
+			<td></td>
+			<td>• мунициальных помещений, м²:</td>
+			<td><nobr>{{ MUNICIPAL_AREA|capfirst|default:"Нет данных"|price_format }}</nobr></td>
+		</tr>
+	</tbody>
+</table>
