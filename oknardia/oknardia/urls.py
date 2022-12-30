@@ -28,6 +28,9 @@ urlpatterns = [
     re_path(r'^$', views.main_init),
     # обработчик автокомлита (подсказки во время ввода адреса на главной странице)
     re_path(r'^autocomplete_addr$', autocomplete_addr.autocomplete_addr),
+    # обработка адреса введеного в форме поиска
+    re_path(r'^get_address$', views.get_address),
+
     # ОБРАБОТЧИКИ АВТОРИЗАЦИИ
     # Вызов шаблона подгружаем captcha
     re_path(r'^captcha', user_manager.captcha),

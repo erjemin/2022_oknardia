@@ -1,0 +1,26 @@
+{% load static %}
+<script type="text/javascript">
+if ( document.getElementById("box") == null ) window.location.replace("/"); // проверяем, а не вызвали-ли этот popup отдельно
+myMap.setCenter([{{ LONGITUDE|default:"37.77" }},{{ LATITUDE|default:"55.68" }}]);
+$(document).ready(function(){
+    setTimeout("window.location.href='/'", 50000);
+});
+</script>
+
+<h1>Ошибка адреса</h1>
+<div>
+  <p>Это могло произойти по следующим причинам:</p>
+  <ul>
+    <li><b>Ошибка при вводе адреса <i>«{{ addr  }}»</i>.</b><br />
+        Если вы&nbsp;ошиблись при указании адреса <a href="/">попробуйте ввести адрес ещё раз</a> или
+        <a href="/stat_all/#s_map">найдите его на карте типовых серий</a> жилого строительства.<br>&nbsp;</li>
+    <li><b>Адрес <i>«{{ addr  }}»</i> отсутствует в&nbsp;нашей базе.</b><br />
+        Приносим извинения, но&nbsp;пока нами обработаны только типовые серии Москвы и&nbsp;Подмосковья, Санкт-Петербурга
+        и&nbsp;Ленинградской области.<br />
+        Свяжитесь с&nbsp;нами чтобы мы&nbsp;ускорили оцифровку и&nbsp;поиск партнеров в&nbsp;вашем&nbsp;регионе.</li>
+  </ul>
+<div style="float:right;font-size:xx-small">TICKs: {{ ticks|floatformat:4 }}</div>
+</div>
+
+
+
