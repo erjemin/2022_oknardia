@@ -44,7 +44,7 @@ function init () {
 
 <div id="box" class="col-md-9 col-md-offset-2"><!--- Сюда подгружаем центральный popup --->
 {% if not CONFIRM_OK %}
-  {% include "popup_index.html" %}
+  {% include "popup/popup_index.html" %}
 {% elif CONFIRM_OK == "YES" %}
   {% include "user_manager/popup_cofirm_email_ok.html" %}
 {% elif CONFIRM_OK == "NO" %}
