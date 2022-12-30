@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+{% block Title %}Цены на окна для {{ ADDRESS }} — дом серии {{ APART|safe }}{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+
+{% block Description %}Цены на окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}. Размер окон (см.): {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}{% if forloop.last %}.{% else %}; {% endif %}{% endfor %} Оконные наборы: {% for CurOffer in PRICE_FRAME %}{{ CurOffer.SETS_NAME }} – {{ CurOffer.FIN_PRICE|stringformat:".0f" }} рублей{% if forloop.last %}.{% else %}; {% endif %}{% endfor %}{% endblock %}
+
+{% comment %}{% block Description %}Цены на плаcтиковые окна для серии {{ BASE_SERIA }} ({{ APART }} квартира, {{ ADDRESS }}) :: {% for CurOffer in PRICE_FRAME %}Поставщик: {{ CurOffer.MERCHANT }}; Комплектация: {{ CurOffer.SETS_NAME }}; Цена: {{ CurOffer.FIN_PRICE }}₽ :: {% endfor %}{% endblock %}{% endcomment %}
+
+{% block Keywords %}цены окон, серия {{ BASE_SERIA }}, {{ BASE_SERIA }}, стоимость окон, окна для {{ BASE_SERIA }}, размеры окон, проемы серии {{ BASE_SERIA }}, окна в {{ APART|safe }}, скидки на окна, {{ ADDRESS }}, оконный профиль, {% for CurOffer in PRICE_FRAME %}{{ CurOffer.MERCHANT }}, {{ CurOffer.PVC_NAME }}, {{ CurOffer.PVC_MANUFACTURER }}, {{ CurOffer.GLAZING_MARK }}, {% endfor %} характеристики пластиковых окон, {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} см., {% endfor %}{{ META_KEYWORDS|default:"" }}{% endblock %}
+
+{% block Top_JS3%}<script type="text/javascript">
+function show_phone_num( id ){ // колапсатор для отображения контатной информации постафшика окон
+  $('#tel'+id).collapse('show');
+  $('#hid'+id).collapse('hide');
+  try {
+    yaCounter32997984.reachGoal('ShowPhone')
+  } catch (e) {
+  }
+  try {
+    var _tmr = window._tmr || (window._tmr = []);
+    _tmr.push({id: "2018432", type: "reachGoal", goal: "ViewPhone"});
+  } catch (e) {
+  }
+}
+function show_dtl( id ){ // колапсаторы для отобращения детальной информации оконого набора
+  $('#dtl'+id).collapse('show');
+  $('#btn'+id+' a .glyphicon-chevron-down').remove();
+  var ContentInA = $('#btn'+id+' a').text();
+  $('#btn'+id).empty();
+  $('#btn'+id).text(ContentInA);
+  try {
+    yaCounter32997984.reachGoal('ShowDetails')
+  } catch (e) {
+  }
+  try {
+    var _tmr = window._tmr || (window._tmr = []);
+    _tmr.push({id: "2018432", type: "reachGoal", goal: "ViewDetails"});
+  } catch (e) {
+  }
+}
+$(window).load( // уменьшение картинок .half для ретина-дисплеев
+	function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});}
+);
+var count = 0;
+var ForCompare = document.getElementsByName('ForCompare');
+$(window).load( // подсчитать сколько прочеканных оферов для сравнения (нужно, когда на страничку возращаются через back, ее подгрущают или она приходит из кеша
+	function(){
+    for (var i=0; i < ForCompare.length; i++)
+      if (ForCompare[i].checked)
+        count++;
+    // alert(count);
+    $('#NumberOfSelected').html(count)
+    }
+);
+var ToURL = '';
+function Click2CompareOffers(){ // вызывается при клике "сравнить коммерческие предложения"
+  try{yaCounter32997984.reachGoal('CompareOffers')}catch(e){}
+  //ForCompare = $('[name]=ForCompare');
+  for (var i=0; i < ForCompare.length; i++)
+    if (ForCompare[i].checked)
+      ToURL += ForCompare[i].value +',';
+  if (ToURL.match(/[,]/g).length > 1 && ToURL.match(/[,]/g).length < 7 )
+    location.href = '/compare_offers/' + ToURL.slice(0,-1);
+  else {
+    $('#modal-exclamation').modal('show');
+    ToURL = '';
+  }
+}
+
+function ChangeCountCheckedBox(CHK_ID){ // изменение числа выбранных для сравнения оферов
+  if ($("#CHK"+CHK_ID).is(":checked"))	count++;
+  else count--;
+  $("#NumberOfSelected").html(count)
+}
+
+function get_more_info_about_building() {
+  try{yaCounter32997984.reachGoal("ClickBuildingDetails");}catch(e){}
+}
+
+$(function () { // инициализация и обработка поповеров рейтинга
+  $('[data-toggle="popover"]').popover({
+    placement: "top",
+    html: true,
+    content: function () {
+      // сохранить текущий контекст
+      var _this = this;
+      $('#shadow_buffer').load('/show_rating_components/' + $(_this).attr("id-set"), function (response, status, xhr) {
+        if (status == "error")
+          $(_this).attr({'data-content': "Ошибка " + xhr.status + " (" + xhr.statusText + ")"});
+        else
+          $(_this).attr({'data-content': response});
+        $(_this).popover('show');
+        try{yaCounter32997984.reachGoal("ShowRating");}catch(e){};
+      });
+    }
+  })
+})
+</script>{% endblock %}
+
+{% block Top_CSS1 %}<link rel="stylesheet" type="text/css" href="{% static "css/csshake-vertical.min.css" %}">{%  endblock %}
+
+{% block Main_Content %}
+<span itemscope itemtype="http://schema.org/Product">
+<div class="row col-md-12">
+    <div class="col-md-9">
+      <h1>Цены на окна для серии {{ APART|safe }} <small>({{ ADDRESS }})</small></h1>
+    </div>
+    <div class="col-md-9">
+      <p>Квартира имеет проёмы (окна и балконные двери) следующих размеров: {% for I_WIN_DIM in FLAP_DIM %}{% if not forloop.first %}{% if forloop.last %} и&nbsp;{% else %}, {% endif %}{% endif %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}&nbsp;см. —&nbsp;{{ I_WIN_DIM.iQuantity }}&nbsp;шт.{% endfor %} Проект (<a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">типовая серия {{ BASE_SERIA }}</a>) предполагает следующие схемы открывания окон:</p>
+    </div>
+  {# Микроразмектка: названеи продукта #}<meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})" />
+</div>
+
+<div class="row col-md-12 ShowBigFlapPictures">
+ <div class="col-sm-9">
+{% include 'report/show_big_flap_pictures.html' %}
+ </div>
+ <div class="col-sm-3 visible-md visible-lg ap_list">
+    <h6>Другие типовые квартиры в&nbsp;этом доме:</h6>
+    <ul>{% for I_APART in APARTMENT_IN_BUILDING %}
+      {% if I_APART.APT_ID == '!' %}<li>{{ I_APART.APT_NAME|safe }}</li>{% else %}<li><a href="/{{ BUILD_ID }}/{{ I_APART.APT_ID }}/{{ ADDRESS_T }}">{{ I_APART.APT_NAME|safe }}</a></li>{% endif %}{% endfor %}
+    </ul>
+    <a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">Информация по серии {{ BASE_SERIA }}</a>
+  </div>
+</div>
+
+<div class="row col-md-12">
+  <div class="col-md-12">
+    <p id="tab-note">Таблица содержит цены поставщиков. Клик на&nbsp;название отобразит детальные спецификации каждого предложения: марку профиля рамы и&nbsp;створки, схему стеклопакета, тип фурнитуры, элементы отделки (отлив, подоконник, откос, клапан <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся покадрово, получите следующий кадр кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Просмотреть и&nbsp;сравнить технические характеристик стеклопакетов, профилей и&nbsp;детальное описание сопутствующих услуг возможно с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
+  </div>
+  {# Микроразмектка: названеи продукта #}
+  <meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})"/>
+</div>
+
+
+<form class="col-md-12" method="get" action="\" id="compare_offers">
+ {% csrf_token %}
+ <table class="table" id="price-list">
+  <thead>
+   <tr>
+    <th><b class="glyphicon glyphicon-th-list" title="Добавление набора окон в список сравнения" aria-label="Добавление набора окон в список сравнения"></b></th>
+    <th>Поставщик окон и название оконного набора<small><br />
+      кликните чтобы увидеть описание и характеристики предложения</small>
+    </th>
+    <th colspan="2">Схема<small><br />
+      открывания</small></th>
+    <th>Цена, <b class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></b><small><br />
+      одно окно</small></th>
+    <th>N</th>
+    <th colspan="2" class="hidden-xs hidden-sm">Cумма, <b class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></b><small><br />
+      однотипные окна</small></th>
+    <th>Стоимость,  <b class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></b><small><br />
+      все окна квартиры</small></th>
+    <th>Скидка</th>
+    <th>Итого<small><br />
+      за все окна с учетом скидки</small></th>
+   </tr>
+  </thead>
+  <tbody id="offers">
+    {% include "report/report_precelist_frame.html" %}
+  </tbody>
+ </table>
+</form>
+</span>
+{% with SERIA_BASE=BASE_SERIA %}{% include "report/build_info_in_table.html" %}{% endwith %}
+  {# --- Баннер: НАЧАЛО --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+  {# --- Баннер: конец --- #}
+  <div class="row">
+  {% include "report/report_last_user_visit.html" %}
+  {% include "report/report_log_user_visit.html" %}
+  <p id="shadow_buffer"></p>
+  </div>
+
+  {# модальное окно #}
+  <div class="modal fade bs-example-modal-sm" id="modal-exclamation" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+          <h4 class="modal-title" id="mySmallModalLabel">Внимание:</h4>
+        </div>
+        <div class="modal-body">
+          <p>Извините, для сравнения коммерческих предложений окон нужно выбрать не менее двух и не более шести позиций.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Спасибо, все понятно.</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+ {% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+
