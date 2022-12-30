@@ -73,6 +73,7 @@ urlpatterns = [
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
             prices.report_one_win_price),
+    re_path(r'^(?P<build_id>\d{1,6})/(?P<apart_id>\d{1,})/(?P<slug>[\s\S]+|.*)$', prices.report_price),
 
 ]
 

@@ -6,6 +6,7 @@ from oknardia.models import LogVisitPriceReport
 # from oknardia.settings import *
 # from web.add_func import normalize, get_rating_set_for_stars
 # from time import time
+import django.utils.dateformat
 import json
 import pytils
 
@@ -50,19 +51,20 @@ def get_last_all_user_visit_list() -> list:
     :return: list -- список четырех последних посещений ценовых предложений всеми пользователями
     """
     result_list_visit = []
-    id_fourth_visit = 0   # id четвертого посещения??? Зачем??? Не помню хоть убей!!!
+    # id_last_visit = 0   # id четвертого посещения??? Зачем??? Не помню хоть убей!!!
     try:
         q_log_visit = LogVisitPriceReport.objects.all().order_by('-dLogVisitTime')[:4]
         for i in q_log_visit:
-            if id_fourth_visit == 0:
-                id_fourth_visit = i.id
+            # if id_last_visit == 0:
+            #     id_last_visit = i.id
             result_list_visit.append({
-                "Time": pytils.dt.distance_of_time_in_words(int(format(i.dLogVisitTime, 'U'))),
+                "id": i.id,
+                "Time": pytils.dt.distance_of_time_in_words(int(django.utils.dateformat.format(i.dLogVisitTime, 'U'))),
                 "LogURL": i.sLogURL,
                 "LogAddress": i.sLogAddress,
                 "LogApart": i.sLogNameApartment
             })
     except LogVisitPriceReport.DoesNotExist:
         pass
-    # return id_fourth_visit+1, list_visit
+    # return id_last_visit+1, list_visit
     return result_list_visit
