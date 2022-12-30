@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams, report2, catalog
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report2, catalog, prices
 
 
 urlpatterns = [
@@ -67,7 +67,9 @@ urlpatterns = [
     # --- --- Каталог производителей окон
     re_path(r'^catalog/company[/*]$', catalog.catalog_company),
     re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$', catalog.catalog_company_detail),
-
+    # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
+    re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
+            prices.report_one_win_price),
 
 ]
 

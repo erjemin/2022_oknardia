@@ -84,7 +84,7 @@ def get_rating_set_for_stars(rating: float = 0.) -> list:
 #
 #
 # # рассчитывает дистанцию в км. между двумя геокоординатами
-# def GetGeoDistance(lon1, lat1, lat2, lon2):
+# def get_geo_distance(lon1, lat1, lat2, lon2):
 #     lonA, latA, latB, lonB = map(math.radians, [lon1, lat1, lat2, lon2])
 #     distance = 2 * math.asin(math.sqrt(math.sin((latB - latA) / 2) ** 2 + math.cos(latA) * math.cos(latB) * math.sin(
 #         (lonB - lonA) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
@@ -416,7 +416,7 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str) -> None
             local_h_ratio_max += j["hRatio"]
         if local_h_ratio_max > h_ratio_max:
             h_ratio_max = local_h_ratio_max
-    img = Image.new("RGBA", (h_ratio_max*PICT_MINWI+(h_ratio_max+1)*3, PICT_MINIH+6), (255, 255, 255, 0))
+    img = Image.new("RGBA", (h_ratio_max * PICT_MINWI + (h_ratio_max + 1) * 3, PICT_MINIH + 6), (255, 255, 255, 0))
     top = 0
     left = 0
     bottom = img.size[1]
@@ -490,17 +490,38 @@ def make_flap_mini_pictures(path_to_img_file: str, str_flap_config: str) -> None
     return
 
 
-def get_flaps_for_mini_pictures(flap_cofig: str) -> str:
-    image_file_name = flap_cofig
-    image_file_name = image_file_name.replace(">", u"G")
+def get_flaps_for_mini_pictures(flap_config: str) -> str:
+    """
+    Функция возвращает строку с именем файла мини-картинки для схемы открывания полученной в flap_config
+
+    :param flap_config: str - строка с схемой открывания.
+    :return: str - строка с именем файла мини-картинки.
+    """
+    image_file_name = flap_config.upper()
+    image_file_name = image_file_name.replace(">", "G")
     image_file_name = image_file_name.replace("<", "L")
     image_file_name = image_file_name.replace("|", "I")
     image_file_name = image_file_name.replace("[", "(")
     image_file_name = image_file_name.replace("]", ")")
     image_file_name = image_file_name.replace("/", "-")
     image_file_name = image_file_name.replace("\\", "-")
-    image_file_name = image_file_name.replace(".", "-") + u".png"
+    image_file_name = image_file_name.replace(".", "-") + ".png"
     image_file_name = f"{PATH_FOR_IMG}/{PATH_FOR_IMGFLAPCONFIG}/{image_file_name}"
     if not os.path.isfile(f"{STATIC_BASE_PATH}/{image_file_name}"):
-        make_flap_mini_pictures(f"{STATIC_BASE_PATH}/{image_file_name}", flap_cofig)
+        make_flap_mini_pictures(f"{STATIC_BASE_PATH}/{image_file_name}", flap_config.upper())
     return image_file_name
+
+
+def get_geo_distance(lon1: float, lat1: float, lat2: float, lon2: float) -> float:
+    """  Функция возвращает расстояние в км. между двумя геокоординатами.
+
+    :param lon1: float - долгота первой точки.
+    :param lat1: float - широта первой точки.
+    :param lat2: float - широта второй точки.
+    :param lon2: float - долгота второй точки.
+    :return: float - расстояние в км. между двумя геокоординатами.
+    """
+    lon_a, lat_a, lat_b, lon_b = map(math.radians, [lon1, lat1, lat2, lon2])
+    distance = 2 * math.asin(math.sqrt(math.sin((lat_b - lat_a) / 2) ** 2 + math.cos(lat_a) * math.cos(lat_b)
+                                       * math.sin((lon_b - lon_a) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
+    return distance

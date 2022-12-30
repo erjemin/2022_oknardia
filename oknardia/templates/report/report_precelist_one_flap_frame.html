@@ -1,0 +1,141 @@
+{% load static %}{% load filters %}{% for CurOffer in PRICE_FRAME %}
+    <tr>
+      <td colspan="7" style="font-size:xx-small;border-top:double black;border-bottom: solid 1px white;padding: 0;"></td>
+		</tr>{% for CurInOffer in CurOffer.DIM %}
+    <tr>
+    {% if forloop.first %}
+      <th rowspan="{% if CurOffer.DIM|length == 1 %}2{% else %}{{ CurOffer.DIM|length }}{% endif %}" title="Добавить коммерческое предложение окна к сравнению">{# красивые чекбоксы BEGIN #}<div class="checkbox"><label><input id="CHK{{ CurOffer.SETS_ID }}" type="checkbox" name="ForCompare" value="{{ CurOffer.SETS_ID }}" onChange="ChangeCountCheckedBox({{ CurOffer.SETS_ID }});" /><span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span></label></div>{# красивые чекбоксы END #}</th>
+			<td rowspan="{% if CurOffer.DIM|length == 1 %}2{% else %}{{ CurOffer.DIM|length }}{% endif %}"{% if CurOffer.IS_COMMERCIAL %} style="background-image: url(/media/{{ CurOffer.MERCHANT_LOGO }})"{% endif %} title="Краткая спецификация коммерческого предложения">
+        <span itemprop="description">
+          <h3 class="set-name shake-trigger" id="btn{{ CurOffer.SETS_ID }}"><a href="javascript://" onclick="show_dtl({{ CurOffer.SETS_ID }})">{{ CurOffer.MERCHANT }} – {{ CurOffer.SETS_NAME }}<i class="glyphicon glyphicon-chevron-down shake-vertical"></i></a></h3>
+
+          <DiV id="dtl{{ CurOffer.SETS_ID }}" class="collapse">■ Профиль: <a href="/catalog/profile/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_MANUFACTURER_T }}/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_NAME_T }}">{{ CurOffer.PVC_NAME|safe }}</a> (<a href="/catalog/profile/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_MANUFACTURER_T }}">{{ CurOffer.PVC_MANUFACTURER }}</a>)
+            ■&nbsp;{{ CurOffer.GLAZING_NAME_B|safe }} <nobr>({{ CurOffer.GLAZING_MARK }})</nobr>
+            ■&nbsp;Тонирование:&nbsp;{{ CurOffer.GLAZING_TONING }}
+            {% if CurOffer.PVC_SEAL %}■&nbsp;Уплотнитель:&nbsp;{{ CurOffer.PVC_SEAL }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT %}■&nbsp;Фурнитура:&nbsp;{{ CurOffer.SETS_IMPLEMENT|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT_R %}■&nbsp;Ручки:&nbsp;{{ CurOffer.SETS_IMPLEMENT_R|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT_P %}■&nbsp;Петли:&nbsp;{{ CurOffer.SETS_IMPLEMENT_P|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT_Z %}■&nbsp;Запоры:&nbsp;{{ CurOffer.SETS_IMPLEMENT_Z|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT_O %}■&nbsp;Ограничители:&nbsp;{{ CurOffer.SETS_IMPLEMENT_O|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_IMPLEMENT_F %}■&nbsp;Фиксаторы:&nbsp;{{ CurOffer.SETS_IMPLEMENT_F|capfirst|safe }}
+            {% endif %}{% if CurOffer.SETS_CLIMATE_CONTROL %}<span {% if CurOffer.SETS_CLIMATE_CONTROL|capfirst != "Нет" or CurOffer.SETS_CLIMATE_CONTROL|length > 3 %}class="bullet-green"{% endif %}>■&nbsp;Климат-контроль:&nbsp;{{ CurOffer.SETS_CLIMATE_CONTROL|capfirst|safe }}</span>
+            {% endif %}{% if CurOffer.SETS_SILL %}<span {% if CurOffer.SETS_SILL|capfirst == "Нет" or CurOffer.SETS_SILL|length < 3 %}class="bullet-red"{% endif %}>■&nbsp;Подоконник:&nbsp;{{ CurOffer.SETS_SILL|capfirst|safe }}</span>
+            {% endif %}{% if CurOffer.SETS_SLOPE %}<span {% if CurOffer.SETS_SLOPE|capfirst == "Нет" or CurOffer.SETS_SLOPE|length < 3 %}class="bullet-red"{% endif %}>■&nbsp;Откос:&nbsp;{{ CurOffer.SETS_SLOPE|capfirst|safe }}</span>
+            {% endif %}{% if CurOffer.SETS_PANES %}<span {% if CurOffer.SETS_PANES|capfirst == "Нет" or CurOffer.SETS_PANES|length < 3 %}class="bullet-red"{% endif %}>■&nbsp;Водоотлив:&nbsp;{{ CurOffer.SETS_PANES|capfirst|safe }}</span>
+            {% endif %}{% if CurOffer.SETS_UNINSTALL_INSTALL %}<span {% if CurOffer.SETS_UNINSTALL_INSTALL_B %}class="bullet-green"{% else %}class="bullet-red"{% endif %}>■&nbsp;Демонтаж/монтаж:&nbsp;{{ CurOffer.SETS_UNINSTALL_INSTALL|capfirst|safe }}</span>
+            {% endif %}{% if CurOffer.SETS_DELIVERY %}<span {% if CurOffer.SETS_DELIVERY_B %}class="bullet-green"{% else %}class="bullet-red"{% endif %}>■&nbsp;Доставка:&nbsp;{{ CurOffer.SETS_DELIVERY|capfirst|safe }}</span>{% endif %}{% comment %} {% if CurOffer.SETS_OTHER %}■&nbsp;Прочие условия:&nbsp;{{ CurOffer.SETS_OTHER|capfirst|safe }}
+            {% endif %}{% endcomment %}
+          </DiV>
+          <!-- Дата обновления  -->
+          <nobr class="badge badge4price" title="Дата обновления коммерческого предложения окон — {{ CurOffer.SETS_DATA_MODIFY|date:"d.M.Y" }}"><b class="glyphicon glyphicon-calendar"></b> {{ CurOffer.SETS_DATA_MODIFY|date:"d.M.Y" }}</nobr>
+          <!-- Звездочки рейтинга -->
+          <nobr class="badge badge4price" title="Рейтинг «Окнардии»{% if CurOffer.SETS_RATING > -0.1 %} — {{ CurOffer.SETS_RATING|stringformat:".2f" }} баллов{% endif %}"><a
+                href="javascript://"
+                id-set="{{ CurOffer.SETS_ID }}"
+                data-trigger="focus" tabindex="0"
+                title="{% if CurOffer.SETS_RATING > 0.01 %}<b> Рейтинг {{ CurOffer.SETS_RATING|stringformat:".2f" }}</b> для оконого набора «{{ CurOffer.SETS_NAME }}» компании «{{ CurOffer.MERCHANT }}» состоит&nbsp;из:{% else %}Рейтинг не присвоен{% endif %}"
+                data-toggle="popover">рейтинг</a>:&nbsp;{% for Star in CurOffer.SETS_RATING_STARTS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if CurOffer.SETS_RATING > -0.1 %} {{ CurOffer.SETS_RATING|stringformat:".2f" }}{% endif %}</nobr>
+        </span>
+        <span itemprop="brand" itemscope itemtype="http://schema.org/Brand">
+				  <meta itemprop="name" content="{{ CurOffer.MERCHANT }}" />
+				  <meta itemprop="logo" content="https://oknardia.ru/media/{{ CurOffer.MERCHANT_LOGO }}" />
+        </span></td>
+      <!--- Конец большой ячейки со спецификацией оконного предложения --->
+    {% endif %}
+
+			<td class="rnw" title="Схема открывания окна или двери {{ CurInOffer.WIDTH|stringformat:".0f" }}0x{{ CurInOffer.HIGHT|stringformat:".0f" }}0 мм."><img src="{% static CurInOffer.IMG_MINI %}" alt="Схема открывания: {{ CurInOffer.DESCRIPTION }} — {{ CurInOffer.WIDTH|stringformat:".0f" }}0x{{ CurInOffer.HIGHT|stringformat:".0f" }}0 мм." /></td>
+
+    {% if forloop.first %}<!-- FIRST -->
+
+			<td class="rnw" title="Стоимость {{ CurOffer.TOTAL|stringformat:".2f" }} рублей за все окна квартиры {{ APART|safe }}.">{{ CurOffer.TOTAL|stringformat:".2f"|price_format }}</td>
+			<th{% if CurOffer.DISCOUNT_COLOR2 != "" %} style="background-color:{{ CurOffer.DISCOUNT_COLOR2 }};"{% endif %} title="{% if CurOffer.DISCOUNT < 0.1 %}Нет скидки{% else %}Скидка — {{ CurOffer.DISCOUNT|stringformat:".1f" }}%{% endif %}">{% if CurOffer.DISCOUNT < 0.1 %}—{% else %}&minus;{{ CurOffer.DISCOUNT|stringformat:".1f" }}%{% endif %}</th>
+			<th{% if CurOffer.DISCOUNT_COLOR1 != "" %} style="background-color:{{ CurOffer.DISCOUNT_COLOR1 }};"{% endif %} itemprop="offers" itemscope itemtype="http://schema.org/Offer" title="Итого за все окна с учетом скидки: {{ CurOffer.FIN_PRICE|stringformat:".2f" }} рублей">
+        Итого: {{ CurOffer.FIN_PRICE|stringformat:".2f"|price_format }}&thinsp;<small class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></small>
+        <meta itemprop="price" content="{{ CurOffer.FIN_PRICE }}" />
+        <meta itemprop="priceCurrency" content="RUB" />
+      </th>
+      {% if CurOffer.DIM|length == 1 %}
+
+    </tr><tr>
+		  <td colspan="2">&nbsp;</td>
+		  <td colspan="3">
+
+      {% endif %}
+
+    {% elif forloop.counter0 == 1 %}
+
+      <td colspan="3" rowspan="{{ CurOffer.DIM|length|add:"-1" }}">
+
+    {% endif %}
+    {% if forloop.counter0 == 1 or CurOffer.DIM|length == 1 %}
+
+        <stong>{{ CurOffer.OFFICE_NAME }}</stong><br />
+        <div id="hid{{ CurOffer.SETS_ID }}" class="collapse in">
+          <a class="btn btn-info btn-xs shake-trigger" data-toggle="collapse" data-target="#tel{{ CurOffer.SETS_ID }}" onclick="show_phone_num({{ CurOffer.SETS_ID }})"><b class="glyphicon glyphicon-phone-alt shake-vertical"></b> Показать телефон</a>
+        </div>
+        <div id="tel{{ CurOffer.SETS_ID }}" class="collapse">
+          <small>{{ CurOffer.OFFICE_ADDRESS }}</small><br />  <b class="glyphicon glyphicon-phone-alt"></b> {{ CurOffer.OFFICE_PHONES }}<br />
+				  <small><nobr>Пожалуйста, скажите, что нашли цены на oknardia.ru</nobr></small>
+        </div>
+      </td>
+
+    {% endif %}
+		</tr>{% endfor %}<!----- ПРОВЕРКА --->{% endfor %}
+
+    <Tr id="preloader_{{ N }}">
+      <tH colspan="7"><center><img src="{% static "img/preloader.gif" %}" alt="подгружаю цены на окна..." height="64" width="64" /></center></tH>
+    </Tr>
+
+    <tR id="load_and_banner_{{ N }}">
+    <!-- сюда подгружаем следующий фрейм прайслиста --->
+      <script type="application/javascript">
+        function get_next_pricelist_frame( ) {
+          try{yaCounter32997984.reachGoal("MoreOffer");}catch(e){}
+          // заменяем ряд с кнопочками кнопочками на рекламу
+          // $("#load_and_banner_{{ N }}").html("<th colspan=10>РЕКЛАМА TMP</th>");
+          // добавляем ячейки с дополнительными ценами и новые кнопочки
+          $("#load_and_banner_{{ N }}").css({"display":"none"});
+          $("#preloader_{{ N }}").css({"display":"table-row","transition":"1s"});// подсчитать сколько прочеканных оферов для сравнения
+          $("#tmp").load(
+              "/next_price_one_flap_frame/idW{{ WIN_ID }}N{{ N }}",
+              function (){
+                window.frame = $("#tmp").html();
+                $("#price-list > tbody").append(window.frame);
+              }
+          );
+          window.setTimeout(
+            function show_adv() {
+              $("#load_and_banner_{{ N }}").html("<td colspan='8' bgcolor='#CCCCCC' align='center'><center><a href='https://api.ozon.ru/partner-tools.affiliates/pankarta/11052421746600/link?partner=e-serg&&utm_content=banner&width=728&height=90' target='_blank'><img src='https://api.ozon.ru/partner-tools.affiliates/pankarta/11052421746600/image?partner=e-serg&utm_content=banner&width=728&height=90' width='728px' height='90px'><small><br/>↑ Здесь могла бы быть ваша реклама ↑</small></center></td>");
+              $("#load_and_banner_{{ N }}").css({"display":"table-row","transition":"all 5s"});
+              $("#preloader_{{ N }}").css({"display":"none","transition":"1s"});
+              // (adsbygoogle=window.adsbygoogle || []).push({});
+              window.count = 0;
+              for (var i=0; i < ForCompare.length; i++)
+                if (ForCompare[i].checked)
+                  window.count++;
+              $("#NumberOfSelected").html(window.count);
+              $('[data-toggle="popover"]').popover({ // реинициализировать подгружаемые поповеры
+                placement: "top",
+                html: true,
+                content: function () {
+                  // сохранить текущий контекст
+                  var _this = this;
+                  $('#shadow_buffer').load('/show_rating_components/' + $(_this).attr("id-set"),
+                      function (response, status, xhr) {
+                    if (status == "error")
+                      $(_this).attr({'data-content': "Ошибка " + xhr.status + " (" + xhr.statusText + ")"});
+                    else
+                      $(_this).attr({'data-content': response});
+                    $(_this).popover('show');
+                    try{yaCounter32997984.reachGoal("ShowRating");}catch(e){};
+                  });
+                }
+              });
+            },
+            2800);
+        }
+      </script>
+      <td colspan="2"><a class="btn btn-info btn-block" data-toggle="collapse" onclick="Click2CompareOffers();">Сравнить выбранные (<span id="NumberOfSelected">0</span>) <small class="glyphicon-stats glyphicon"></small></a><p id="tmp"></p></td>
+      <td colspan="5">{% if N != "-1" %}<a href="javascript://" class="btn btn-info btn-block" onclick="get_next_pricelist_frame();">Ещё коммерческие предложения окон &nbsp;<small class="glyphicon-refresh glyphicon"></small></a>{% endif %}</td>
+    </tR>
