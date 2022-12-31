@@ -233,11 +233,11 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 # т.к. из-за изменений в api яндекс карт поменялась местами широта-долгота и вообще, то
                 # порядок переменных  строчной выше... На самом деле должно быть как в закоментированной
                 # строке ниже
-                # distance = get_geo_distance(i2.fOfficeGeoCode_Longitude, i2.fOfficeGeoCode_Latitude, address_longitude,
-                #                           address_latitude)
+                # distance = get_geo_distance(i2.fOfficeGeoCode_Longitude, i2.fOfficeGeoCode_Latitude,
+                #                             address_longitude, address_latitude)
             else:
                 distance = -1
-            #p rint(discount)
+            # print(discount)
             if discount > 99 or discount < 0.1:
                 discount_color1 = ""
                 discount_color2 = ""
@@ -245,7 +245,7 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 color_ratio = (discount + 0.) / 100
                 discount_color1 = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
                 discount_color2 = f"#{255 - int(color_ratio * 255):02x}ff{255 - int(color_ratio * 255):02x}"
-                #p rint(discount_color1, discount_color2)
+                # print(discount_color1, discount_color2)
             price_frame.append({
                 'DISTANCE': distance,
                 'DIM': dim_in_offer,
@@ -312,35 +312,6 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
     if len(price_frame) < offer_per_frame:
         n_begin = '-1'
     return {'META_DATA_PUBLISH': time_for_meta, 'PRICE_FRAME': price_frame, 'N': n_begin}
-
-
-def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_offer: str = "1",
-                     address_longitude: str = "0.", address_latitude: str = "0.",
-                     frame_begin_n: str = "0") -> HttpResponse:
-    """ Возвращает очередным фреймом ценовых предложений.
-
-    :param request: HttpRequest -- входящий HTTP-запрос
-    :param apart_id: str -- ID типовой квартиры, для которой получаем ценовые предложения
-    :param mount_dim_per_offer: str -- число различных оконных проемов в этой квартире (чтобы отсеять предложения,
-                                       в которых не представлены все проемы)
-    :param address_longitude: str   -- долгота адреса (геокоордината), для которого получаем ценовые предложения, чтобы
-                                       рассчитать удаленность компании предоставившей коммерческие предложения
-    :param address_latitude: str    -- широта адреса (геокоордината), для которого получаем ценовые предложения, чтобы
-                                       рассчитать удаленность компании предоставившей коммерческие предложения
-    :param frame_begin_n: str       -- Номер записи с которой начинается фрейм с ценами
-    :return: HttpResponse            -- HTTP-ответ с JSON-данными:
-    """
-    time_start = time.time()
-    # получаем данные для фрейма ценовых предложений
-    PriceFrame = report_price_frame(int(apart_id), int(mount_dim_per_offer), float(address_longitude),
-                                    float(address_latitude), int(frame_begin_n))
-    to_template = PriceFrame
-    to_template.update({'APPARTMENT_ID': apart_id,
-                        'MOUNT_DIM_PER_OFFER': mount_dim_per_offer,
-                        'ADDRESS_LAT': address_latitude,
-                        'ADDRESS_LON': address_longitude,
-                        'ticks': float(time.time() - time_start)})
-    return render(request, "report/report_precelist_frame.html", to_template)
 
 
 def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_height_mm: str = '2160',
@@ -471,8 +442,6 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
         'ticks': float(time.time() - time_start)
     })
     return render(request, "report/report_price-offers_for_one_window.html", to_template)
-
-
 
 
 def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = "61",
@@ -695,3 +664,32 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     response = render(request, "report/report_pricelist.html", to_template)
     response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
     return response
+
+
+def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_offer: str = "1",
+                     address_longitude: str = "0.", address_latitude: str = "0.",
+                     frame_begin_n: str = "0") -> HttpResponse:
+    """ Возвращает очередным фреймом ценовых предложений.
+
+    :param request: HttpRequest -- входящий HTTP-запрос
+    :param apart_id: str -- ID типовой квартиры, для которой получаем ценовые предложения
+    :param mount_dim_per_offer: str -- число различных оконных проемов в этой квартире (чтобы отсеять предложения,
+                                       в которых не представлены все проемы)
+    :param address_longitude: str   -- долгота адреса (геокоордината), для которого получаем ценовые предложения, чтобы
+                                       рассчитать удаленность компании предоставившей коммерческие предложения
+    :param address_latitude: str    -- широта адреса (геокоордината), для которого получаем ценовые предложения, чтобы
+                                       рассчитать удаленность компании предоставившей коммерческие предложения
+    :param frame_begin_n: str       -- Номер записи с которой начинается фрейм с ценами
+    :return: HttpResponse            -- HTTP-ответ
+    """
+    time_start = time.time()
+    # получаем данные для фрейма ценовых предложений
+    price_frame = report_price_frame(int(apart_id), int(mount_dim_per_offer), float(address_longitude),
+                                    float(address_latitude), int(frame_begin_n))
+    to_template = price_frame
+    to_template.update({'APPARTMENT_ID': apart_id,
+                        'MOUNT_DIM_PER_OFFER': mount_dim_per_offer,
+                        'ADDRESS_LAT': address_latitude,
+                        'ADDRESS_LON': address_longitude,
+                        'ticks': float(time.time() - time_start)})
+    return render(request, "report/report_precelist_frame.html", to_template)
