@@ -661,7 +661,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     last_visit = json.dumps(last_visit[:3])  # упаковываем json без пробелов (три записи)
     # print u"сейчас запишем вот эту куку:", LastVisit
     to_template.update({'ticks': float(time.time() - time_start)})
-    response = render(request, "report/report_pricelist.html", to_template)
+    response = render(request, "report/report_price_list.html", to_template)
     response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
     return response
 
@@ -692,4 +692,4 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
                         'ADDRESS_LAT': address_latitude,
                         'ADDRESS_LON': address_longitude,
                         'ticks': float(time.time() - time_start)})
-    return render(request, "report/report_precelist_frame.html", to_template)
+    return render(request, "report/report_price_list_frame.html", to_template)

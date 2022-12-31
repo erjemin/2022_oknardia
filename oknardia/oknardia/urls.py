@@ -75,7 +75,7 @@ urlpatterns = [
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
             prices.report_one_win_price),
     # --- Ценовая выдача
-    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]+|.*)[/*]$', prices.report_price),
+    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price),
     # --- Подгружаемый фрейм ценовая выдачи
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
