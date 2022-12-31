@@ -441,7 +441,23 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.time() - time_start)
     })
-    return render(request, "report/report_price-offers_for_one_window.html", to_template)
+    return render(request, "report/report_price_offers_for_one_window.html", to_template)
+
+
+def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
+    """ Возвращает очередной фреймом ценовых предложений для выдачи с одиночным окном.
+
+    :param request: HttpRequest -- входящий http-запрос
+    :param win_id: str -- id типового окна
+    :param frame_begin_n: str -- Номер записи с которой начинается фрейм с ценами
+    :return: HttpResponse --
+    """
+    time_start = time.time()
+    to_template = report_price_frame(0, 1, 0, 0, int(frame_begin_n), 0, int(win_id))
+    to_template.update({'MOUNT_DIM_PER_OFFER': 1,
+                        'WIN_ID': int(win_id),
+                        'ticks': float(time.time() - time_start)})
+    return render(request, "report/report_price_offers_for_one_window_frame.html", to_template)
 
 
 def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = "61",
@@ -680,7 +696,7 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
     :param address_latitude: str    -- широта адреса (геокоордината), для которого получаем ценовые предложения, чтобы
                                        рассчитать удаленность компании предоставившей коммерческие предложения
     :param frame_begin_n: str       -- Номер записи с которой начинается фрейм с ценами
-    :return: HttpResponse            -- HTTP-ответ
+    :return: HttpResponse           -- HTTP-ответ
     """
     time_start = time.time()
     # получаем данные для фрейма ценовых предложений
