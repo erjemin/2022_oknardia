@@ -441,7 +441,7 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.time() - time_start)
     })
-    return render(request, "report/report_price_offers_for_one_window.html", to_template)
+    return render(request, "price/price_offers_for_one_window.html", to_template)
 
 
 def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
@@ -457,7 +457,7 @@ def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
     to_template.update({'MOUNT_DIM_PER_OFFER': 1,
                         'WIN_ID': int(win_id),
                         'ticks': float(time.time() - time_start)})
-    return render(request, "report/report_price_offers_for_one_window_frame.html", to_template)
+    return render(request, "price/price_offers_for_one_window_frame.html", to_template)
 
 
 def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = "61",
@@ -677,7 +677,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     last_visit = json.dumps(last_visit[:3])  # упаковываем json без пробелов (три записи)
     # print u"сейчас запишем вот эту куку:", LastVisit
     to_template.update({'ticks': float(time.time() - time_start)})
-    response = render(request, "report/report_price_list.html", to_template)
+    response = render(request, "price/price_list.html", to_template)
     response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
     return response
 
@@ -708,4 +708,4 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
                         'ADDRESS_LAT': address_latitude,
                         'ADDRESS_LON': address_longitude,
                         'ticks': float(time.time() - time_start)})
-    return render(request, "report/report_price_list_frame.html", to_template)
+    return render(request, "price/price_list_frame.html", to_template)
