@@ -1,0 +1,20 @@
+{# отображение рейтинга #}{% load static %}
+<table class="pop-tab" width="100%" style="border: none !important;">
+<tbody style="border: none !important;">
+  <tr style="border: none !important; border-left: none !important;">
+    <td style="border: none !important;">Услуги:</td>
+    <td style="border: none !important;"><nobr><!-- НАЧАЛО звездочки рейтинга -->{% for Star in RATING_SERVIZ_STARS %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"></i>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if RATING_SERVIZ > 0 %}<tt class="badge">{{ RATING_SERVIZ|stringformat:".2f" }}</tt>{% else %}<tt class="badge">не присвоен</tt>{% endif %}<!-- КОНЕЦ бедж --></nobr></td>
+  </tr><tr style="border: none !important;">
+    <td style="border: none !important;">Оконный&nbsp;профиль:</td>
+    <td style="border: none !important;"><nobr><!-- НАЧАЛО звездочки рейтинга -->{% for Star in RATING_PVC_STARS %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"></i>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if RATING_PVC > 0 %}<tt class="badge">{{ RATING_PVC|stringformat:".2f" }}</tt>{% else %}<tt class="badge">не присвоен</tt>{% endif %}<!-- КОНЕЦ бедж --></nobr></td>
+  </tr><tr style="border: none !important;">
+    <td style="border: none !important;">Стеклопакет:</td>
+    <td style="border: none !important;"><nobr><!-- НАЧАЛО звездочки рейтинга -->{% for Star in RATING_GLAZ_STARS %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"></i>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if RATING_GLAZ > 0 %}<tt class="badge">{{ RATING_GLAZ|stringformat:".2f" }}</tt>{% else %}<tt class="badge">не присвоен</tt>{% endif %}<!-- КОНЕЦ бедж --></nobr></td>
+  </tr><tr style="border: none !important;">
+    <td style="border: none !important;">От&nbsp;пользователей:</td>
+    <td style="border: none !important;"><nobr><!-- НАЧАЛО звездочки рейтинга -->{% for Star in RATING_OFFER_STARS %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"></i>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if RATING_OFFER > 0 %}<tt class="badge">{{ RATING_OFFER|stringformat:".2f" }}</tt>{% else %}<tt class="badge">не присвоен</tt>{% endif %}<!-- КОНЕЦ бедж --></nobr></td>
+  </tr><tr style="border: none !important;">
+    <td colspan="2" style="background:ghostwhite;padding:1ex;border: none !important;"><small>В базе {{ NUM_OFFERS }}. Обновление цен {{ DATA_OFFER_UPDATE }}.<!-- Время исполнения: {{ ticks|stringformat:".4f" }}--></small></td>
+  </tr>
+</tbody>
+</table>

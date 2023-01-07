@@ -83,8 +83,11 @@ urlpatterns = [
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
     # СРАВНЕНИЕ ОКОННЫХ НАБОРОВ
-    re_path( r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
-    re_path( r'^compare_offers/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),
+    re_path(r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
+    re_path(r'^compare_offers/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),
+    re_path(r'^specification_set/\d$', views.main_init),       # заглушка (позже будет спецификация оконного набора)
+    # отображение всех составлющих рейтинга
+    re_path( r'^show_rating_components/(?P<win_set>\d+)$', report1.show_rating_components),
 
 ]
 
