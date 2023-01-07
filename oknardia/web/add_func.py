@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw
 from oknardia.settings import *
 import os
 import math
+import re
 import urllib3
 import xml.dom.minidom
 
@@ -55,9 +56,9 @@ def safe_html_spec_symbols(s: str) -> str:
 #
 #
 # # Суммирует все цифры в строке через произвольные (не цифровые) разделители
-# def SummThrought(StringWSlash):
-#     StringWSlash = re.sub( r"[^0-9]", u",", StringWSlash)
-#     ListTerms = StringWSlash.split(u',')
+# def sum_through(string_w_slash):
+#     string_w_slash = re.sub( r"[^0-9]", u",", string_w_slash)
+#     ListTerms = string_w_slash.split(u',')
 #     Summ = 0
 #     for Count in ListTerms:
 #         try:
@@ -555,3 +556,20 @@ def get_yandex_geocode_by_address(address_string: str) -> list:
         # Перечень исключений: https://urllib3.readthedocs.io/en/stable/reference/urllib3.exceptions.html
         # Возвращаем нулевые координаты, как признак, что данные не получены.
         return [0, 0]
+
+
+def sum_through(string_w_slash: str) -> int:
+    """ Суммирует все цифры (числа) в строке через произвольные (не цифровые) разделители
+
+    :param string_w_slash: str -- строка с цифрами (числами) через разделители
+    :return: summ: int -- сумма цифр (чисел) в строке
+    """
+    string_w_slash = re.sub(r"[^0-9]", ",", string_w_slash)
+    list_terms = string_w_slash.split(',')
+    sum_result = 0
+    for Count in list_terms:
+        try:
+            sum_result += int(Count)
+        except ValueError:
+            pass
+    return sum_result
