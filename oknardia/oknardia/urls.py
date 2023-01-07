@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams, report2, catalog, prices
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices
 
 
 urlpatterns = [
@@ -33,7 +33,7 @@ urlpatterns = [
 
     # ОБРАБОТЧИКИ АВТОРИЗАЦИИ
     # Вызов шаблона подгружаем captcha
-    re_path(r'^captcha', user_manager.captcha),
+    re_path(r'^captcha$', user_manager.captcha),
     # Обработчик информации и статусов пользователя и, или подгрузка шаблона login-logout.html
     re_path(r'^login-logout', user_manager.menu_login_logout),
     # Обработчик форма login-logout-restore. После обработки пере-подгружает шаблон login-logout-after.html
@@ -52,6 +52,8 @@ urlpatterns = [
     re_path(r'^tariff[/*]$', views.tariff),
     re_path(r'^contact[/*]$', views.contact),
     re_path(r'^stat_all[/*]$', diagrams.statistic_menu),
+    re_path(r'^stat/series/analiz[/*]$', diagrams.statistic_menu),  # дубль для старых ссылок
+    re_path(r'^stat/series/geo[/*]$', diagrams.statistic_menu),     # дубль для старых ссылок
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
     # --- Каталог
@@ -80,6 +82,9 @@ urlpatterns = [
     # --- Подгружаемый фрейм ценовая выдачи
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
+    # СРАВНЕНИЕ ОКОННЫХ НАБОРОВ
+    re_path( r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
+    re_path( r'^compare_offers/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),
 
 ]
 
