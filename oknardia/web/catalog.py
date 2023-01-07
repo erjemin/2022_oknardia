@@ -1028,3 +1028,20 @@ def catalog_company_detail(request: HttpRequest, company_id: str, company_name_s
         'ticks': float(time.time() - time_start)
     })
     return render(request, "catalog/catalog_company_detail.html", to_template)
+
+
+def report_all_info_seria_redirect(request: HttpRequest, seria_id: str = "12") -> HttpResponse:
+    """  Переадресация старых URL, т.к. их сколько-то есть (было) во внешних ссылках
+
+    :param request: HttpRequest -- запрос
+    :param seria_id: str -- id серии типового строительства
+    :return:
+    """
+    try:
+        seria_id = int(seria_id)
+        q_seria = Seria_Info.objects.get(id=seria_id)
+        if q_seria.id == q_seria.kRoot_id:
+            return redirect("f/catalog/seria/{pytils.translit.slugify(q_seria.sName)}/all{seria_id}")
+    except (Seria_Info.DoesNotExist, ValueError):
+        return redirect("/catalog/seria")
+    return redirect("/catalog/seria")
