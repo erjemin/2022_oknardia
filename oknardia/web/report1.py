@@ -188,77 +188,77 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
         if i.sGlazingMark not in list_of_glazing_brief_description:
             list_of_glazing_brief_description.append(i.sGlazingMark)
         profile_num_cameras = sum_through(i.iProfileCameras)
-        if profile_num_cameras > 0:             # Общее число камер профиля (рама+створка)
+        if profile_num_cameras > 0:  # Общее число камер профиля (рама+створка)
             if profile_num_cameras > max_i_profile_cameras:
                 max_i_profile_cameras = profile_num_cameras
             if profile_num_cameras < min_i_profile_cameras:
                 min_i_profile_cameras = profile_num_cameras
-        if i.iProfileThickness > 0:             # Контуров уплотнения
+        if i.iProfileThickness > 0:  # Контуров уплотнения
             if i.fProfileSeals > max_f_profile_seals:
                 max_f_profile_seals = i.fProfileSeals
             if i.fProfileSeals < min_f_profile_seals:
                 min_f_profile_seals = i.fProfileSeals
-        if i.iProfileThickness > 10:            # Монтажная ширина профиля
+        if i.iProfileThickness > 10:  # Монтажная ширина профиля
             if i.iProfileThickness > max_i_profile_thickness:
                 max_i_profile_thickness = i.iProfileThickness
             if i.iProfileThickness < min_i_profile_thickness:
                 min_i_profile_thickness = i.iProfileThickness
-        if i.iProfileGlazingThickness > 4:      # Максимальная толщина стеклопакета
+        if i.iProfileGlazingThickness > 4:  # Максимальная толщина стеклопакета
             if i.iProfileGlazingThickness > max_i_profile_glazing_thickness:
                 max_i_profile_glazing_thickness = i.iProfileGlazingThickness
             if i.iProfileGlazingThickness < min_i_profile_glazing_thickness:
                 min_i_profile_glazing_thickness = i.iProfileGlazingThickness
-        if i.fProfileHeatTransf > 0:            # Сопротивление теплопередаче
+        if i.fProfileHeatTransf > 0:  # Сопротивление теплопередаче
             if i.fProfileHeatTransf > max_f_profile_heat_transf:
                 max_f_profile_heat_transf = i.fProfileHeatTransf
             if i.fProfileHeatTransf < min_f_profile_heat_transf:
                 min_f_profile_heat_transf = i.fProfileHeatTransf
-        if i.fProfileSoundproofing > 0:         # Коэффициент звукоизоляции
+        if i.fProfileSoundproofing > 0:  # Коэффициент звукоизоляции
             if i.fProfileSoundproofing > max_f_profile_soundproofing:
                 max_f_profile_soundproofing = i.fProfileSoundproofing
             if i.fProfileSoundproofing < min_f_profile_soundproofing:
                 min_f_profile_soundproofing = i.fProfileSoundproofing
-        if i.iProfileRabbet > 1:                # Фальц
+        if i.iProfileRabbet > 1:  # Фальц
             if i.iProfileRabbet > max_i_profile_rabbet:
                 max_i_profile_rabbet = i.iProfileRabbet
             if i.iProfileRabbet < min_i_profile_rabbet:
                 min_i_profile_rabbet = i.iProfileRabbet
-        if i.iProfileHeight > 12:               # Высота в световом проеме
+        if i.iProfileHeight > 12:  # Высота в световом проеме
             if i.iProfileHeight > max_i_profile_height:
                 max_i_profile_height = i.iProfileHeight
             if i.iProfileHeight < min_i_profile_height:
                 min_i_profile_height = i.iProfileHeight
-        if i.iGlazingCamerasN > 0:              # Камер стеклопакета
+        if i.iGlazingCamerasN > 0:  # Камер стеклопакета
             if i.iGlazingCamerasN > max_i_glazing_cameras_n:
                 max_i_glazing_cameras_n = i.iGlazingCamerasN
             if i.iGlazingCamerasN < min_i_glazing_cameras_n:
                 min_i_glazing_cameras_n = i.iGlazingCamerasN
-        if i.iGlazingThickness > 4:             # Толщина стеклопакета
+        if i.iGlazingThickness > 4:  # Толщина стеклопакета
             if i.iGlazingThickness > max_i_glazing_thickness:
                 max_i_glazing_thickness = i.iGlazingThickness
             if i.iGlazingThickness < min_i_glazing_thickness:
                 min_i_glazing_thickness = i.iGlazingThickness
-        if i.fGlazingHeatTransfer > 0.05:       # Сопротивление теплопередаче стеклопакета Ro (м²×°C/Вт)
+        if i.fGlazingHeatTransfer > 0.05:  # Сопротивление теплопередаче стеклопакета Ro (м²×°C/Вт)
             if i.fGlazingHeatTransfer > max_f_glazing_heat_transfer:
                 max_f_glazing_heat_transfer = i.fGlazingHeatTransfer
             if i.fGlazingHeatTransfer < min_f_glazing_heat_transfer:
                 min_f_glazing_heat_transfer = i.fGlazingHeatTransfer
-        if i.fGlazingSoundproofing > 5:         # Коэффициент звукоизоляции стеклопакета
+        if i.fGlazingSoundproofing > 5:  # Коэффициент звукоизоляции стеклопакета
             if i.fGlazingSoundproofing > max_f_glazing_soundproofing:
                 max_f_glazing_soundproofing = i.fGlazingSoundproofing
             if i.fGlazingSoundproofing < min_f_glazing_soundproofing:
                 min_f_glazing_soundproofing = i.fGlazingSoundproofing
-        if i.fGlazingLightTransmission > 5:     # Коэффициент светопропускания стеклопакета
+        if i.fGlazingLightTransmission > 5:  # Коэффициент светопропускания стеклопакета
             if i.fGlazingLightTransmission > max_f_glazing_light_transmission:
                 max_f_glazing_light_transmission = i.fGlazingLightTransmission
             if i.fGlazingLightTransmission < min_f_glazing_light_transmission:
                 min_f_glazing_light_transmission = i.fGlazingLightTransmission
-        if i.fGlazingPassingSun > 5:            # Коэффициент солнцепропускания стеклопакета
+        if i.fGlazingPassingSun > 5:  # Коэффициент солнцепропускания стеклопакета
             if i.fGlazingPassingSun > max_f_glazing_passing_sun:
                 max_f_glazing_passing_sun = i.fGlazingPassingSun
             if i.fGlazingPassingSun < min_f_glazing_passing_sun:
                 min_f_glazing_passing_sun = i.fGlazingPassingSun
-        if i.fSetRating > 0.05:             # Рейтинг НАБОРА!
+        if i.fSetRating > 0.05:  # Рейтинг НАБОРА!
             if i.fSetRating > max_rating_set:
                 max_rating_set = i.fSetRating
             if i.fSetRating < min_rating_set:
@@ -272,138 +272,138 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
         #  построим массив "цветов" для рейтинга "Общее число камер профиля (рама+створка)" (чем больше, тем лучше)
         profile_num_cameras = sum_through(i.iProfileCameras)
         if max_i_profile_cameras == ini_max or min_i_profile_cameras == ini_min or profile_num_cameras <= 1 \
-                or profile_num_cameras == min_i_profile_cameras or max_i_profile_cameras-min_i_profile_cameras < 0.001:
+                or profile_num_cameras == min_i_profile_cameras or max_i_profile_cameras - min_i_profile_cameras < 0.001:
             profile_num_cameras_color = None
         else:
-            color_ratio = (profile_num_cameras-min_i_profile_cameras)/(max_i_profile_cameras-min_i_profile_cameras)
+            color_ratio = (profile_num_cameras - min_i_profile_cameras) / (
+                        max_i_profile_cameras - min_i_profile_cameras)
             profile_num_cameras_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         #  построим массив "цветов" для рейтинга "Контуров уплотнения" (чем больше, тем лучше)
         if max_f_profile_seals == ini_max or min_f_profile_seals == ini_min or i.fProfileSeals <= 0 \
-                or i.fProfileSeals == min_f_profile_seals or max_f_profile_seals-min_f_profile_seals < 0.001:
+                or i.fProfileSeals == min_f_profile_seals or max_f_profile_seals - min_f_profile_seals < 0.001:
             profile_seals_color = None
         else:
-            color_ratio = (i.fProfileSeals-min_f_profile_seals)/(max_f_profile_seals-min_f_profile_seals)
+            color_ratio = (i.fProfileSeals - min_f_profile_seals) / (max_f_profile_seals - min_f_profile_seals)
             profile_seals_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         #  построим массив "цветов" для рейтинга "Монтажная ширина профиля" (чем больше, тем лучше)
         if max_i_profile_thickness == ini_max or min_i_profile_thickness == ini_min or i.iProfileThickness <= 10 \
                 or i.iProfileThickness == min_i_profile_thickness \
-                or max_i_profile_thickness-min_i_profile_thickness < 0.001:
+                or max_i_profile_thickness - min_i_profile_thickness < 0.001:
             profile_thickness_color = None
         else:
-            color_ratio = (i.iProfileThickness-min_i_profile_thickness)/(max_i_profile_thickness
+            color_ratio = (i.iProfileThickness - min_i_profile_thickness) / (max_i_profile_thickness
                                                                              - min_i_profile_thickness)
             profile_thickness_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Максимальная толщина стеклопакета" (чем больше, тем лучше)
         if max_i_profile_glazing_thickness == ini_max or min_i_profile_glazing_thickness == ini_min \
                 or i.iProfileGlazingThickness <= 4 or i.iProfileGlazingThickness == min_i_profile_glazing_thickness \
-                or max_i_profile_glazing_thickness-min_i_profile_glazing_thickness < 0.001:
+                or max_i_profile_glazing_thickness - min_i_profile_glazing_thickness < 0.001:
             profile_glazing_thickness_color = None
         else:
             color_ratio = (i.iProfileGlazingThickness
-                           - min_i_profile_glazing_thickness)/(max_i_profile_glazing_thickness
-                                                                   - min_i_profile_glazing_thickness)
+                           - min_i_profile_glazing_thickness) / (max_i_profile_glazing_thickness
+                                                                 - min_i_profile_glazing_thickness)
             profile_glazing_thickness_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Сопротивление теплопередаче" (чем больше, тем лучше)
-        if max_f_profile_heat_transf == ini_max or min_f_profile_heat_transf == ini_min  \
+        if max_f_profile_heat_transf == ini_max or min_f_profile_heat_transf == ini_min \
                 or i.fProfileHeatTransf == min_f_profile_heat_transf \
-                or max_f_profile_heat_transf-min_f_profile_heat_transf < 0.001:
+                or max_f_profile_heat_transf - min_f_profile_heat_transf < 0.001:
             profile_heat_transf_color = None
         else:
-            color_ratio = (i.fProfileHeatTransf-min_f_profile_heat_transf)/(max_f_profile_heat_transf
-                                                                            - min_f_profile_heat_transf)
+            color_ratio = (i.fProfileHeatTransf - min_f_profile_heat_transf) / (max_f_profile_heat_transf
+                                                                                - min_f_profile_heat_transf)
             profile_heat_transf_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Коэффициент звукоизоляции" (чем больше, тем лучше)
         if max_f_profile_soundproofing == ini_max or min_f_profile_soundproofing == ini_min \
                 or i.fProfileSoundproofing == min_f_profile_soundproofing \
-                or max_f_profile_soundproofing-min_f_profile_soundproofing < 0.001:
+                or max_f_profile_soundproofing - min_f_profile_soundproofing < 0.001:
             profile_soundproofing_color = None
         else:
-            color_ratio = (i.fProfileSoundproofing-min_f_profile_soundproofing)/(max_f_profile_soundproofing
-                                                                                 - min_f_profile_soundproofing)
+            color_ratio = (i.fProfileSoundproofing - min_f_profile_soundproofing) / (max_f_profile_soundproofing
+                                                                                     - min_f_profile_soundproofing)
             profile_soundproofing_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Фальц" (чем больше, тем лучше)
         if max_i_profile_rabbet == ini_max or min_i_profile_rabbet == ini_min or i.iProfileRabbet <= 1 \
-                or i.iProfileRabbet == min_i_profile_rabbet or max_i_profile_rabbet-min_i_profile_rabbet < 0.001:
+                or i.iProfileRabbet == min_i_profile_rabbet or max_i_profile_rabbet - min_i_profile_rabbet < 0.001:
             profile_rabbet_color = None
         else:
-            color_ratio = (i.iProfileRabbet-min_i_profile_rabbet)/(max_i_profile_rabbet-min_i_profile_rabbet)
+            color_ratio = (i.iProfileRabbet - min_i_profile_rabbet) / (max_i_profile_rabbet - min_i_profile_rabbet)
             profile_rabbet_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Высота в световом проеме" (чем меньше, тем лучше)
         if max_i_profile_rabbet == ini_max or min_i_profile_height == ini_min or i.iProfileHeight <= 12 \
-                or i.iProfileHeight == max_i_profile_height or max_i_profile_height-min_i_profile_height < 0.01:
+                or i.iProfileHeight == max_i_profile_height or max_i_profile_height - min_i_profile_height < 0.01:
             profile_height_color = None
         else:
             color_ratio = (i.iProfileHeight - min_i_profile_height) / (max_i_profile_height - min_i_profile_height)
             profile_height_color = f"#{127 + int(color_ratio * 128):02x}ff{127 + int(color_ratio * 128):02x}"
-        print(profile_height_color)
         # построим массив "цветов" для рейтинга "Камер стеклопакета" (чем больше, тем лучше)
         if max_i_glazing_cameras_n == ini_max or min_i_profile_height == ini_min \
                 or i.iGlazingCamerasN == min_i_glazing_cameras_n \
-                or max_i_glazing_cameras_n-min_i_glazing_cameras_n < 0.001:
+                or max_i_glazing_cameras_n - min_i_glazing_cameras_n < 0.001:
             glazing_cameras_n_color = None
         else:
-            color_ratio = (i.iGlazingCamerasN-min_i_glazing_cameras_n)/(max_i_glazing_cameras_n
-                                                                        - min_i_glazing_cameras_n)
+            color_ratio = (i.iGlazingCamerasN - min_i_glazing_cameras_n) / (max_i_glazing_cameras_n
+                                                                            - min_i_glazing_cameras_n)
             glazing_cameras_n_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Толщина стеклопакета" (чем больше, тем лучше)
         if max_i_glazing_thickness == ini_max or min_i_glazing_thickness == ini_min or i.iGlazingThickness <= 3 \
                 or i.iGlazingThickness == min_i_glazing_thickness \
-                or max_i_glazing_thickness-min_i_glazing_thickness < 0.001:
+                or max_i_glazing_thickness - min_i_glazing_thickness < 0.001:
             glazing_thickness_color = None
         else:
-            color_ratio = (i.iGlazingThickness-min_i_glazing_thickness)/(max_i_glazing_thickness
+            color_ratio = (i.iGlazingThickness - min_i_glazing_thickness) / (max_i_glazing_thickness
                                                                              - min_i_glazing_thickness)
             glazing_thickness_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Сопротивление теплопередаче стеклопакета" (чем больше, тем лучше)
         if max_f_glazing_heat_transfer == ini_max or min_f_glazing_heat_transfer == ini_min \
                 or i.fGlazingHeatTransfer <= 0.05 or i.fGlazingHeatTransfer == min_f_glazing_heat_transfer \
-                or max_f_glazing_heat_transfer-min_f_glazing_heat_transfer < 0.001:
+                or max_f_glazing_heat_transfer - min_f_glazing_heat_transfer < 0.001:
             glazing_heat_transfer_color = None
         else:
-            color_ratio = (i.fGlazingHeatTransfer-min_f_glazing_heat_transfer)/(max_f_glazing_heat_transfer
-                                                                                - min_f_glazing_heat_transfer)
+            color_ratio = (i.fGlazingHeatTransfer - min_f_glazing_heat_transfer) / (max_f_glazing_heat_transfer
+                                                                                    - min_f_glazing_heat_transfer)
             glazing_heat_transfer_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Коэффициент звукоизоляции стеклопакета" (чем больше, тем лучше)
         if max_f_glazing_soundproofing == ini_max or min_f_glazing_soundproofing == ini_min \
                 or i.fGlazingSoundproofing <= 5 or i.fGlazingSoundproofing == min_f_glazing_heat_transfer \
-                or max_f_glazing_soundproofing-min_f_glazing_soundproofing < 0.001:
+                or max_f_glazing_soundproofing - min_f_glazing_soundproofing < 0.001:
             glazing_soundproofing_color = None
         else:
-            color_ratio = (i.fGlazingSoundproofing-min_f_glazing_soundproofing)/(max_f_glazing_soundproofing
-                                                                                 - min_f_glazing_soundproofing)
+            color_ratio = (i.fGlazingSoundproofing - min_f_glazing_soundproofing) / (max_f_glazing_soundproofing
+                                                                                     - min_f_glazing_soundproofing)
             glazing_soundproofing_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Коэффициент светопропускания стеклопакета" (чем больше, тем лучше)
-        if max_f_glazing_light_transmission == ini_max or min_f_glazing_light_transmission == ini_min\
-                or i.fGlazingLightTransmission <= 5 or i.fGlazingLightTransmission == min_f_glazing_light_transmission\
-                or max_f_glazing_light_transmission-min_f_glazing_light_transmission < 0.002:
+        if max_f_glazing_light_transmission == ini_max or min_f_glazing_light_transmission == ini_min \
+                or i.fGlazingLightTransmission <= 5 or i.fGlazingLightTransmission == min_f_glazing_light_transmission \
+                or max_f_glazing_light_transmission - min_f_glazing_light_transmission < 0.002:
             glazing_light_transmission_color = None
         else:
             color_ratio = (i.fGlazingLightTransmission
                            - min_f_glazing_light_transmission) / (max_f_glazing_light_transmission
                                                                   - min_f_glazing_light_transmission)
-            glazing_light_transmission_color = f"#{255 - int(color_ratio*128):02x}ff{255 - int(color_ratio*128):02x}"
+            glazing_light_transmission_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
         # построим массив "цветов" для рейтинга "Коэффициент солнцепропускания стеклопакета" (чем меньше, тем лучше)
         if max_f_glazing_passing_sun == ini_max or min_f_glazing_passing_sun == ini_min or i.fGlazingPassingSun <= 5 \
                 or i.fGlazingPassingSun == max_f_glazing_passing_sun \
-                or max_f_glazing_passing_sun-min_f_glazing_passing_sun < 0.0001:
+                or max_f_glazing_passing_sun - min_f_glazing_passing_sun < 0.0001:
             glazing_passing_sun_color = None
         else:
-            color_ratio = (i.fGlazingPassingSun-min_f_glazing_passing_sun)/(max_f_glazing_passing_sun
-                                                                            - min_f_glazing_passing_sun)
+            color_ratio = (i.fGlazingPassingSun - min_f_glazing_passing_sun) / (max_f_glazing_passing_sun
+                                                                                - min_f_glazing_passing_sun)
             glazing_passing_sun_color = f"#{127 + int(color_ratio * 128):02x}ff{127 + int(color_ratio * 128):02x}"
         ########################################################################
         # построим массив цветов "звездочек" для рейтинга наборов
         if i.fSetRating > RARING_SET_MAX:
             rating_set_n = RARING_SET_MAX
             rating_set_color = "#80ff80"
-        elif i.fSetRating < RARING_SET_MIN+0.05 or max_rating_set-min_rating_set < 0.001:
+        elif i.fSetRating < RARING_SET_MIN + 0.05 or max_rating_set - min_rating_set < 0.001:
             rating_set_n = RARING_SET_MIN
             rating_set_color = ""
         else:
             try:
                 rating_set_n = i.fSetRating * (RARING_SET_MAX - RARING_SET_MIN) / RARING_STAR
                 color_ratio = (i.fSetRating - min_rating_set) / (max_rating_set - min_rating_set)
-                rating_set_color = f"#{255 - int(color_ratio*128):02x}ff{255 - int(color_ratio*128):02x}"
+                rating_set_color = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
             except (ZeroDivisionError, TypeError):
                 rating_set_color = None
                 rating_set_n = RARING_SET_MIN
@@ -427,61 +427,62 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
             "PROFILE_MANUFACTURER": i.sProfileManufacturer,
             "PROFILE_MANUFACTURER_T": pytils.translit.slugify(i.sProfileManufacturer),
             "PROFILE_NUM_COLOR": i.sProfileColor,
-            "PROFILE_NUM_CAMERAS": i.iProfileCameras,                   # Число камер рамы/створки
-            "PROFILE_NUM_CAMERAS_COLOR": profile_num_cameras_color,     # Число камер рамы/створки ЦВЕТА
-            "PROFILE_THICKNESS": i.iProfileThickness,                   # Монтажная ширина профиля
-            "PROFILE_THICKNESS_COLOR": profile_thickness_color,         # Окраска Монтажная ширина профиля ЦВЕТА
-            "PROFILE_GLAZING_THICKNESS": i.iProfileGlazingThickness,    # Максимальная толщина стеклопакета
+            "PROFILE_NUM_CAMERAS": i.iProfileCameras,  # Число камер рамы/створки
+            "PROFILE_NUM_CAMERAS_COLOR": profile_num_cameras_color,  # Число камер рамы/створки ЦВЕТА
+            "PROFILE_THICKNESS": i.iProfileThickness,  # Монтажная ширина профиля
+            "PROFILE_THICKNESS_COLOR": profile_thickness_color,  # Окраска Монтажная ширина профиля ЦВЕТА
+            "PROFILE_GLAZING_THICKNESS": i.iProfileGlazingThickness,  # Максимальная толщина стеклопакета
             "PROFILE_GLAZING_THICKNESS_COLOR": profile_glazing_thickness_color,  # Макс-толщина стеклопакета ЦВЕТА
-            "PROFILE_HEAT_TRANSFER": i.fProfileHeatTransf,              # Сопротивление теплопередаче
-            "PROFILE_HEAT_TRANSFER_COLOR": profile_heat_transf_color,   # Сопротивление теплопередаче ЦВЕТА
-            "PROFILE_NUM_SEALS": i.fProfileSeals,                       # Контуров уплотнения
-            "PROFILE_NUM_SEALS_COLOR": profile_seals_color,             # Контуров уплотнения ЦВЕТА
+            "PROFILE_HEAT_TRANSFER": i.fProfileHeatTransf,  # Сопротивление теплопередаче
+            "PROFILE_HEAT_TRANSFER_COLOR": profile_heat_transf_color,  # Сопротивление теплопередаче ЦВЕТА
+            "PROFILE_NUM_SEALS": i.fProfileSeals,  # Контуров уплотнения
+            "PROFILE_NUM_SEALS_COLOR": profile_seals_color,  # Контуров уплотнения ЦВЕТА
             "PROFILE_SEAL_DESCRIPTION": i.sProfileSealDescription,
-            "PROFILE_SOUND_PROOFING": i.fProfileSoundproofing,          # Коэффициент звукоизоляции
-            "PROFILE_SOUND_PROOFING_COLOR": profile_soundproofing_color,        # Коэффициент звукоизоляции ЦВЕТА
-            "PROFILE_HEIGHT": i.iProfileHeight,                         # Высота в световом проеме
-            "PROFILE_HEIGHT_COLOR": profile_height_color,               # Высота в световом проеме ЦВЕТА
-            "PROFILE_RABBET": i.iProfileRabbet,                         # Фальц
-            "PROFILE_RABBET_COLOR": profile_rabbet_color,               # Фальц ЦВЕТА
-            "PROFILE_FILLET": i.sProfileFillet,                         # Штапик
-            "PROFILE_REINFORCEMENT": i.sProfileReinforcement,           # Армирование профиля
+            "PROFILE_SOUND_PROOFING": i.fProfileSoundproofing,  # Коэффициент звукоизоляции
+            "PROFILE_SOUND_PROOFING_COLOR": profile_soundproofing_color,  # Коэффициент звукоизоляции ЦВЕТА
+            "PROFILE_HEIGHT": i.iProfileHeight,  # Высота в световом проеме
+            "PROFILE_HEIGHT_COLOR": profile_height_color,  # Высота в световом проеме ЦВЕТА
+            "PROFILE_RABBET": i.iProfileRabbet,  # Фальц
+            "PROFILE_RABBET_COLOR": profile_rabbet_color,  # Фальц ЦВЕТА
+            "PROFILE_FILLET": i.sProfileFillet,  # Штапик
+            "PROFILE_REINFORCEMENT": i.sProfileReinforcement,  # Армирование профиля
             "PROFILE_OTHER": i.sProfileOther,
-            "SET_ID": i.id,                                             # id-набора
-            "SET_CLIMATE_CONTROL": i.sSetClimateControl,                # климат контроль
-            "SET_STILL": i.sSetSill,                                    # Подоконник
-            "SET_IMPLEMENTS_ALL": i.sSetImplementAll,                   # Фурнитура
-            "SET_IMPLEMENTS_HANDLES": i.sSetImplementHandles,           # Фурнитура: Ручки
-            "SET_IMPLEMENTS_HINGES": i.sSetImplementHinges,             # Фурнитура: Петли
-            "SET_IMPLEMENTS_LATCH": i.sSetImplementLatch,               # Фурнитура: механизма запирания (запор)
-            "SET_IMPLEMENTS_LIMITER": i.sSetImplementLimiter,           # Фурнитура: Ограничитель
-            "SET_IMPLEMENTS_CATCH": i.sSetImplementCatch,               # Фурнитура: Фиксаторы открывания
-            "SET_PANES": i.sSetPanes,                                   # Водоотлив
-            "SET_SLOPE": i.sSetSlope,                                   # Откос
-            "SET_DELIVERY": i.sSetDelivery,                             # Доставка (условия
-            "SET_DELIVERY_B": i.bSetDelivery,                           # Доставка (да/нет)
-            "SET_UNINSTALL_INSTALL": i.sSetUninstallInstall,            # Монтаж/демонтаж (условия)
-            "SET_UNINSTALL_INSTALL_B": i.bSetUninstallInstall,          # Монтаж/демонтаж (да/нет)
-            "SET_OTHER_CONDITIONS": i.sSetOtherConditions,              # Прочие условия
-            "GLAZING_CAMERAS_NUM": i.iGlazingCamerasN,                  # Камер стеклопакета
-            "GLAZING_CAMERAS_COLOR": glazing_cameras_n_color,           # Камер стеклопакета ЦВЕТА
-            "GLAZING_THICKNESS": i.iGlazingThickness,                   # Толщина стеклопакета
-            "GLAZING_THICKNESS_COLOR": glazing_thickness_color,         # Толщина стеклопакета
+            "SET_ID": i.id,  # id-набора
+            "SET_CLIMATE_CONTROL": i.sSetClimateControl,  # климат контроль
+            "SET_STILL": i.sSetSill,  # Подоконник
+            "SET_IMPLEMENTS_ALL": i.sSetImplementAll,  # Фурнитура
+            "SET_IMPLEMENTS_HANDLES": i.sSetImplementHandles,  # Фурнитура: Ручки
+            "SET_IMPLEMENTS_HINGES": i.sSetImplementHinges,  # Фурнитура: Петли
+            "SET_IMPLEMENTS_LATCH": i.sSetImplementLatch,  # Фурнитура: механизма запирания (запор)
+            "SET_IMPLEMENTS_LIMITER": i.sSetImplementLimiter,  # Фурнитура: Ограничитель
+            "SET_IMPLEMENTS_CATCH": i.sSetImplementCatch,  # Фурнитура: Фиксаторы открывания
+            "SET_PANES": i.sSetPanes,  # Водоотлив
+            "SET_SLOPE": i.sSetSlope,  # Откос
+            "SET_DELIVERY": i.sSetDelivery,  # Доставка (условия
+            "SET_DELIVERY_B": i.bSetDelivery,  # Доставка (да/нет)
+            "SET_UNINSTALL_INSTALL": i.sSetUninstallInstall,  # Монтаж/демонтаж (условия)
+            "SET_UNINSTALL_INSTALL_B": i.bSetUninstallInstall,  # Монтаж/демонтаж (да/нет)
+            "SET_OTHER_CONDITIONS": i.sSetOtherConditions,  # Прочие условия
+            "GLAZING_CAMERAS_NUM": i.iGlazingCamerasN,  # Камер стеклопакета
+            "GLAZING_CAMERAS_COLOR": glazing_cameras_n_color,  # Камер стеклопакета ЦВЕТА
+            "GLAZING_THICKNESS": i.iGlazingThickness,  # Толщина стеклопакета
+            "GLAZING_THICKNESS_COLOR": glazing_thickness_color,  # Толщина стеклопакета
             "GLAZING_BRIEF_DESCRIPTION": re.sub(u",[\s\d]+мм", "", i.sGlazingBriefDescription),  # Кратко о стеклопакете
-            "GLAZING_MARK": i.sGlazingMark,                             # Схема, марка, маркировка, модель стеклопакета
-            "GLAZING_MANUFACTURER": i.sGlazingManufacturer,             # Производитель стеклопакета
-            "GLAZING_HEAT_TRANSFER": i.fGlazingHeatTransfer,    # Сопротивление теплопередаче стеклопакета Ro (м²×°C/Вт)
+            "GLAZING_MARK": i.sGlazingMark,  # Схема, марка, маркировка, модель стеклопакета
+            "GLAZING_MANUFACTURER": i.sGlazingManufacturer,  # Производитель стеклопакета
+            "GLAZING_HEAT_TRANSFER": i.fGlazingHeatTransfer,  # Сопротивление теплопередаче стеклопакета Ro (м²×°C/Вт)
             "GLAZING_HEAT_TRANSFER_COLOR": glazing_heat_transfer_color,  # Сопротивление теплопередаче стеклопакета ЦВЕТ
-            "GLAZING_SOUNDPROOFING": i.fGlazingSoundproofing,            # Коэффициент звукоизоляции стеклопакета
+            "GLAZING_SOUNDPROOFING": i.fGlazingSoundproofing,  # Коэффициент звукоизоляции стеклопакета
             "GLAZING_SOUNDPROOFING_COLOR": glazing_soundproofing_color,  # Коэффициент звукоизоляции стеклопакета ЦВЕТА
-            "GLAZING_LIGHT_TRANSMISSION": i.fGlazingLightTransmission,   # Коэффициент светопропускания стеклопакета
+            "GLAZING_LIGHT_TRANSMISSION": i.fGlazingLightTransmission,  # Коэффициент светопропускания стеклопакета
             "GLAZING_LIGHT_TRANSMISSION_COLOR": glazing_light_transmission_color,  # Коэффициент светопропускания ЦВЕТА
-            "GLAZING_LIGHT_REFLECTION": i.sGlazingLightReflectance,      # Коэффициент светоотражения внешний/внутренний
-            "GLAZING_PASSING_SUN": i.fGlazingPassingSun,                 # Коэффициент солнцепропускания стеклопакета
-            "GLAZING_PASSING_SUN_COLOR": glazing_passing_sun_color,      # Коэффициент солнцепропускания ЦВЕТ
-            "GLAZING_REFLECTION_AND_ABSORPTION": i.sGlazingReflectionAndAbsorptionOfHeat,  # Коэффициент теплоотражения/теплопоглощения стеклопакета
-            "GLAZING_TONING": i.sGlazingToning,                          # Тонирование стеклопакета
-            "URL_W_DEL": list2_del.replace(f",{i.id},", ",")[1:-1]       # Тонирование стеклопакета
+            "GLAZING_LIGHT_REFLECTION": i.sGlazingLightReflectance,  # Коэффициент светоотражения внешний/внутренний
+            "GLAZING_PASSING_SUN": i.fGlazingPassingSun,  # Коэффициент солнцепропускания стеклопакета
+            "GLAZING_PASSING_SUN_COLOR": glazing_passing_sun_color,  # Коэффициент солнцепропускания ЦВЕТ
+            "GLAZING_REFLECTION_AND_ABSORPTION": i.sGlazingReflectionAndAbsorptionOfHeat,
+            # Коэффициент теплоотражения/теплопоглощения стеклопакета
+            "GLAZING_TONING": i.sGlazingToning,  # Тонирование стеклопакета
+            "URL_W_DEL": list2_del.replace(f",{i.id},", ",")[1:-1]  # Тонирование стеклопакета
         })
     to_template.update({'SET_LIST': dim,
                         'LIST_MERCHANT': list_of_merchant_name,
@@ -518,7 +519,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
                 if i.deltaData < 100:
                     early_data = pytils.dt.distance_of_time_in_words(
                         int(django.utils.dateformat.format(i.dLastData, 'U')), accuracy=2
-                        )
+                    )
                 else:
                     early_data = ""
                 dim.append({
@@ -542,3 +543,58 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
     })
     return render(request, "report/report_compare_set.html", to_template)
 
+
+def show_rating_components(request: HttpRequest, win_set: str = "1") -> HttpResponse:
+    """ Показать состав рейтинга оконного предложения (компоненты рейтинга)
+
+    :param request: HttpRequest -- входящий http-запрос
+    :param win_set: str -- id оконного набора, для которого показать состав рейтинга
+    :return: HttpResponse --
+    """
+    time_start = time.time()
+    to_template = {}
+    try:
+        win_set = int(win_set)
+    except ValueError:
+        win_set = 1
+    q = SetKit.objects.raw(
+        f"SELECT oknardia_pvcprofiles.fProfileRating, oknardia_glazing.fGlazingRating,"
+        f"  oknardia_setkit.fSetRating, oknardia_setkit.id, MAX(oknardia_priceoffer.dOfferModify) AS dPriceModify,"
+        f"  COUNT(oknardia_priceoffer.id) AS NumOffer, AVG(oknardia_priceoffer.fOfferRating) AS fOfferRatingAvg "
+        f"FROM oknardia_setkit"
+        f"  INNER JOIN oknardia_glazing"
+        f"    ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id"
+        f"  INNER JOIN oknardia_pvcprofiles"
+        f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
+        f"  INNER JOIN oknardia_priceoffer"
+        f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id "
+        f"WHERE oknardia_setkit.id = {win_set} "
+        f"GROUP BY oknardia_pvcprofiles.fProfileRating,"
+        f"         oknardia_glazing.fGlazingRating,"
+        f"         oknardia_setkit.fSetRating,"
+        f"         oknardia_setkit.id;")
+    raring_list = list(q)
+    f_rating_service = raring_list[0].fSetRating - RARING_WEIGHT_PVC_PROFILE_IN_SET * normalize(
+        raring_list[0].fProfileRating, val_max=RARING_PVC_PROFILE_MAX
+    )
+    f_rating_service -= RARING_WEIGHT_GLAZING_IN_SET * normalize(raring_list[0].fGlazingRating,
+                                                                 val_max=RARING_GLAZING_MAX)
+    f_rating_service = normalize(f_rating_service,
+                                 val_max=RARING_SET_MAX-RARING_WEIGHT_PVC_PROFILE_IN_SET-RARING_WEIGHT_GLAZING_IN_SET)
+    f_rating_service *= RARING_SET_MAX
+    to_template.update({'RATING_SERVIZ': f_rating_service,
+                        'RATING_SERVIZ_STARS': get_rating_set_for_stars(f_rating_service),
+                        'RATING_GLAZ': raring_list[0].fGlazingRating,
+                        'RATING_GLAZ_STARS': get_rating_set_for_stars(raring_list[0].fGlazingRating),
+                        'RATING_PVC': raring_list[0].fProfileRating,
+                        'RATING_PVC_STARS': get_rating_set_for_stars(raring_list[0].fProfileRating),
+                        'RATING_OFFER': raring_list[0].fOfferRatingAvg,
+                        'RATING_OFFER_STARS': get_rating_set_for_stars(raring_list[0].fOfferRatingAvg),
+                        'DATA_OFFER_UPDATE': pytils.dt.distance_of_time_in_words(
+                            int(django.utils.dateformat.format(raring_list[0].dPriceModify, 'U')), accuracy=2),
+                        'NUM_OFFERS': pytils.numeral.get_plural(raring_list[0].NumOffer,
+                                                                "коммерческое предложение, коммерческих предложения,"
+                                                                " коммерческих предложений"),
+                        'TEST': win_set,
+                        'ticks': float(time.time() - time_start)})
+    return render(request, "report/show_rating_components.html", to_template)
