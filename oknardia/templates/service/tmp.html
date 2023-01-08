@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+{% load humanize %}
+
+{% block Title %}: Тарифы и услуги{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Тарифы и услуги маркетплейс-агрегатора Окнардия. Размещение предложений пластиковых и деревянных окон, обновление цен на окна, рекламные баннеры и виджеты на сайт оконной компании.{% endblock %}
+
+{% block Keywords %}типовые проекты зданий, панельное строительство, {% for CountSeria in SERIA_NAV_DIM %}серия {{ CountSeria.SERIA_R }}, {{ CountSeria.SERIA_R }}, {% endfor %}, года простойки, регионы построки, распространенность{% endblock %}
+
+{% block Top_JS1%}
+<script type="text/javascript">
+$(window).load(function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});
+</script>
+{% endblock %}
+
+{% block Main_Content %}<!--- Контент НАЧАЛО --->
+<dIv class="container-fluid" itemscope itemtype="http://schema.org/Article">
+  <div class="row">
+    <div class="col-md-11">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/blog/">Блог</a></li>
+        <li><a href="/blog/P1">Стр.2</a></li>
+        <li class="active">Питерские хрущёвки <nobr>1ЛГ-507</nobr> в&nbsp;базе &laquo;Окнардии&raquo;</li>
+      </ol>
+    </div>
+    <div class="header_blog">
+      <p class="col-xs-4"><span>{% now "d.F.Y (l) H:i" %}</span><br /><small><img src="/media/img_avatar/avatar_eserg_160x160.png" alt="Аватар: oknardia (администрация)" title="Аватар: oknardia (администрация)" />  <i>администрация</i></small></p>
+      <script type="text/javascript">(function() {
+  if (window.pluso)if (typeof window.pluso.start == "function") return;
+  if (window.ifpluso==undefined) { window.ifpluso = 1;
+    var d = document, s = d.createElement('script'), g = 'getElementsByTagName';
+    s.type = 'text/javascript'; s.charset='UTF-8'; s.async = true;
+    s.src = ('https:' == window.location.protocol ? 'https' : 'http')  + '://share.pluso.ru/pluso-like.js';
+    var h=d[g]('body')[0];
+    h.appendChild(s);
+  }})();</script>
+    <p class="col-xs-7 pluso" style="" data-background="white" data-options="medium,square,line,horizontal,counter,theme=08" data-services="facebook,vkontakte,twitter,odnoklassniki,google,moimir,print,googlebookmark,tumblr,pinterest,email"></p>
+      <h1 class="col-md-11" itemprop="name">ЗАГОЛОВОК</h1>
+    </div>
+  </div>
+  <DiV class="row">
+    <DIv class="col-md-11">
+      <dIv style="padding-top: 1ex;font-size:120%" itemprop="articleBody">
+<!--- Пост в блоге :: начало --->
+
+
+
+<p>Против некоторых позиций в&nbsp;тарифах &laquo;Окнардии&raquo; давно стояла метка &laquo;с&nbsp;11.2017&raquo;. Она появилась почти два года назад, вместе с&nbsp;тарифами нашего оконного агрегатора когда закончилось <nobr>бета-тестирование</nobr>. И&nbsp;вот этот 11.2017 наступил. А&nbsp;значит цены на&nbsp;размещение цен на&nbsp;размещение оконных предложений меняются. Как и&nbsp;было обещано.</p>
+<p><center><img src="/media/img_for_blog/tariff-changing.gif" /></center></p>
+<p>Но&nbsp;перед тем, как рассказать детали напомним, что было сделано за&nbsp;эти два года</p><cut />
+<ul>
+<li>Размещено 22 оконных набора в&nbsp;предложениях. Размещаются как пластиковые, так и&nbsp;деревянные окна.</li>
+<li>С&nbsp;&laquo;Окнардией&raquo; работают уже семь <nobr>оконных-компании</nobr> партнёра.</li>
+<li>&mdash;&nbsp;Добавлен функционал сравнения характеристик оконных предложений и&nbsp;отдельных компонентов этих предложений.</li>
+<li>Создан <a href="/catalog/profile/">каталог профилей</a>, <a href="/catalog/standard_opening/">стандартных проёмов</a>, <a href="/catalog/seria/">типовых серий домов</a>, <a href="https://oknardia.ru/catalog/company/">оконных компаний</a>. В&nbsp;будущем будет каталог стеклопакетов и&nbsp;фурнитуры&hellip; планов много.</li>
+<li>Построен <a href="/blogpost/17/Nagljadnoe-sravnenie-harakteristik-okonnyh-profilej/">алгоритм расчёта реальных рейтингов</a> предложений, профилей, стеклопакетов и&nbsp;сервиса компаний. Рейтинги не&nbsp;на&nbsp;базе &laquo;общественного голосования&raquo;, &laquo;опросов&raquo; или измерением <nobr>&laquo;интернет-популярности&raquo;</nobr>, а&nbsp;на&nbsp;базе физических характеристик и&nbsp;измеримых параметров. Таким образом&nbsp;&mdash; это объектовые рейтинги.</li>
+<li>Разработан <a href="https://widget.oknardia.ru/">виджет</a>, который позволяет оконной компании реализовать функционал &laquo;Окнардии&raquo; на&nbsp;собственном сайте.</li>
+<li>Расширены <nobr><a href="/blogpost/16/Novye-media-vozmozhnosti-uchastnikam-Oknardii-/">медиа-возможности</a></nobr> проекта: баннеры, посты в&nbsp;блоге, специальное выделение.</li>
+</ul>
+<h3>Теперь о&nbsp;том, что меняется:</h3>
+<ul>
+<li>Повысились цены на&nbsp;<nobr>бизнес-пакеты</nobr>. В&nbsp;том числе и&nbsp;стартовый. Эти расценки анонсировались в&nbsp;примечаниях к&nbsp;каждому пакету, так что сюрпризом эти изменения не&nbsp;стали. В&nbsp;том числе стало недоступно бесплатное размещение полных наборов&nbsp;&mdash; коммерческих предложений для всех типовых проёмов нашей базы.</li>
+<li>Введён новый пакет для бесплатного размещения. В&nbsp;его рамках возможно размещать цен только для третьи набора. Это 20&ndash;25 расчётов цен типовых проёмов. Выбравшим бесплатный, стартовый набор можно следовать двумя стратегиями: разместить цены на&nbsp;полный набор постепенно в&nbsp;течении квартала или обновлять цены только для проёмов, распространённых в&nbsp;вашем регионе.</li>
+</ul>
+<h3>И&nbsp;что не&nbsp;меняется:</h3>
+<ul>
+<li>Коммерческие предложения останутся в&nbsp;агрегаторе навсегда. А&nbsp;значит навсегда останутся детальные характеристики предложений, описание оконной компании и&nbsp;ссылки на&nbsp;её сайт.</li>
+<li>Тарифы на&nbsp;медийное размещения остались без изменений.</li>
+</ul>
+<p><a href="/tariff">Новые тарифы размещены на&nbsp;сайте</a>. Скачать шаблоны для платного и&nbsp;бесплатного размещения <a href="/blogpost/2/My_zhdem_vashi_prajs-listy%21/">можно здесь</a>.</p>
+&downarrow; &uparrow; &longrightarrow; &longleftarrow; &nearr; &nearr; &searr; &swarr; &nwarr;
+
+<!--- Пост в блоге :: конец --->
+      </dIv>
+    </DIv>
+  </DiV>
+
+
+<!-- Листалка: НАЧАЛО --><div class="row">
+    <div class="col-md-11">
+      <hr class="dotted-black" />
+      <nav aria-label="перелистывание записей блога">
+        <ul class="pager">
+          <li class="previous"><a href="/blogpost/9/Dobavleno-opisanie-serii-1LG-504"><span aria-hidden="true">&larr;</span> Предыдущая запись</a></li>
+
+          <li class="previous"></li>
+          <li class="next"><a href="/blogpost/11/Rejting-Oknardii-i-kak-on-ustroen-(chast-1)">Следующая запись <span aria-hidden="true">&rarr;</span></a></li>
+        </ul>
+      </nav>
+    </div>
+  </div><!--- Листалка: КОНЕЦ --->
+</dIv>
+
+<!---/ Контент КОНЕЦ --->
+<div class="row col-md-12">
+	<div class="col-md-8" >
+
+    <details>
+      <summary>Коменты внутри</summary>
+      <p>
+        <details>
+          <summary>Первый</summary>
+          <p>Текст комментария 1</p>
+        </details>
+        <details>
+          <summary>Второй</summary>
+          <p>Текст комментария 2</p>
+        </details>
+        <details>
+          <summary>И внутри...</summary>
+          <p>
+            <details>
+              <summary>Третий</summary>
+              <p>Текст комментария 3</p>
+            </details>
+          </p>
+        </details>
+      </p>
+    </details>
+
+  </div>
+</div>
+
+
+{% endblock %}
+
+ {% comment %}
+{% block Top_Nav_Bar %}
+    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
+{% endblock %}
+{% endcomment %}
+
