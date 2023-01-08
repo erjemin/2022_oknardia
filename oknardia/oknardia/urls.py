@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service
 
 
 urlpatterns = [
@@ -89,7 +89,8 @@ urlpatterns = [
     re_path(r'^specification_set/\d$', views.main_init),       # заглушка (позже будет спецификация оконного набора)
     # отображение всех составлющих рейтинга
     re_path( r'^show_rating_components/(?P<win_set>\d+)$', report1.show_rating_components),
-
+    # СЛУЖЕБНЫЕ СТРАНИЦЫ (для администратора)
+    re_path(r'^service/tmp[/*]$', service.tmp),
 ]
 
 if DEBUG:
