@@ -90,7 +90,13 @@ urlpatterns = [
     # отображение всех составлющих рейтинга
     re_path( r'^show_rating_components/(?P<win_set>\d+)$', report1.show_rating_components),
     # СЛУЖЕБНЫЕ СТРАНИЦЫ (для администратора)
+    # --- страничка "главная сервис-утилит"
+    re_path(r'^service[/*]$', service.service),
+    # --- страничка для тестирования верстки текста в блоге
     re_path(r'^service/tmp[/*]$', service.tmp),
+    # --- страничка "нет доступа"
+    re_path(r'^not-denice[/*]$', service.not_denice),
+
 ]
 
 if DEBUG:
