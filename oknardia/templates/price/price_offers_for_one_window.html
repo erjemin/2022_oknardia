@@ -138,7 +138,7 @@ $(function () { // инициализация и обработка попове
         <li><a href="/">Главная</a></li>
         <li><a href="/catalog">Каталог</a></li>
         <li><a href="/catalog/standard_opening/">Оконные проёмы и балконные блоки</a></li>
-        <li>Окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}0x{{ I_WIN_DIM.iWinHight|floatformat:0 }}0{% endfor %}&nbsp;мм. </li>
+        <li>Окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}&times;{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }}{% endfor %}&nbsp;мм. </li>
       </ol>
       <h1>Стандартные оконные проёмы и&nbsp;балконные блоки</h1>
     </div>
@@ -146,10 +146,10 @@ $(function () { // инициализация и обработка попове
   <span itemscope itemtype="http://schema.org/Product">
   <div class="row">
       <div class="col-md-9">
-        <h1>Цены на окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}0x{{ I_WIN_DIM.iWinHight|floatformat:0 }}0{% endfor %}&nbsp;мм. <small>(типовое)</small></h1>
+        <h1>Цены на окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}&times;{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }}{% endfor %}&nbsp;мм. <small>(типовое)</small></h1>
       </div>
       <div class="col-md-9">
-        <p>Типовой проём {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:1 }}x{{ I_WIN_DIM.iWinHight|floatformat:1 }}{% endfor %}&nbsp;cм. представлен в домах серий: {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}<a href="/catalog/seria/{{ I.sNameLat }}/all{{ I.id }}">{{ I.sName }}</a>{% endfor %}. База «Окнардии» размещено {{ NUM_TOTAL_OFFER_N_WORD }} цен для окон в такой проем (из них в архиве {{ NUM_ARCHIVE_OFFER }}). Предложено {{ NUM_FLAP_VARIATION_IN_WORD }} открывания от {{ NUM_TOTAL_FIRM_N_WORD }}.</p>
+        <p>Типовой проём {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:1 }}&times;{{ I_WIN_DIM.iWinHight|floatformat:1 }}{% endfor %}&nbsp;cм. представлен в домах серий: {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}<a href="/catalog/seria/{{ I.sNameLat }}/all{{ I.id }}">{{ I.sName }}</a>{% endfor %}. База «Окнардии» размещено {{ NUM_TOTAL_OFFER_N_WORD }} цен для окон в такой проем (из них в архиве {{ NUM_ARCHIVE_OFFER }}). Предложено {{ NUM_FLAP_VARIATION_IN_WORD }} открывания от {{ NUM_TOTAL_FIRM_N_WORD }}.</p>
       </div>
     {# Микроразмектка: названеи продукта #}<meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})" />
   </div>
