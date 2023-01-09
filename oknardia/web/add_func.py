@@ -162,6 +162,8 @@ def get_flaps_for_big_pictures(query_set) -> dict:
             'url2img': f"img/{img_file_name}",
             'iWinWidth': i.iWinWidth,
             'iWinHight': i.iWinHight,
+            'iWinWidth_mm': int(i.iWinWidth*10),
+            'iWinHight_mm': int(i.iWinHight*10),
             'iWinDepth': i.iWinDepth,
             'iQuantity': i.iQuantity,
             'sDescription': i.sDescripion,
