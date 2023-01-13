@@ -61,7 +61,6 @@ def statistic_menu(request: HttpRequest) -> HttpResponse:
     :return: HttpResponse -- исходящий http-ответ
     """
     time_start = time()
-    template = "seria_info/all_stat.html"
     to_template = {}
     seria_id, for_seria_nav = seria_nav(0)
     to_template.update(for_seria_nav)
@@ -94,4 +93,4 @@ def statistic_menu(request: HttpRequest) -> HttpResponse:
     # print(data2pie)
     to_template.update({'DATA2PIE': data2pie})
     to_template.update({'ticks': float(time()-time_start)})
-    return render(request, template, to_template)
+    return render(request, "seria_info/all_stat.html", to_template)
