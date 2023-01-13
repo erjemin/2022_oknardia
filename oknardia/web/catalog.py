@@ -466,7 +466,7 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
     return render(request, "catalog/catalog_seria.html", to_template)
 
 
-def catalog_seria_info(request: HttpRequest, seria_name_translit: str = "II-49", seria_id: int = 12) -> HttpResponse:
+def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id: int = 843) -> HttpResponse:
     """
     КАТАЛОГ ТИПОВЫЙ СЕРИЙ: страница детальной информацией по серии зданий
 
@@ -684,7 +684,8 @@ def all_seria_nav(seria_id: int, q_seria) -> (int, dict):
         if count_seria.id == seria_id:
             this_return.update({"THIS_SERIA_NAME": count_seria.sName,
                                 "THIS_SERIA_DESCRIPTION": count_seria.sSeriaDescription})
-            one_seria.update({"SERIA_L": ""})
+            # one_seria.update({"SERIA_L": ""})
+            one_seria.update({"SERIA_L": pytils.translit.slugify(count_seria.sName)})
         else:
             one_seria.update({"SERIA_L": pytils.translit.slugify(count_seria.sName)})
         seria_nav_dim.append(one_seria)
