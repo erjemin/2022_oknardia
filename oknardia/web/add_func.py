@@ -118,7 +118,7 @@ def get_flaps_for_big_pictures(query_set) -> dict:
     for i in query_set:  # найдём максимальную высоту проёма окна и двери
         if i.iWinHight >= mount_max_h:
             mount_max_h = i.iWinHight
-        if i.bIsDoor >= door_h:
+        if i.bIsDoor and i.iWinHight >= door_h:
             door_h = i.iWinHight
     # Проверяем есть ли папка для хранения картинки конфигурации проема и схемы открывания для данной серии.
     if not os.path.exists(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{PATH_FOR_BIGIMGFLAPCONFIG}"):
@@ -176,8 +176,8 @@ def get_flaps_for_big_pictures(query_set) -> dict:
     return result
 
 
-def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int, is_door: bool,
-                          flap_config: str, height_max: int, height_mount_bulk: int, height_door: int) -> None:
+def make_big_img_win_flap(img_file_name_with_path: str, width: float, height: float, is_door: bool,
+                          flap_config: str, height_max: float, height_mount_bulk: float, height_door: int) -> None:
     """
     Функция создает png-картинку схемы открывания окна или двери
     :param img_file_name_with_path: str -- полное имя файла картинки
@@ -191,7 +191,7 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     :return: None
     """
     # создаем картинку с нужными размерами
-    img = Image.new("RGBA", (width * PICT_H / height_max, PICT_H), (255, 255, 255, 0))
+    img = Image.new("RGBA", (int(width * PICT_H / height_max), PICT_H), (255, 255, 255, 0))
     # print(img_file_name_with_path)
     # находим крайние точки периметра (если окно -- выравнено вверх; если дверь -- вниз)
     top = 0
