@@ -3,6 +3,8 @@ __author__ = 'Sergei Erjemin'
 
 from PIL import Image, ImageDraw
 from oknardia.settings import *
+import django.utils.dateformat
+import django.utils.timezone
 import os
 import math
 import re
@@ -140,6 +142,7 @@ def get_flaps_for_big_pictures(query_set) -> dict:
         else:
             img_file_name += u"-"  # добавляем символ отдельное окно (не рядом с дверью)
         # маскируем символы схемы открывания, которые не допустимы в названии файлов
+        # print(img_file_name)
         img_file_name += i.sFlapConfig
         img_file_name = img_file_name.replace(">", "G")
         img_file_name = img_file_name.replace("<", "L")
@@ -147,11 +150,12 @@ def get_flaps_for_big_pictures(query_set) -> dict:
         img_file_name = img_file_name.replace("]", ")")
         img_file_name = img_file_name.replace("|", "I")
         img_file_name = f"{PATH_FOR_BIGIMGFLAPCONFIG}/{img_file_name}.png"
+        # print(img_file_name)
         # проверяем, есть ли файл с нужной картинкой схемам открывания?
         if not os.path.isfile(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{img_file_name}"):
             # картинки нет, вызываем функцию для ее создания
-            make_big_img_win_flap(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{img_file_name}", i.iWinWidth, i.iWinHight,
-                                  i.bIsDoor, i.sFlapConfig, mount_max_h, mount_bulk, door_h)
+            make_big_img_win_flap(f"{STATIC_BASE_PATH}/{PATH_FOR_IMG}/{img_file_name}", i.iWinWidth,
+                                  i.iWinHight, i.bIsDoor, i.sFlapConfig, mount_max_h, mount_bulk, door_h)
         # чтобы получить разноцветные маркеры меток количества проемов
         # получаем последовательность тип: AB, CD, E, FG, H
         q_local = ""
@@ -176,8 +180,8 @@ def get_flaps_for_big_pictures(query_set) -> dict:
     return result
 
 
-def make_big_img_win_flap(img_file_name_with_path: str, width: float, height: float, is_door: bool,
-                          flap_config: str, height_max: float, height_mount_bulk: float, height_door: int) -> None:
+def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int, is_door: bool,
+                          flap_config: str, height_max: int, height_mount_bulk: int, height_door: int) -> None:
     """
     Функция создает png-картинку схемы открывания окна или двери
     :param img_file_name_with_path: str -- полное имя файла картинки
@@ -190,9 +194,14 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: float, height: fl
     :param height_door: int -- высота дверного проема
     :return: None
     """
+    # width = int(width)
+    # height = int(height)
+    # height_max = int(height_max)
+    # height_mount_bulk = int(height_mount_bulk)
+    # height_door = int(height_door)
     # создаем картинку с нужными размерами
     img = Image.new("RGBA", (int(width * PICT_H / height_max), PICT_H), (255, 255, 255, 0))
-    # print(img_file_name_with_path)
+    print(img_file_name_with_path)
     # находим крайние точки периметра (если окно -- выравнено вверх; если дверь -- вниз)
     top = 0
     left = 0
@@ -575,3 +584,13 @@ def sum_through(string_w_slash: str) -> int:
         except ValueError:
             pass
     return sum_result
+
+
+def touch_reload_wsgi(s: str = ''):
+    """ Функция перезагружает WSGI-сервер.
+
+    :return: None
+    """
+    with open(TOUCH_RELOAD, 'a', encoding="utf-8") as f:
+        f.write(f'\nreload wsgi by cash-template {s}'
+                f' {django.utils.dateformat.format(django.utils.timezone.now(), "Y-m-d H:i:s")}')
