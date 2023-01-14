@@ -7,7 +7,8 @@ from django.utils import timezone
 from oknardia.settings import *
 from oknardia.models import PVCprofiles, Seria_Info, Win_MountDim, Building_Info, MerchantBrand
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
-from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures
+from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures,\
+    get_flaps_for_mini_pictures, touch_reload_wsgi
 import django.utils.dateformat
 import time
 import json
@@ -489,6 +490,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
     light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
     # print(f"{TEMPLATES[0]['DIRS'][0]}/{light_template}")
     # print(light_template_w_path)
+    print(light_template_w_path)
     if os.path.isfile(light_template_w_path):
         is_hard_template = False
     else:
@@ -614,6 +616,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
         # file.write(AA.encode('utf-8'))
         file.write(string_prerender)
         file.close()
+        touch_reload_wsgi(light_template_w_path)
     else:
         seria_name = Seria_Info.objects.get(id=seria_id).sName
         to_template.update({'THIS_SERIA_NAME': seria_name})
