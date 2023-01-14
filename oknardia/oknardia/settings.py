@@ -31,7 +31,8 @@ if socket.gethostname() in MY_HOST_DEV:
     DEBUG = TEMPLATE_DEBUG = True
 else:
     # Все остальные хосты (подразумевается продакшн)
-    DEBUG = TEMPLATE_DEBUG = False
+    DEBUG = TEMPLATE_DEBUG = True
+    # DEBUG = TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = MY_ALLOWED_HOSTS
 
@@ -118,7 +119,7 @@ STATIC_URL = 'static/'
 MEDIA_URL = 'media/'
 
 
-if DEBUG:     # DEBUG: заменяем настройки прода, на настройки девопа
+if socket.gethostname() in MY_HOST_DEV:     # DEBUG: заменяем настройки прода, на настройки девопа
     MEDIA_ROOT = MY_MEDIA_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_MEDIA_ROOT_DEV2
     SITEMAP_ROOT = MY_SITEMAP_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_SITEMAP_ROOT_DEV2
     # STATIC_ROOT = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
@@ -138,7 +139,7 @@ if DEBUG:     # DEBUG: заменяем настройки прода, на на
             # 'OPTIONS': { 'autocommit': True, }
         }
     }
-    TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
+    TOUCH_RELOAD = MY_TOUCH_RELOAD_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_TOUCH_RELOAD_DEV2
 else:
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
     # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]
