@@ -590,7 +590,8 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         to_template.update({'BASE_SERIA': q_base_seria.sName,
                             'BASE_SERIA_LAT': base_seria_slug,
                             'BASE_SERIA_ID': q_base_seria.id})
-    except (ValueError, IndexError, TypeError, ObjectDoesNotExist):
+    # except (ValueError, IndexError, TypeError, ObjectDoesNotExist):
+    except ObjectDoesNotExist:
         return redirect("/")
     ###############################################
     # получаем массив окон для данной квартиры...
