@@ -490,7 +490,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
     light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
     # print(f"{TEMPLATES[0]['DIRS'][0]}/{light_template}")
     # print(light_template_w_path)
-    print(light_template_w_path)
+    # print(light_template_w_path)
     if os.path.isfile(light_template_w_path):
         is_hard_template = False
     else:
