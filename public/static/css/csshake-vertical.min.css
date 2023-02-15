@@ -1,0 +1,9 @@
+/*! * * * * * * * * * * * * * * * * * * * *\  
+  CSShake :: shake-vertical
+  v1.5.0
+  CSS classes to move your DOM
+  (c) 2015 @elrumordelaluz
+  http://elrumordelaluz.github.io/csshake/
+  Licensed under MIT
+\* * * * * * * * * * * * * * * * * * * * */
+.shake-vertical{display:inline-block;transform-origin:center center;}.shake-freeze,.shake-constant.shake-constant--hover:hover,.shake-trigger:hover .shake-constant.shake-constant--hover{animation-play-state:paused;}.shake-freeze:hover,.shake-trigger:hover .shake-freeze,.shake-vertical:hover,.shake-trigger:hover .shake-vertical{animation-play-state:running;}@keyframes shake-vertical{30%{transform:translate(0,0px) rotate(0);}45%{transform:translate(0,-2px) rotate(0);}55%{transform:translate(0,2px) rotate(0);}70%{transform:translate(0,0px) rotate(0);}0%,100%{transform:translate(0,0) rotate(0);}}.shake-vertical:hover,.shake-trigger:hover .shake-vertical,.shake-vertical.shake-freeze,.shake-vertical.shake-constant{animation-name:shake-vertical;animation-duration:600ms;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
