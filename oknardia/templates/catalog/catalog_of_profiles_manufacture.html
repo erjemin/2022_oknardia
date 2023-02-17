@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block Title %} Каталог :: Оконные профили производства {{ CATALOG_MANUFACT }}{% endblock %}
+{% block Title %}Оконные профили производства {{ CATALOG_MANUFACT }} : Каталог{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Оконные профили {{ CATALOG_MANUFACT }}{% endblock %}
+{% block Description %}Оконные профили {{ CATALOG_MANUFACT }} ({% for i in PROFILES %}{% if forloop.first %}{{ i.PROFILE_NAME }}{% else %}{% if not forloop.last %}, {{ i.PROFILE_NAME }}{% else %} и {{ i.PROFILE_NAME }}{% endif %}{% endif %}{% endfor %}){% endblock %}
 
-{% block Keywords %}{{ CATALOG_MANUFACT }}, оконные профили {{ CATALOG_MANUFACT }}, производитель {{ CATALOG_MANUFACT }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}{{ CATALOG_MANUFACT }}, оконные профили {{ CATALOG_MANUFACT }}, производитель {{ CATALOG_MANUFACT }}, {% for i in PROFILES %}{{ i.PROFILE_NAME }}, {% endfor %}каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
 
 {% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
 

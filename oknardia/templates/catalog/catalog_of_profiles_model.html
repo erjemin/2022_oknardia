@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block Title %} Каталог :: Оконные профили {{ CATALOG_MODEL.sProfileName }}{% endblock %}
+{% block Title %}Оконный профиль {{ CATALOG_MODEL.sProfileName }} : Каталог{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Описание и характеристики оконного профиля {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}{% endblock %}
+{% block Description %}Характеристики оконного профиля {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}{% endblock %}
 
 {% block Keywords %}оконный профиль {{ CATALOG_MODEL.sProfileName }}, характеристики профиля {{ CATALOG_MODEL.sProfileName }}, описание профиля {{ CATALOG_MODEL.sProfileName }}, производитель оконный профилей {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
 
