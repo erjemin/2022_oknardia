@@ -1,7 +1,7 @@
 {% extends "base.html" %}{% load static %}
 {% load filters %}
 
-{% block Title %}Цены на типовое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} для домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}{% endfor %} мм.{% endblock %}
+{% block Title %}Цены на типовое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} см. для домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}{% endfor %}{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
@@ -35,7 +35,7 @@
     }
   </script>{% endblock %}
 
-{% block Description %}Цены на типовое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}{% endfor %} cм. для домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}.{% endblock %}
+{% block Description %}Цены на типовое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} см. для домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}{% endfor %}.{% endblock %}
 
 {% comment %}{% block Description %}Цены на пластиковые окна для серии {{ BASE_SERIA }} ({{ APART }} квартира, {{ ADDRESS }}) :: {% for CurOffer in PRICE_FRAME %}Поставщик: {{ CurOffer.MERCHANT }}; Комплектация: {{ CurOffer.SETS_NAME }}; Цена: {{ CurOffer.FIN_PRICE }}₽ :: {% endfor %}{% endblock %}{% endcomment %}
 
