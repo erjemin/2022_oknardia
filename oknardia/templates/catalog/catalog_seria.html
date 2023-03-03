@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block Title %}Серии типового строительства{% endblock %}
+{% block Title %}Серии типового строительства : Каталог{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Серии типового строительства | Каталог «Окнардия»{% endblock %}
+{% block Description %}Каталог серий зданий и типовое панельное строительство оконного агрегатора Окнардия{% endblock %}
 
 {% block Keywords %}типовое строительство, панельные серии, серии домов, серии зданий, типовые дома, типовые здания, каталог серий типового строительства, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
 
@@ -13,9 +13,9 @@
 
 {% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Author4Meta %}: Каталог серий домов{% endblock %}
+{% block Author4Meta %}Серии домов : {% endblock %}
 
-{% block CopyrightAuthor4Meta %}: Каталог серий домов{% endblock %}
+{% block CopyrightAuthor4Meta %}Cерии домов : {% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
   <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
