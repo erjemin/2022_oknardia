@@ -644,7 +644,10 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
 
     # получаем последние визиты всех посетителей из базы
     log_visit = get_last_all_user_visit_list()
-    id_last_visit_log = log_visit[0]['id'] + 1
+    if log_visit[0]['id'] is not None:
+        id_last_visit_log = log_visit[0]['id'] + 1
+    else:
+        id_last_visit_log = 1
     # print("id_last_visit_log:", id_last_visit_log)
     to_template.update({'LOG_VISIT': log_visit})
     if id_last_visit_log > MAX_LEN_RING_LOG_BUFFER:  # максимальный размер циклического буфера
