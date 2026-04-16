@@ -5,7 +5,7 @@
 ИНСТРУКЦИЯ: скопируйте этот файл в my_secret.py и заполните реальные значения.
 
 Пример:
-    cp oknardia/oknardia/my_secret.py.template oknardia/oknardia/my_secret.py
+    cp oknardia/oknardia/my_secret__sample.py oknardia/oknardia/my_secret.py
     # затем отредактируйте значения в my_secret.py
 
 ВАЖНО: my_secret.py НИКОГДА не должен быть в git!
