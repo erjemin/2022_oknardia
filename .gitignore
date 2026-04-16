@@ -133,3 +133,33 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# MacOS specific files
+.DS_Store
+
+# Database dumps and backups (CRITICAL - NEVER commit production data!)
+SQL/
+*.sql
+*.dump
+*.backup
+*.sql.gz
+db.json
+db.json.zip
+
+# API keys, certificates, and credentials
+*.key
+*.pem
+*.p12
+*.p8
+*.crt
+*.cert
+
+# IDE and editor specific
+.vscode/settings.json
+.idea/vcs.xml
+.idea/inspectionProfiles/
+
+# Project specific ignore patterns
+.github/
+.log/
+.logs/
