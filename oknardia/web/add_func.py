@@ -201,7 +201,7 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     # height_door = int(height_door)
     # создаем картинку с нужными размерами
     img = Image.new("RGBA", (int(width * PICT_H / height_max), PICT_H), (255, 255, 255, 0))
-    print(img_file_name_with_path)
+    # print(img_file_name_with_path)
     # находим крайние точки периметра (если окно -- выравнено вверх; если дверь -- вниз)
     top = 0
     left = 0
@@ -592,5 +592,5 @@ def touch_reload_wsgi(s: str = ''):
     :return: None
     """
     with open(TOUCH_RELOAD, 'a', encoding="utf-8") as f:
-        f.write(f'\nreload wsgi by cash-template {s}'
-                f' {django.utils.dateformat.format(django.utils.timezone.now(), "Y-m-d H:i:s")}')
+        f.write(f'\nreload wsgi by cash-template - {s} - '
+                f'{django.utils.dateformat.format(django.utils.timezone.now(), "Y-m-d H:i:s")}')
