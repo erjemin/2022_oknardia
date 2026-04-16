@@ -11,12 +11,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from oknardia.my_secret import *
 import socket
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Переключатель БД для DEV: по умолчанию используем SQLite.
+# Чтобы вернуть MariaDB на DEV, установите OKNARDIA_USE_SQLITE_DEV=0
+USE_SQLITE_DEV = os.getenv("OKNARDIA_USE_SQLITE_DEV", "1").strip().lower() in {
+    "1", "true", "yes", "on"
+}
+PROJECT_ROOT = BASE_DIR.parent
+SQLITE_DB_PATH = PROJECT_ROOT / 'database' / 'oknadria.sqlite3'
 
 
 # Quick-start development settings - unsuitable for production
@@ -31,8 +40,8 @@ if socket.gethostname() in MY_HOST_DEV:
     DEBUG = TEMPLATE_DEBUG = True
 else:
     # Все остальные хосты (подразумевается продакшн)
-    DEBUG = TEMPLATE_DEBUG = True
-    # DEBUG = TEMPLATE_DEBUG = False
+    # DEBUG = TEMPLATE_DEBUG = True
+    DEBUG = TEMPLATE_DEBUG = False
 
 ALLOWED_HOSTS = MY_ALLOWED_HOSTS
 
@@ -123,22 +132,33 @@ if socket.gethostname() in MY_HOST_DEV:     # DEBUG: заменяем настр
     MEDIA_ROOT = MY_MEDIA_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_MEDIA_ROOT_DEV2
     SITEMAP_ROOT = MY_SITEMAP_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_SITEMAP_ROOT_DEV2
     # STATIC_ROOT = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
-    STATICFILES_DIRS = [
-        MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2,
-    ]
+    dev_static_from_secret = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
+    # Если путь из секрета устарел, используем путь текущего репозитория.
+    dev_static_fallback = PROJECT_ROOT / 'public' / 'static'
+    dev_static_path = dev_static_from_secret if os.path.isdir(dev_static_from_secret) else str(dev_static_fallback)
+    STATICFILES_DIRS = [dev_static_path]
     # путь к каталогу static (в эту переменную использовать для указания пути где будут делаться кэш-блоки для шаблонов)
-    STATIC_BASE_PATH = MY_STATIC_BASE_PATH_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_BASE_PATH_DEV2
-    DATABASES = {
-        'default': {
-            'ENGINE': "django.db.backends.mysql",
-            'HOST': MY_DATABASE_HOST_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_DATABASE_HOST_DEV2,
-            'PORT': MY_DATABASE_PORT_DEV,  # Set to "" for default. Not used with sqlite3.
-            'NAME': MY_DATABASE_NAME_DEV,  # Not used with sqlite3.
-            'USER': MY_DATABASE_USER_DEV,  # Not used with sqlite3.
-            'PASSWORD': MY_DATABASE_PASSWORD_DEV,  # Not used with sqlite3.
-            # 'OPTIONS': { 'autocommit': True, }
+    dev_static_base_from_secret = MY_STATIC_BASE_PATH_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_BASE_PATH_DEV2
+    STATIC_BASE_PATH = dev_static_base_from_secret if os.path.isdir(dev_static_base_from_secret) else str(dev_static_fallback)
+    if USE_SQLITE_DEV:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': SQLITE_DB_PATH,
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': "django.db.backends.mysql",
+                'HOST': MY_DATABASE_HOST_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_DATABASE_HOST_DEV2,
+                'PORT': MY_DATABASE_PORT_DEV,  # Set to "" for default. Not used with sqlite3.
+                'NAME': MY_DATABASE_NAME_DEV,  # Not used with sqlite3.
+                'USER': MY_DATABASE_USER_DEV,  # Not used with sqlite3.
+                'PASSWORD': MY_DATABASE_PASSWORD_DEV,  # Not used with sqlite3.
+                # 'OPTIONS': { 'autocommit': True, }
+            }
+        }
     TOUCH_RELOAD = MY_TOUCH_RELOAD_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_TOUCH_RELOAD_DEV2
 else:
     MEDIA_ROOT = MY_MEDIA_ROOT_PROD
@@ -159,6 +179,17 @@ else:
         }
     }
     TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
+
+# Для локальной/тестовой разработки можно принудительно включить SQLite даже
+# если hostname не попал в MY_HOST_DEV. На прод-хостах (MY_HOST_PROD) override
+# не применяется.
+if USE_SQLITE_DEV and socket.gethostname() not in MY_HOST_PROD:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': SQLITE_DB_PATH,
+        }
+    }
 
 #########################################
 # настройки для почтового сервера (они одинаковые для DEV и PROD)
