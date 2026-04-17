@@ -15,7 +15,7 @@
      2. Добавьте URL-адрес в urlpatterns: path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
 from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service
@@ -103,10 +103,12 @@ urlpatterns = [
 ]
 
 if DEBUG:
+    #  ___    ____      _              _____         _ _              _____             _
+    # | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
+    # |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |
+    #   |_|  |____/|___|___|___|_  |    |_| |___|___|_|___|__,|_|    |__|  |__,|_|_|___|_|
+    #                          |___|
+    urlpatterns = [path('__debug__/', include('debug_toolbar.urls')), *urlpatterns]
+    # Медиа-файлы
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 
-#  ___    ____      _              _____         _ _              _____             _
-# | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
-# |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |
-#   |_|  |____/|___|___|___|_  |    |_| |___|___|_|___|__,|_|    |__|  |__,|_|_|___|_|
-#                          |___|
