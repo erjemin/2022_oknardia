@@ -11,42 +11,50 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import os
 from pathlib import Path
-from oknardia.my_secret import *
-import socket
+import environ
+
+
+def _env_admins(raw_items: list[str]) -> tuple[tuple[str, str], ...]:
+    # Формат: "Имя1:email1,Имя2:email2"
+    admins: list[tuple[str, str]] = []
+    for item in raw_items:
+        if ":" not in item:
+            continue
+        admin_name, admin_email = item.split(":", maxsplit=1)
+        admin_name = admin_name.strip()
+        admin_email = admin_email.strip()
+        if admin_name and admin_email:
+            admins.append((admin_name, admin_email))
+    return tuple(admins)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Переключатель БД для DEV: по умолчанию используем SQLite.
-# Чтобы вернуть MariaDB на DEV, установите OKNARDIA_USE_SQLITE_DEV=0
-USE_SQLITE_DEV = os.getenv("OKNARDIA_USE_SQLITE_DEV", "1").strip().lower() in {
-    "1", "true", "yes", "on"
-}
 PROJECT_ROOT = BASE_DIR.parent
-SQLITE_DB_PATH = PROJECT_ROOT / 'database' / 'oknadria.sqlite3'
+PUBLIC_ROOT = PROJECT_ROOT / 'public'
+STATIC_SOURCE_ROOT = PUBLIC_ROOT / 'static'
+
+env = environ.Env()
+environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-pd&1$j6z*1w#(j*16b+(@@#&2)+@x^^ot4)zqt-e67*1+$^qch'
+SECRET_KEY = env(
+    'DJANGO_SECRET_KEY',
+    default='django-insecure-pd&1$j6z*1w#(j*16b+(@@#&2)+@x^^ot4)zqt-e67*1+$^qch',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # ПРЕДУПРЕЖДЕНИЕ БЕЗОПАСНОСТИ: не работайте в режиме DEBUG в продашене!
-if socket.gethostname() in MY_HOST_DEV:
-    DEBUG = TEMPLATE_DEBUG = True
-else:
-    # Все остальные хосты (подразумевается продакшн)
-    # DEBUG = TEMPLATE_DEBUG = True
-    DEBUG = TEMPLATE_DEBUG = False
+DEBUG = TEMPLATE_DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = MY_ALLOWED_HOSTS
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
 
 # Настройки сообщений об ошибках когда все упало и т.п.
-ADMINS = MY_ADMINS
+ADMINS = _env_admins(env.list('ADMINS', default=[]))
 
 
 # Application definition
@@ -124,82 +132,67 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 # Статические файлы (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
 
 
-if socket.gethostname() in MY_HOST_DEV:     # DEBUG: заменяем настройки прода, на настройки девопа
-    MEDIA_ROOT = MY_MEDIA_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_MEDIA_ROOT_DEV2
-    SITEMAP_ROOT = MY_SITEMAP_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_SITEMAP_ROOT_DEV2
-    # STATIC_ROOT = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
-    dev_static_from_secret = MY_STATIC_ROOT_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_ROOT_DEV2
-    # Если путь из секрета устарел, используем путь текущего репозитория.
-    dev_static_fallback = PROJECT_ROOT / 'public' / 'static'
-    dev_static_path = dev_static_from_secret if os.path.isdir(dev_static_from_secret) else str(dev_static_fallback)
-    STATICFILES_DIRS = [dev_static_path]
-    # путь к каталогу static (в эту переменную использовать для указания пути где будут делаться кэш-блоки для шаблонов)
-    dev_static_base_from_secret = MY_STATIC_BASE_PATH_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_STATIC_BASE_PATH_DEV2
-    STATIC_BASE_PATH = dev_static_base_from_secret if os.path.isdir(dev_static_base_from_secret) else str(dev_static_fallback)
-    if USE_SQLITE_DEV:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': SQLITE_DB_PATH,
-            }
-        }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': "django.db.backends.mysql",
-                'HOST': MY_DATABASE_HOST_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_DATABASE_HOST_DEV2,
-                'PORT': MY_DATABASE_PORT_DEV,  # Set to "" for default. Not used with sqlite3.
-                'NAME': MY_DATABASE_NAME_DEV,  # Not used with sqlite3.
-                'USER': MY_DATABASE_USER_DEV,  # Not used with sqlite3.
-                'PASSWORD': MY_DATABASE_PASSWORD_DEV,  # Not used with sqlite3.
-                # 'OPTIONS': { 'autocommit': True, }
-            }
-        }
-    TOUCH_RELOAD = MY_TOUCH_RELOAD_DEV1 if socket.gethostname() == MY_HOST_HOME1 else MY_TOUCH_RELOAD_DEV2
-else:
-    MEDIA_ROOT = MY_MEDIA_ROOT_PROD
-    # STATICFILES_DIRS = [MY_STATIC_ROOT_PROD1, ]
-    STATIC_ROOT = MY_STATIC_ROOT_PROD
-    SITEMAP_ROOT = MY_SITEMAP_ROOT_PROD
-    # путь к каталогу static (в эту переменную использовать для указания пути где будут делаться кэш-блоки для шаблонов)
-    STATIC_BASE_PATH = MY_STATIC_BASE_PATH_PROD
-    DATABASES = {
-        'default': {
-            'ENGINE': "django.db.backends.mysql",
-            'HOST': MY_DATABASE_HOST_PROD,  # Set to "" for localhost. Not used with sqlite3.
-            'PORT': MY_DATABASE_PORT_PROD,  # Set to "" for default. Not used with sqlite3.
-            'NAME': MY_DATABASE_NAME_PROD,  # Not used with sqlite3.
-            'USER': MY_DATABASE_USER_PROD,  # Not used with sqlite3.
-            'PASSWORD': MY_DATABASE_PASSWORD_PROD,  # Not used with sqlite3.
-            # 'OPTIONS': { 'autocommit': True, }
-        }
-    }
-    TOUCH_RELOAD = MY_TOUCH_RELOAD_PROD
+MEDIA_ROOT = str(PUBLIC_ROOT / 'media')
+# STATIC_ROOT отделен от исходной статики, чтобы избежать staticfiles.E002.
+STATIC_ROOT = str(PUBLIC_ROOT / 'static_collected')
+SITEMAP_ROOT = str(PUBLIC_ROOT)
 
-# Для локальной/тестовой разработки можно принудительно включить SQLite даже
-# если hostname не попал в MY_HOST_DEV. На прод-хостах (MY_HOST_PROD) override
-# не применяется.
-if USE_SQLITE_DEV and socket.gethostname() not in MY_HOST_PROD:
+# Каталоги, откуда Django читает исходную статику в DEBUG-режиме.
+STATICFILES_DIRS = [
+    str(STATIC_SOURCE_ROOT)
+] if STATIC_SOURCE_ROOT.is_dir() else []
+
+# Путь к каталогу static для генерации кэш-файлов и служебных JS.
+STATIC_BASE_PATH = str(STATIC_SOURCE_ROOT)
+
+database_engine = env('DATABASE_ENGINE', default='django.db.backends.sqlite3')
+if database_engine == 'django.db.backends.sqlite3':
+    # Для SQLite принимаем только имя файла из env и кладем БД в PROJECT_ROOT/database.
+    sqlite_db_filename = Path(env('DATABASE_NAME', default='oknadria.sqlite3')).name
+    sqlite_db_path = PROJECT_ROOT / 'database' / sqlite_db_filename
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': SQLITE_DB_PATH,
+            'NAME': str(sqlite_db_path),
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': database_engine,
+            'HOST': env('DATABASE_HOST', default='localhost'),
+            'PORT': env('DATABASE_PORT', default='3306'),
+            'NAME': env('DATABASE_NAME', default=''),
+            'USER': env('DATABASE_USER', default=''),
+            'PASSWORD': env('DATABASE_PASSWORD', default=''),
         }
     }
 
+TOUCH_RELOAD = env('TOUCH_RELOAD', default='')
+
 #########################################
 # настройки для почтового сервера (они одинаковые для DEV и PROD)
-EMAIL_HOST = MY_EMAIL_HOST_DEV
-EMAIL_PORT = MY_EMAIL_PORT_DEV
-EMAIL_HOST_USER = MY_EMAIL_HOST_USER_DEV
-EMAIL_HOST_PASSWORD = MY_EMAIL_HOST_PASSWORD_DEV
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-EMAIL_USE_TLS = True
+EMAIL_BACKEND = env(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.smtp.EmailBackend',
+)
+EMAIL_HOST = env('EMAIL_HOST', default='localhost')
+EMAIL_PORT = env.int('EMAIL_PORT', default=25)
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
+EMAIL_USE_SSL = env.bool('EMAIL_USE_SSL', default=False)
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
+SERVER_EMAIL = env('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
 EMAIL_SUBJECT_PREFIX = 'OKNARDIA ERR: '     # префикс для оповещений об ошибках и необработанных исключениях
+
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)
+SESSION_COOKIE_SECURE = env.bool('SESSION_COOKIE_SECURE', default=False)
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=False)
 
 
 # Default primary key field type
@@ -208,8 +201,8 @@ EMAIL_SUBJECT_PREFIX = 'OKNARDIA ERR: '     # префикс для оповещ
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ключи для Google Captha
-CAPTCHA_PUBLIC_KEY = MY_CAPTCHA_PUBLIC_KEY
-CAPTCHA_PRIVATE_KEY = MY_CAPTCHA_PRIVATE_KEY
+CAPTCHA_PUBLIC_KEY = env('CAPTCHA_PUBLIC_KEY', default='')
+CAPTCHA_PRIVATE_KEY = env('CAPTCHA_PRIVATE_KEY', default='')
 
 # количество коммерческих предложений во фреме отчета
 OFFER_PER_FRAME = 5
@@ -303,4 +296,4 @@ CATALOG_SORTER_MAGIC_NUMBER_TIZER = 1
 
 MAX_LEN_RING_LOG_BUFFER = 250  # МАКСИМАЛЬНЫЙ РАЗМЕР КОЛЬЦЕВОГО БУФЕРА
 
-YANDEX_MAPS_API_KEY = MY_YANDEX_MAPS_API_KEY
+YANDEX_MAPS_API_KEY = env('YANDEX_MAPS_API_KEY', default='')
