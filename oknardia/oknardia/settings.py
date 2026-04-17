@@ -84,6 +84,13 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Разрешенные IP для отладки (нужно для django-debug-toolbar).
+INTERNAL_IPS = env.list('INTERNAL_IPS', default=['127.0.0.1', 'localhost'])
+
+if DEBUG:
+    INSTALLED_APPS += ['debug_toolbar']
+    MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware', *MIDDLEWARE]
+
 ROOT_URLCONF = 'oknardia.urls'
 
 TEMPLATES = [
