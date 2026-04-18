@@ -45,65 +45,52 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.time()
-    q_profile = PVCprofiles.objects.raw('SELECT'
-                                        '  oknardia_pvcprofiles.id,'
-                                        '  oknardia_pvcprofiles.sProfileName,'
-                                        '  oknardia_pvcprofiles.sProfileBriefDescription,'
-                                        '  oknardia_pvcprofiles.sProfileManufacturer,'
-                                        '  oknardia_catalog2profile.sCatalogCardType,'
-                                        '  oknardia_blogposts.sPostContent,'
-                                        '  oknardia_blogposts.sPostHeader,'
-                                        'oknardia_pvcprofiles.dProfileModify,'
-                                        'MAX(oknardia_blogposts.dPostDataModify) AS lastBlog '
-                                        'FROM oknardia_catalog2profile'
-                                        '  RIGHT OUTER JOIN oknardia_pvcprofiles'
-                                        '    ON oknardia_catalog2profile.kProfile_id = oknardia_pvcprofiles.id'
-                                        '  LEFT OUTER JOIN oknardia_blogposts'
-                                        '    ON oknardia_catalog2profile.kBlogCatalog_id = oknardia_blogposts.id '
-                                        'GROUP BY oknardia_catalog2profile.sCatalogCardType,'
-                                        '         oknardia_pvcprofiles.sProfileName,'
-                                        '         oknardia_pvcprofiles.id,'
-                                        '         oknardia_pvcprofiles.sProfileBriefDescription,'
-                                        '         oknardia_pvcprofiles.sProfileManufacturer,'
-                                        '         oknardia_blogposts.sPostHeader,'
-                                        '         oknardia_blogposts.sPostContent,'
-                                        '         oknardia_pvcprofiles.dProfileModify '
-                                        'ORDER BY oknardia_pvcprofiles.sProfileManufacturer,'
-                                        '         oknardia_pvcprofiles.sProfileBriefDescription;')
-    to_template = {'CATALOG_PROFILE_NUM': pytils.numeral.get_plural(len(list(q_profile)), "профиль,профиля,профилей")}
+    # Берём только те поля, которые реально нужны для построения страницы каталога.
+    # Это позволяет не тащить лишние данные из БД и сразу работать с простыми словарями.
+    profile_rows = list(
+        PVCprofiles.objects.values(
+            "id",
+            "sProfileName",
+            "sProfileBriefDescription",
+            "sProfileManufacturer",
+        ).order_by("sProfileManufacturer", "sProfileBriefDescription")
+    )
+    profile_count = len(profile_rows)
+    to_template = {
+        'CATALOG_PROFILE_NUM': pytils.numeral.get_plural(profile_count, "профиль,профиля,профилей")
+    }
+    # Локальный помощник: slug нужен несколько раз, а повторять одну и ту же строку не хочется.
+    def make_slug(value: str) -> str:
+        return pytils.translit.slugify(value).lower()
+
     list_profile_manufactures = []
     tmp_profile_manufacture = ""
-    last_update = None
-    for i in q_profile:
-        if last_update is None:
-            last_update = i.dProfileModify
-        if last_update < i.dProfileModify:
-            last_update = i.dProfileModify
-        # if (i.lastBlog is not None) and (last_update < i.lastBlog):
-        #     last_update = i.lastBlog
-        if tmp_profile_manufacture != i.sProfileManufacturer:
-            tmp_profile_manufacture = i.sProfileManufacturer
+    for profile in profile_rows:
+        if profile["sProfileManufacturer"] == "":
+            # Пустой производитель в каталоге только мешает: не создаём для него отдельную группу.
+            continue
+
+        if tmp_profile_manufacture != profile["sProfileManufacturer"]:
+            # Новый производитель — открываем новую группу карточек.
+            tmp_profile_manufacture = profile["sProfileManufacturer"]
             list_profile_manufactures.append({
-                "PROF_MAN_ID": i.id,
-                "PROF_MAN": i.sProfileManufacturer,
-                "PROF_MAN_T": pytils.translit.slugify(i.sProfileManufacturer).lower(),
+                "PROF_MAN_ID": profile["id"],
+                "PROF_MAN": profile["sProfileManufacturer"],
+                "PROF_MAN_T": make_slug(profile["sProfileManufacturer"]),
                 "PROF_MAN_LIST": [{
-                    "PROF_NAME_ID": i.id,
-                    "PROF_NAME": i.sProfileBriefDescription,
-                    "PROF_NAME_T": pytils.translit.slugify(i.sProfileName).lower(),
+                    "PROF_NAME_ID": profile["id"],
+                    "PROF_NAME": profile["sProfileBriefDescription"],
+                    "PROF_NAME_T": make_slug(profile["sProfileName"]),
                 }]
             })
-            # print("===", i.sProfileManufacturer, ">>> >>> >>>", Rus2Url(i.sProfileManufacturer))
-        elif len(list_profile_manufactures) == 0:
-            # Какая-то фигня. Похоже "пустой" производитель профиля (пустая строка). Ну его нафиг.
-            continue
         else:
+            # Если производитель уже встречался, просто дописываем новую модель в его список.
             list_profile_manufactures[-1]["PROF_MAN_LIST"].append({
-                "PROF_NAME_ID": i.id,
-                "PROF_NAME": i.sProfileBriefDescription,
-                "PROF_NAME_T": pytils.translit.slugify(i.sProfileName).lower(),
+                "PROF_NAME_ID": profile["id"],
+                "PROF_NAME": profile["sProfileBriefDescription"],
+                "PROF_NAME_T": make_slug(profile["sProfileName"]),
             })
-        # print(\"--- ---", i.sProfileBriefDescription, ">>>", Rus2Url(i.sProfileBriefDescription))
+
     to_template.update({
         'CATALOG_PROFILE_MAN1_NAME2': list_profile_manufactures,
         'CATALOG_MANUFACT_NUM': len(list_profile_manufactures),
@@ -111,11 +98,9 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
             pytils.numeral.sum_string(len(list_profile_manufactures), pytils.numeral.MALE, ("производитель",
                                                                                             "производителя",
                                                                                             "производителей")),
-        'CATALOG_LAST_UPDATE': last_update,
-        'CATALOG_LAST_UPDATE_W': pytils.dt.distance_of_time_in_words(time.mktime(last_update.timetuple()), accuracy=2),
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.time() - time_start),
     })
     return render(request, "catalog/catalog_of_profiles.html", to_template)
 
