@@ -96,8 +96,6 @@ urlpatterns = [
     re_path(r'^service/tmp[/*]$', service.tmp),
     # --- страничка "нет доступа"
     re_path(r'^service/not-denice[/*]$', service.not_denice),
-    # --- создание файлов sitemap.xml
-    re_path(r'^service/make_sitemaps[/*]$', service.make_site_maps),
     re_path(r'^service/make_rating[/*]$', service.make_rating),
 
 ]

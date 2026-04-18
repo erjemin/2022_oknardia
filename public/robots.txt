@@ -1,8 +1,7 @@
 # для агрегатора коммерческих предложений пластиковых окон -- ОКНАРДИЯ
 User-Agent: *
 Allow: /
-Disallow: /service
-Disallow: /admin
 Host: https://oknardia.ru
-Sitemap: https://oknardia.ru/sitemap.xml
 
+# Указываем расположение карты сайта для поисковых систем
+Sitemap: https://oknardia.ru/media/_serv_sitemap/sitemap.xml
