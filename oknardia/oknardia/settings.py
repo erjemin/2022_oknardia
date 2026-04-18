@@ -68,7 +68,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'django.contrib.humanize',
-    # 'django.contrib.sitemaps',
+    'django.contrib.sitemaps',
 
     'oknardia.apps.OknardiaConfig',
     'web.apps.WebConfig',
@@ -146,7 +146,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = str(PUBLIC_ROOT / 'media')
 # STATIC_ROOT отделен от исходной статики, чтобы избежать staticfiles.E002.
 STATIC_ROOT = str(PUBLIC_ROOT / 'static_collected')
-SITEMAP_ROOT = str(PUBLIC_ROOT)
+
+# Базовый URL сайта нужен для абсолютных URL в sitemap.xml.
+SITE_BASE_URL = env('SITE_BASE_URL', default='https://oknardia.ru').rstrip('/')
+# Файлы sitemap храним в media-volume, чтобы переживали пересоздание контейнера.
+SITEMAP_SUBDIR = env('SITEMAP_SUBDIR', default='_serv_sitemap').strip('/ ')
+SITEMAP_ROOT = str(Path(MEDIA_ROOT) / SITEMAP_SUBDIR)
+SITEMAP_URL_PREFIX = f"{MEDIA_URL.rstrip('/')}/{SITEMAP_SUBDIR}"
+SITEMAP_INDEX_URL = f"{SITE_BASE_URL}{SITEMAP_URL_PREFIX}/sitemap.xml"
 
 # Каталоги, откуда Django читает исходную статику в DEBUG-режиме.
 STATICFILES_DIRS = [
