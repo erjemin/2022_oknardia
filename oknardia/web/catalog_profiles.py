@@ -33,7 +33,8 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
         ).order_by("sProfileManufacturer", "sProfileBriefDescription")
     )
     profile_count = len(profile_rows)
-    to_template = {
+    # В этом контексте смешанные типы значений (str/int/list/float), поэтому задаём общий тип явно.
+    to_template: dict[str, object] = {
         'CATALOG_PROFILE_NUM': pytils.numeral.get_plural(profile_count, "профиль,профиля,профилей")
     }
     # Локальный помощник: slug нужен несколько раз, а повторять одну и ту же строку не хочется.
@@ -387,3 +388,4 @@ def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manuf
         'ticks': float(time.time() - time_start)
     })
     return render(request, "catalog/catalog_of_profiles_manufacture.html", to_template)
+
