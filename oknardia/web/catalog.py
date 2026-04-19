@@ -1,11 +1,20 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from django.utils import timezone
 from oknardia.settings import *
-from oknardia.models import PVCprofiles, Seria_Info, Win_MountDim, Building_Info, MerchantBrand
+from oknardia.models import (
+    Catalog2Profile,
+    MerchantBrand,
+    PVCprofiles,
+    PriceOffer,
+    Seria_Info,
+    Win_MountDim,
+    Building_Info,
+)
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures,\
     get_flaps_for_mini_pictures, touch_reload_wsgi
@@ -121,11 +130,58 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     manufacture_id = int(manufacture_id)
     model_id = int(model_id)
     q_pvc_by_id = PVCprofiles.objects.get(id=model_id)
-    if pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer) != manufacture_name \
-            or pytils.translit.slugify(q_pvc_by_id.sProfileName) != model_name \
+    manufacturer_slug = pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)
+    model_slug = pytils.translit.slugify(q_pvc_by_id.sProfileName)
+    if manufacturer_slug != manufacture_name \
+            or model_slug != model_name \
             or manufacture_id != model_id:
-        return redirect(f"/catalog/profile/{model_id}-{pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)}/"
-                        f"{model_id}-{pytils.translit.slugify(q_pvc_by_id.sProfileName)}")
+        return redirect(f"/catalog/profile/{model_id}-{manufacturer_slug}/"
+                        f"{model_id}-{model_slug}")
+
+    # Локальные помощники держат вьюху короче и не размазывают однотипную логику по коду.
+    def make_slug(value: str) -> str:
+        return pytils.translit.slugify(value).lower()
+
+    def clean_description(value: str) -> str:
+        return re.sub(
+            r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<iframe[\s\S]*?</iframe>|<cut[\s\S]*>',
+            '',
+            value,
+            0,
+            re.IGNORECASE,
+        )
+
+    def build_other_list(value: str) -> list[str]:
+        # Убираем пустые куски, чтобы не плодить «пустые» характеристики в шаблоне.
+        result = []
+        for chunk in (part.strip() for part in value.split(";")):
+            if not chunk:
+                continue
+            if ":" in chunk:
+                head, tail = chunk.split(":", 1)
+                result.append(f"<b>{head.strip()}:</b>{tail.strip()}")
+            else:
+                result.append(f"<b>{chunk}</b>")
+        return result
+
+    def update_pub_dat(current_pub_dat, candidate_pub_dat):
+        # На странице оставляем дату публикации/обновления только если она реально новее карточки профиля.
+        if candidate_pub_dat is None:
+            return current_pub_dat
+        if current_pub_dat is None or candidate_pub_dat.replace(tzinfo=None) > current_pub_dat.replace(tzinfo=None):
+            return candidate_pub_dat
+        return current_pub_dat
+
+    def apply_rating_colors(rating: dict, rating_pairs: tuple[tuple[str, str], ...], multiplier: int,
+                            gray: bool = False) -> None:
+        # Один маленький helper вместо россыпи почти одинаковых строк: меняется только множитель и формат RGB.
+        for rating_key, template_key in rating_pairs:
+            color = int(255 - rating[rating_key] * multiplier)
+            if gray:
+                to_template[template_key] = f"{color},{color},{color}"
+            else:
+                to_template[template_key] = f"{color},255,{color}"
+
     to_template = {"CATALOG_MODEL": q_pvc_by_id,
                    "CATALOG_MAN2URL": manufacture_name,
                    "CATALOG_URL": f"{manufacture_id}-{manufacture_name}",
@@ -134,135 +190,92 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     try:
         got_json = json.loads(q_pvc_by_id.sProfileDescription)
         # раскрашиваем кружочки рейтинга напротив характеристик профиля
+        rating_pairs = (
+            (RANK_PVCP_CAMERAS_NUM_NAME, "RANK_PVCP_CAMERAS_COLOR"),
+            (RANK_PVCP_SEALS_NAME, "RANK_PVCP_SEALS_COLOR"),
+            (RANK_PVCP_THICKNESS_NAME, "RANK_PVCP_THICKNESS_COLOR"),
+            (RANK_PVCP_G_THICKNESS_NAME, "RANK_PVCP_G_THICKNESS_COLOR"),
+            (RANK_PVCP_RABBET_NAME, "RANK_PVCP_RABBET_COLOR"),
+            (RANK_PVCP_HEAT_TRANSFER_NAME, "RANK_PVCP_HEAT_TRANSFER_COLOR"),
+            (RANK_PVCP_SOUNDPROOFING_NAME, "RANK_PVCP_SOUNDPROOFING_COLOR"),
+            (RANK_PVCP_HEIGHT_NAME, "RANK_PVCP_HEIGHT_COLOR"),
+        )
         if KEY_RATING in got_json:
-            # RatingReal = True     # Рейтинг реальный (профиль представлен в ценовых предложениях)
             # кружочки зелёные
-            rating = got_json[KEY_RATING]
-            color = int(255 - rating[RANK_PVCP_CAMERAS_NUM_NAME] * 255)
-            to_template.update({"RANK_PVCP_CAMERAS_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_SEALS_NAME] * 255)
-            to_template.update({"RANK_PVCP_SEALS_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_THICKNESS_NAME] * 255)
-            to_template.update({"RANK_PVCP_THICKNESS_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_G_THICKNESS_NAME] * 255)
-            to_template.update({"RANK_PVCP_G_THICKNESS_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_RABBET_NAME] * 255)
-            to_template.update({"RANK_PVCP_RABBET_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_HEAT_TRANSFER_NAME] * 255)
-            to_template.update({"RANK_PVCP_HEAT_TRANSFER_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_SOUNDPROOFING_NAME] * 255)
-            to_template.update({"RANK_PVCP_SOUNDPROOFING_COLOR": f"{color},255,{color}"})
-            color = int(255 - rating[RANK_PVCP_HEIGHT_NAME] * 255)
-            to_template.update({"RANK_PVCP_HEIGHT_COLOR": f"{color},255,{color}"})
+            apply_rating_colors(got_json[KEY_RATING], rating_pairs, 255)
         elif KEY_RATING_VIRTUAL in got_json:
-            # RatingReal = False     # Рейтинг виртуальный (профиль представлен в ценовых предложениях)
             # кружочки серые
-            rating = got_json[KEY_RATING_VIRTUAL]
-            color = int(255 - rating[RANK_PVCP_CAMERAS_NUM_NAME] * 64)
-            to_template.update({"RANK_PVCP_CAMERAS_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_SEALS_NAME] * 64)
-            to_template.update({"RANK_PVCP_SEALS_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_THICKNESS_NAME] * 64)
-            to_template.update({"RANK_PVCP_THICKNESS_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_G_THICKNESS_NAME] * 64)
-            to_template.update({"RANK_PVCP_G_THICKNESS_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_RABBET_NAME] * 64)
-            to_template.update({"RANK_PVCP_RABBET_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_HEAT_TRANSFER_NAME] * 64)
-            to_template.update({"RANK_PVCP_HEAT_TRANSFER_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_SOUNDPROOFING_NAME] * 64)
-            to_template.update({"RANK_PVCP_SOUNDPROOFING_COLOR": f"{color},{color},{color}"})
-            color = int(255 - rating[RANK_PVCP_HEIGHT_NAME] * 64)
-            to_template.update({"RANK_PVCP_HEIGHT_COLOR": f"{color},{color},{color}"})
+            apply_rating_colors(got_json[KEY_RATING_VIRTUAL], rating_pairs, 64, gray=True)
         else:
             pass
         if KEY_HTML in got_json:
             to_template.update({"EXTRA_INFO": got_json[KEY_HTML]})
     except (TypeError, ValueError, KeyError):
         pass
-    list_other = []
-    for i in q_pvc_by_id.sProfileOther.split(";"):
-        j = i.find(":")
-        list_other.append(u"<b>" + i[:j + 1] + u"</b>" + i[j + 1:])
-    to_template.update({"LIST_OTHER": list_other})
-    q_merchant = PVCprofiles.objects.raw(f"SELECT"
-                                         f"  COUNT(oknardia_priceoffer.id) AS offers_by_merchant,"
-                                         f"  oknardia_merchantbrand.sMerchantName,"
-                                         f"  oknardia_merchantbrand.pMerchantLogo,"
-                                         f"  oknardia_merchantbrand.id "
-                                         f"FROM oknardia_priceoffer"
-                                         f"  INNER JOIN oknardia_setkit"
-                                         f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
-                                         f"  INNER JOIN oknardia_pvcprofiles"
-                                         f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
-                                         f"  INNER JOIN oknardia_ouruser"
-                                         f"    ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id"
-                                         f"  INNER JOIN oknardia_merchantoffice"
-                                         f"    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id"
-                                         f"  INNER JOIN oknardia_merchantbrand"
-                                         f"    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id "
-                                         f"WHERE oknardia_pvcprofiles.id = {model_id} "
-                                         f"GROUP BY oknardia_merchantbrand.sMerchantName,"
-                                         f"         oknardia_merchantbrand.pMerchantLogo,"
-                                         f"         oknardia_merchantbrand.id "
-                                         f"ORDER BY offers_by_merchant DESC;")
+    to_template.update({"LIST_OTHER": build_other_list(q_pvc_by_id.sProfileOther)})
+    # Партнёров считаем через ORM: так код проще читать и легче переносить между СУБД.
+    q_merchant = (
+        PriceOffer.objects.filter(
+            kOffer2SetKit__kSet2PVCprofiles_id=model_id,
+            sOfferActive=True,
+        )
+        .values(
+            "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id",
+            "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName",
+            "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo",
+        )
+        .annotate(offers_by_merchant=Count("id"))
+        .order_by("-offers_by_merchant", "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName")
+    )
     list_merchant = []
-    for i in q_merchant:
+    for row in q_merchant:
         list_merchant.append({
-            "MERCHANT_ID": i.id,
-            "MERCHANT_NAME": i.sMerchantName,
-            "MERCHANT_NAME_T": pytils.translit.slugify(i.sMerchantName),
-            "MERCHANT_LOGO_URL": i.pMerchantLogo,
-            "MERCHANT_OFFERS": i.offers_by_merchant,
+            "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
+            "MERCHANT_NAME": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"],
+            "MERCHANT_NAME_T": make_slug(row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]),
+            "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
+            "MERCHANT_OFFERS": row["offers_by_merchant"],
         })
     to_template.update({'MERCHANTS': list_merchant})
-    q_profiles = PVCprofiles.objects.raw(f"SELECT oknardia_pvcprofiles.id,"
-                                         f"  oknardia_pvcprofiles.fProfileRating,"
-                                         f"  oknardia_pvcprofiles.sProfileBriefDescription,"
-                                         f"  oknardia_pvcprofiles.sProfileName "
-                                         f"FROM oknardia_pvcprofiles "
-                                         f"WHERE oknardia_pvcprofiles.sProfileManufacturer ="
-                                         f"                                   '{q_pvc_by_id.sProfileManufacturer}' "
-                                         f"ORDER BY oknardia_pvcprofiles.fProfileRating;")
+    # Близкие профили этого же производителя нужны для быстрых переходов по карточкам.
+    q_profiles = (
+        PVCprofiles.objects.filter(sProfileManufacturer=q_pvc_by_id.sProfileManufacturer)
+        .exclude(id=model_id)
+        .values("id", "fProfileRating", "sProfileBriefDescription", "sProfileName")
+        .order_by("fProfileRating")
+    )
     list_profiles = []
-    for i in q_profiles:
-        if i.id != model_id:
-            list_profiles.append({
-                "PROFILE_NAME": i.sProfileBriefDescription,
-                "PROFILE_ID": i.id,
-                "PROFILE_URL": pytils.translit.slugify(i.sProfileName).lower(),
-                "PROFILE_RATING": i.fProfileRating,
-                "PROFILE_RATING_STARS": get_rating_set_for_stars(i.fProfileRating),
-            })
+    for profile in q_profiles:
+        list_profiles.append({
+            "PROFILE_NAME": profile["sProfileBriefDescription"],
+            "PROFILE_ID": profile["id"],
+            "PROFILE_URL": make_slug(profile["sProfileName"]),
+            "PROFILE_RATING": profile["fProfileRating"],
+            "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
+        })
     to_template.update({'PROFILES': list_profiles})
-    q_profiles_detail = PVCprofiles.objects.raw(f"SELECT"
-                                                f"  oknardia_blogposts.*,"
-                                                f"  oknardia_pvcprofiles.id,"
-                                                f"  oknardia_catalog2profile.sCatalogCardType,"
-                                                f"  oknardia_blogposts.iCatalogSort "
-                                                f"FROM oknardia_catalog2profile"
-                                                f"  INNER JOIN oknardia_blogposts"
-                                                f"    ON oknardia_catalog2profile.kBlogCatalog_id=oknardia_blogposts.id"
-                                                f"  INNER JOIN oknardia_pvcprofiles"
-                                                f"    ON oknardia_catalog2profile.kProfile_id=oknardia_pvcprofiles.id "
-                                                f"WHERE oknardia_pvcprofiles.id = {model_id} "
-                                                f"AND oknardia_catalog2profile.sCatalogCardType ="
-                                                f"                                 {CATALOG_RECORD_FOR_PROFILE_MODEL} "
-                                                f"ORDER BY oknardia_blogposts.iCatalogSort;")
-    list_profiles_detail = list(q_profiles_detail)
+    # Описание профиля берём через связку каталог -> блог: это один ORM-запрос вместо сырого SQL.
+    q_profiles_detail = (
+        Catalog2Profile.objects.filter(
+            kProfile_id=model_id,
+            sCatalogCardType=CATALOG_RECORD_FOR_PROFILE_MODEL,
+            kBlogCatalog__isnull=False,
+        )
+        .select_related("kBlogCatalog")
+        .order_by("kBlogCatalog__iCatalogSort")
+    )
+    list_profiles_detail = [row.kBlogCatalog for row in q_profiles_detail if row.kBlogCatalog is not None]
     to_template.update({'PROFILE_DETAIL': list_profiles_detail})
-    list_img_for_blog = []
-    for i in list_profiles_detail:
-        if i.sImgForBlogSocial != "":
-            list_img_for_blog.append(i.sImgForBlogSocial)
-    if len(list_profiles_detail) > 0:
-        random.shuffle(list_img_for_blog)
+    # Картинка и дата публикации для meta-тегов берутся из связанного блога, если он есть.
+    list_img_for_blog = [post.sImgForBlogSocial for post in list_profiles_detail if post.sImgForBlogSocial]
+    if list_img_for_blog:
         to_template.update({'IMG_FOR_BLOG': list_img_for_blog[0]})
-    to_template.update({'PUB_DAT': q_pvc_by_id.dProfileModify})
-    if len(list_profiles_detail) > 0:
-        pub_data = sorted(list_profiles_detail, key=lambda item: item.dPostDataModify)[0].dPostDataModify
-        if pub_data.replace(tzinfo=None) < q_pvc_by_id.dProfileModify.replace(tzinfo=None):
-            to_template.update({'PUB_DAT': pub_data})
+
+    pub_dat = q_pvc_by_id.dProfileModify
+    if list_profiles_detail:
+        blog_pub_dat = max((post.dPostDataModify for post in list_profiles_detail), default=pub_dat)
+        pub_dat = update_pub_dat(pub_dat, blog_pub_dat)
+    to_template.update({'PUB_DAT': pub_dat})
     to_template.update({
         # получаем последние визиты клиента через куки
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
