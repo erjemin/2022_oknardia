@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count
 from django.shortcuts import render, redirect
@@ -115,7 +116,7 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
 
 
 def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture_name: str,
-                          model_id: id, model_name: str) -> HttpResponse:
+                          model_id: int, model_name: str) -> HttpResponse:
     """
     КАТАЛОГ ПРОФИЛЕЙ: страница с описанием марки профиля
 
@@ -142,15 +143,6 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     def make_slug(value: str) -> str:
         return pytils.translit.slugify(value).lower()
 
-    def clean_description(value: str) -> str:
-        return re.sub(
-            r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<iframe[\s\S]*?</iframe>|<cut[\s\S]*>',
-            '',
-            value,
-            0,
-            re.IGNORECASE,
-        )
-
     def build_other_list(value: str) -> list[str]:
         # Убираем пустые куски, чтобы не плодить «пустые» характеристики в шаблоне.
         result = []
@@ -164,7 +156,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
                 result.append(f"<b>{chunk}</b>")
         return result
 
-    def update_pub_dat(current_pub_dat, candidate_pub_dat):
+    def update_pub_dat(current_pub_dat: datetime | None, candidate_pub_dat: datetime | None) -> datetime | None:
         # На странице оставляем дату публикации/обновления только если она реально новее карточки профиля.
         if candidate_pub_dat is None:
             return current_pub_dat
@@ -182,11 +174,32 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
             else:
                 to_template[template_key] = f"{color},255,{color}"
 
-    to_template = {"CATALOG_MODEL": q_pvc_by_id,
-                   "CATALOG_MAN2URL": manufacture_name,
-                   "CATALOG_URL": f"{manufacture_id}-{manufacture_name}",
-                   "CATALOG_URL2": f"{manufacture_id}-{manufacture_name}/{model_id}-{model_name}",
-                   "PROFILE_RATING_STARS": get_rating_set_for_stars(q_pvc_by_id.fProfileRating)}
+    def merchant_row_to_dict(row: dict) -> dict:
+        # Один маппер для строки с партнёром: ключи шаблона остаются как были.
+        merchant_name = row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]
+        return {
+            "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
+            "MERCHANT_NAME": merchant_name,
+            "MERCHANT_NAME_T": make_slug(merchant_name),
+            "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
+            "MERCHANT_OFFERS": row["offers_by_merchant"],
+        }
+
+    def profile_row_to_dict(profile: dict) -> dict:
+        # И то же самое для списка соседних профилей производителя.
+        return {
+            "PROFILE_NAME": profile["sProfileBriefDescription"],
+            "PROFILE_ID": profile["id"],
+            "PROFILE_URL": make_slug(profile["sProfileName"]),
+            "PROFILE_RATING": profile["fProfileRating"],
+            "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
+        }
+
+    to_template: dict[str, object] = {"CATALOG_MODEL": q_pvc_by_id,
+                                      "CATALOG_MAN2URL": manufacture_name,
+                                      "CATALOG_URL": f"{manufacture_id}-{manufacture_name}",
+                                      "CATALOG_URL2": f"{manufacture_id}-{manufacture_name}/{model_id}-{model_name}",
+                                      "PROFILE_RATING_STARS": get_rating_set_for_stars(q_pvc_by_id.fProfileRating)}
     try:
         got_json = json.loads(q_pvc_by_id.sProfileDescription)
         # раскрашиваем кружочки рейтинга напротив характеристик профиля
@@ -227,16 +240,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         .annotate(offers_by_merchant=Count("id"))
         .order_by("-offers_by_merchant", "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName")
     )
-    list_merchant = []
-    for row in q_merchant:
-        list_merchant.append({
-            "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
-            "MERCHANT_NAME": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"],
-            "MERCHANT_NAME_T": make_slug(row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]),
-            "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
-            "MERCHANT_OFFERS": row["offers_by_merchant"],
-        })
-    to_template.update({'MERCHANTS': list_merchant})
+    to_template.update({'MERCHANTS': [merchant_row_to_dict(row) for row in q_merchant]})
     # Близкие профили этого же производителя нужны для быстрых переходов по карточкам.
     q_profiles = (
         PVCprofiles.objects.filter(sProfileManufacturer=q_pvc_by_id.sProfileManufacturer)
@@ -244,16 +248,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         .values("id", "fProfileRating", "sProfileBriefDescription", "sProfileName")
         .order_by("fProfileRating")
     )
-    list_profiles = []
-    for profile in q_profiles:
-        list_profiles.append({
-            "PROFILE_NAME": profile["sProfileBriefDescription"],
-            "PROFILE_ID": profile["id"],
-            "PROFILE_URL": make_slug(profile["sProfileName"]),
-            "PROFILE_RATING": profile["fProfileRating"],
-            "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
-        })
-    to_template.update({'PROFILES': list_profiles})
+    to_template.update({'PROFILES': [profile_row_to_dict(profile) for profile in q_profiles]})
     # Описание профиля берём через связку каталог -> блог: это один ORM-запрос вместо сырого SQL.
     q_profiles_detail = (
         Catalog2Profile.objects.filter(
@@ -264,26 +259,27 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         .select_related("kBlogCatalog")
         .order_by("kBlogCatalog__iCatalogSort")
     )
-    list_profiles_detail = [row.kBlogCatalog for row in q_profiles_detail if row.kBlogCatalog is not None]
-    to_template.update({'PROFILE_DETAIL': list_profiles_detail})
+    profile_blog_posts = [row.kBlogCatalog for row in q_profiles_detail if row.kBlogCatalog is not None]
+    to_template.update({'PROFILE_DETAIL': profile_blog_posts})
     # Картинка и дата публикации для meta-тегов берутся из связанного блога, если он есть.
-    list_img_for_blog = [post.sImgForBlogSocial for post in list_profiles_detail if post.sImgForBlogSocial]
-    if list_img_for_blog:
-        to_template.update({'IMG_FOR_BLOG': list_img_for_blog[0]})
+    if profile_blog_posts:
+        for blog_post in profile_blog_posts:
+            if blog_post.sImgForBlogSocial:
+                to_template['IMG_FOR_BLOG'] = blog_post.sImgForBlogSocial
+                break
 
-    pub_dat = q_pvc_by_id.dProfileModify
-    if list_profiles_detail:
-        blog_pub_dat = max((post.dPostDataModify for post in list_profiles_detail), default=pub_dat)
-        pub_dat = update_pub_dat(pub_dat, blog_pub_dat)
-    to_template.update({'PUB_DAT': pub_dat})
-    to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
-    })
+    pub_dat: datetime = q_pvc_by_id.dProfileModify
+    if profile_blog_posts:
+        profile_blog_dat: datetime | None = max((post.dPostDataModify for post in profile_blog_posts), default=pub_dat)
+        pub_dat = update_pub_dat(pub_dat, profile_blog_dat) or pub_dat
+    to_template['PUB_DAT'] = pub_dat
+    to_template.update(
+        {
+            'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+            'LOG_VISIT': get_last_all_user_visit_list(),
+            'ticks': float(time.time() - time_start),
+        }
+    )
     return render(request, "catalog/catalog_of_profiles_model.html", to_template)
 
 

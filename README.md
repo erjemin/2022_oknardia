@@ -8,9 +8,9 @@
 * Изменена база данных используемая в проекте (SQLite вместо MariaDB).
 * Окружение проекта теперь настраивается через `poetry` вместо `pip` и `requirements.txt`.
 * Проект получает настройки и секреты через переменные окружения (`.env`) вместо `my_secret*.py`.
-* Рефакторинг создания `sitemap.xml` (raw ⟶ ORM, создание через Django-команду `generate_sitemaps` в медиа-файлы).
-* Рефакторинг URL `/catalog/profil/` (raw SQL ⟶ ORM, убран `last_update`, измененs SEO `description` и `keywords`).
-* 
+* Рефакторинг создания `sitemap.xml`: raw ⟶ ORM, создание через Django-команду `generate_sitemaps` в медиа-файлы.
+* Рефакторинг URL `/catalog/profil/`: raw SQL ⟶ ORM, убран `last_update`, измененs SEO `description` и `keywords`.
+* Рефакторинг `catalog_profile_model` (`/catalog/profile/...`): raw SQL ⟶ ORM, упрощена логика, вынесены helper-функции, сокращено дублирование расчёта цветов рейтинга, нормализована подготовка `LIST_OTHER`/`MERCHANTS`/`PROFILES`/`PROFILE_DETAIL`, сохранена совместимость шаблонов.
 
 #### Планы, задачи, маркеры и идеи на будущее:
 
