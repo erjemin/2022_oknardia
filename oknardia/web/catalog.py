@@ -14,12 +14,12 @@ def catalog_root(request: HttpRequest) -> HttpResponse:
     :param request: HttpRequest -- входящий http-запрос
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     # получаем из cookies последние визиты клиента
     to_template = {
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)}
+        'ticks': float(time.perf_counter() - time_start)}
     response = render(request, "catalog/catalog_root.html", to_template)
     return response
 

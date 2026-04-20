@@ -15,7 +15,7 @@ import pytils
 
 
 def catalog_company(request: HttpRequest) -> HttpResponse:
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}   # словарь, для передачи шаблону
     q_company = MerchantBrand.objects.raw('SELECT'
                                           '  oknardia_merchantbrand.id,'
@@ -65,13 +65,13 @@ def catalog_company(request: HttpRequest) -> HttpResponse:
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "catalog/catalog_company.html", to_template)
 
 
 def catalog_company_detail(request: HttpRequest, company_id: str, company_name_slug: str) -> HttpResponse:
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}   # словарь, для передачи шаблону
     company_id = int(company_id)
     q_by_id = MerchantBrand.objects.get(id=company_id)
@@ -156,6 +156,6 @@ def catalog_company_detail(request: HttpRequest, company_id: str, company_name_s
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "catalog/catalog_company_detail.html", to_template)

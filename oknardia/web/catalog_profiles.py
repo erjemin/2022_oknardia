@@ -51,7 +51,7 @@ def _append_visit_context(to_template: dict, request: HttpRequest, time_start: f
     to_template.update({
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start),
+        'ticks': float(time.perf_counter() - time_start),
     })
 
 
@@ -65,7 +65,7 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
     :param request: HttpRequest -- входящий http-запрос
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     # Берём только те поля, которые реально нужны для построения страницы каталога.
     # Это позволяет не тащить лишние данные из БД и сразу работать с простыми словарями.
     profile_rows = list(
@@ -134,7 +134,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
     :param model_name: модель (марка) профиля (транслитерированное pytils.translit.slugify(sProfileName))
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     manufacture_id = int(manufacture_id)
     model_id = int(model_id)
     q_pvc_by_id = PVCprofiles.objects.get(id=model_id)
@@ -269,7 +269,7 @@ def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manuf
     :param manufacture_name: название производителя (транслитерированное pytils.translit.slugify())
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     manufacture_id = int(manufacture_id)
     q_pvc_by_id = PVCprofiles.objects.get(id=manufacture_id)
     if pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer) != manufacture_name:

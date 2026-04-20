@@ -325,7 +325,7 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
     :param win_id: str -- ID проема (см. таблицу oknardia_win_mountdim)
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}
     try:
         # т.к. для вызова GetFlapDim4BigPictures нужно иметь внутри queryset поле iQuantity нельзя использовать
@@ -439,7 +439,7 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "price/price_offers_for_one_window.html", to_template)
 
@@ -452,11 +452,11 @@ def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
     :param frame_begin_n: str -- Номер записи с которой начинается фрейм с ценами
     :return: HttpResponse --
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = report_price_frame(0, 1, 0, 0, int(frame_begin_n), 0, int(win_id))
     to_template.update({'MOUNT_DIM_PER_OFFER': 1,
                         'WIN_ID': int(win_id),
-                        'ticks': float(time.time() - time_start)})
+                        'ticks': float(time.perf_counter() - time_start)})
     return render(request, "price/price_offers_for_one_window_frame.html", to_template)
 
 
@@ -470,7 +470,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     :param slug: str - slug адреса здания
     :return: response: HttpResponse
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     msg = ""
     to_template = {}
     try:
@@ -657,14 +657,14 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         log_entry.sLogAddress = to_template["ADDRESS"]
         log_entry.sLogNameApartment = to_template["APART"]
         log_entry.sLogURL = f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}"
-        log_entry.dLogVisitTime = time.time()
+        log_entry.dLogVisitTime = time.perf_counter()
         log_entry.save()  # UPDATE
     except ObjectDoesNotExist:
         log_entry = LogVisitPriceReport(
             sLogAddress=to_template["ADDRESS"],
             sLogNameApartment=to_template["APART"],
             sLogURL=f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}",
-            dLogVisitTime=time.time()
+            dLogVisitTime=time.perf_counter()
         )
         log_entry.save()  # INSERT
 
@@ -676,11 +676,11 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         "LastURL": f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}",
         "LastAddress": to_template["ADDRESS"],
         "LastApart": to_template["APART"],
-        "Time": time.time()}
+        "Time": time.perf_counter()}
     last_visit.insert(0, Item)  # Добавляем текущий Item в начало
     last_visit = json.dumps(last_visit[:3])  # упаковываем json без пробелов (три записи)
     # print u"сейчас запишем вот эту куку:", LastVisit
-    to_template.update({'ticks': float(time.time() - time_start)})
+    to_template.update({'ticks': float(time.perf_counter() - time_start)})
     response = render(request, "price/price_list.html", to_template)
     response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
     return response
@@ -702,7 +702,7 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
     :param frame_begin_n: str       -- Номер записи с которой начинается фрейм с ценами
     :return: HttpResponse           -- HTTP-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     # получаем данные для фрейма ценовых предложений
     price_frame = report_price_frame(int(apart_id), int(mount_dim_per_offer), float(address_longitude),
                                     float(address_latitude), int(frame_begin_n))
@@ -711,5 +711,5 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
                         'MOUNT_DIM_PER_OFFER': mount_dim_per_offer,
                         'ADDRESS_LAT': address_latitude,
                         'ADDRESS_LON': address_longitude,
-                        'ticks': float(time.time() - time_start)})
+                        'ticks': float(time.perf_counter() - time_start)})
     return render(request, "price/price_list_frame.html", to_template)

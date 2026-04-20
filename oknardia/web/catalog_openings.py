@@ -11,7 +11,7 @@ import time
 import pytils
 
 def standard_opening(request: HttpRequest) -> HttpResponse:
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}   # словарь, для передачи шаблону
     q_seria = Seria_Info.objects.raw('SELECT oknardia_seria_info.id, oknardia_seria_info.sName '
                                      'FROM oknardia_seria_info '
@@ -76,7 +76,7 @@ def standard_opening(request: HttpRequest) -> HttpResponse:
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "catalog/catalog_standard_opening.html", to_template)
 

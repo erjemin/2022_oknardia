@@ -24,7 +24,7 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
     :param request: HttpRequest -- входящий http-запрос
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     try:
         q_seria = Seria_Info.objects.raw('SELECT'
                                          '  oknardia_seria_info.id,'
@@ -50,7 +50,7 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "catalog/catalog_seria.html", to_template)
 
@@ -64,7 +64,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
     :param seria_id: int -- id серии
     :return response: HttpResponse -- исходящий http-ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     msg = ""
     try:
         seria_id = int(seria_id)
@@ -113,7 +113,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
     # print StringForSqlIN
     # Получаем данные для таблички Окон по типам квартирах в серии дома
     # "  IFNULL(oknardia_mountdim2apartment.iQuantity, 0) AS iQuantity," \
-    # tStart2 = time.time()     # замер времени
+    # tStart2 = time.perf_counter()     # замер времени
     q_win_in_apartment_in_seria = Win_MountDim.objects.raw(
         f"SELECT"
         f"  oknardia_win_mountdim.id,"
@@ -186,7 +186,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
             min_offer_in_row = 10000
             row_for_table = []
     # print(table_of_win_in_seria_by_apartmment)
-    # print(f"==============>{float(time.time()-tStart2)}<==============")
+    # print(f"==============>{float(time.perf_counter()-tStart2)}<==============")
     # print NumOffersPerColumn, NumMerchantPerColumn
     to_template.update({"WIN_OFFER_AND_MERCHANT": offer_and_merchant_per_win,
                         "TABLE_OF_WINDOWS": table_of_win_in_seria_by_apartmment})
@@ -210,14 +210,14 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
         to_template.update({'THIS_SERIA_NAME': seria_name})
 
     # to_template.update({'LOG_VISIT': GetLastAllUserVisitSeriaList(SeriaName),
-    #                     'ticks': float(time.time()-time_start)})
+    #                     'ticks': float(time.perf_counter()-time_start)})
     to_template.update({
         # получаем последние визиты клиента через куки
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, light_template, to_template)
 

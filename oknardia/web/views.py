@@ -113,7 +113,7 @@ def get_address(request: HttpRequest) -> HttpResponse:
     :param request: request
     :return: response
     ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░"""
-    time_start = time.time()
+    time_start = time.perf_counter()
     if request.method != 'POST':
         return redirect("/")
     if 'address' not in request.POST:
@@ -149,7 +149,7 @@ def get_address(request: HttpRequest) -> HttpResponse:
             f"ORDER BY R2 "
             f"LIMIT 1;")[0]
         if q.R2 > 0.67:     # Если расстояние между точками больше 670 метров, то не показываем результат
-            to_template.update({'ticks': float(time.time()-time_start)})
+            to_template.update({'ticks': float(time.perf_counter()-time_start)})
             to_template.update({'addr': addr})
             return render(request, "popup/popup_incorrect_address.html", to_template)
     addr = q.sAddress
@@ -292,5 +292,5 @@ def get_address(request: HttpRequest) -> HttpResponse:
     to_template.update({'SERIA_BASE': q1.sName,
                         'addr': addr,
                         'addr_T': pytils.translit.slugify(addr),
-                        'ticks': float(time.time()-time_start)})
+                        'ticks': float(time.perf_counter()-time_start)})
     return render(request, "popup/popup_show_apartment_variants.html", to_template)
