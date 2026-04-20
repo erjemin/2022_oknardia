@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import F
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -16,6 +17,20 @@ import os
 import math
 import pytils
 
+
+def _make_slug(value: str) -> str:
+    """Транслитерирует строку в slug (pytils)."""
+    return pytils.translit.slugify(value)
+
+
+def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
+    """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
+    to_template.update({
+        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+        'LOG_VISIT': get_last_all_user_visit_list(),
+        'ticks': float(time.perf_counter() - time_start),
+    })
+
 # Каталог типовых серий зданий (пока переадресация)
 def catalog_seria(request: HttpRequest) -> HttpResponse:
     """
@@ -25,33 +40,24 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.perf_counter()
-    try:
-        q_seria = Seria_Info.objects.raw('SELECT'
-                                         '  oknardia_seria_info.id,'
-                                         '  oknardia_seria_info.sURL2IMG,'
-                                         '  oknardia_seria_info.sName '
-                                         'FROM oknardia_seria_info '
-                                         'WHERE oknardia_seria_info.id = oknardia_seria_info.kRoot_id '
-                                         'ORDER BY oknardia_seria_info.sName;')
-        list_seria = []
-        for i in q_seria:
-            list_seria.append({
-                "ID": i.id,
-                "URL": i.sURL2IMG,
-                "NAME": i.sName,
-                "NAME_T": pytils.translit.slugify(i.sName)
-            })
-        to_template = {'SERIAS': list_seria}
-    except (ObjectDoesNotExist,):
-        to_template = {}
-    to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.perf_counter() - time_start)
-    })
+    # Только корневые серии (id == kRoot_id), сортировка как в старом SQL.
+    q_seria = (
+        Seria_Info.objects.filter(id=F('kRoot_id'))
+        .values('id', 'sURL2IMG', 'sName')
+        .order_by('sName')
+    )
+    to_template: dict[str, object] = {
+        'SERIAS': [
+            {
+                'ID': row['id'],
+                'URL': row['sURL2IMG'],
+                'NAME': row['sName'],
+                'NAME_T': _make_slug(row['sName']),
+            }
+            for row in q_seria
+        ]
+    }
+    _append_visit_context(to_template, request, time_start)
     return render(request, "catalog/catalog_seria.html", to_template)
 
 
@@ -83,7 +89,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
         is_hard_template = False
     else:
         is_hard_template = True
-    to_template = {}
+    to_template: dict[str, object] ={}
     # получаем проемы использующиеся в данной серии домов
     q_windows_in_seria = Win_MountDim.objects.raw(
         f"SELECT DISTINCT"
@@ -211,14 +217,7 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
 
     # to_template.update({'LOG_VISIT': GetLastAllUserVisitSeriaList(SeriaName),
     #                     'ticks': float(time.perf_counter()-time_start)})
-    to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.perf_counter() - time_start)
-    })
+    _append_visit_context(to_template, request, time_start)
     return render(request, light_template, to_template)
 
 

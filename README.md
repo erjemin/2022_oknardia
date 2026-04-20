@@ -13,6 +13,14 @@
 * Распилен `oknardia/web/catalog.py` на тематические модули (`catalog_companies.py`, `catalog_profiles.py`, `catalog_series.py`, `catalog_openings.py`) с вынесением общей логики в `catalog_utils.py`; маршруты обновлены без изменения внешних URL.
 * Рефакторинг `catalog_profile_model` (`/catalog/profile/...`): raw SQL ⟶ ORM, упрощена логика, вынесены helper-функции, сокращено дублирование расчёта цветов рейтинга, нормализована подготовка `LIST_OTHER`/`MERCHANTS`/`PROFILES`/`PROFILE_DETAIL`, сохранена совместимость шаблонов.
 * Рефакторинг `catalog_profile_manufacture` (`/catalog/profile/<id>-<manufacturer>`): упрощена валидация URL, убран дублирующий код маппинга для `PROFILES` и `MERCHANTS` через общие хелперы, стандартизирован хвост контекста (`LAST_VISIT`, `LOG_VISIT`, `ticks`) через `_append_visit_context`.
+* Рефакторинг `catalog_seria` (`/catalog/seria/`): raw SQL ⟶ ORM для списка корневых серий, подготовка данных упрощена, хвост контекста с визитами и `ticks` вынесен в общий helper внутри `catalog_series.py`.
+* 
+* 
+* 
+* 
+* 
+* 
+* 
 
 #### Планы, задачи, маркеры и идеи на будущее:
 
