@@ -16,18 +16,18 @@ def service(request: HttpRequest) -> HttpResponse:
     :param request: HttpRequest
     :return: HttpResponse
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     # проверка на аутентификацию
     # print(request.user.is_authenticated)
     if not request.user.is_authenticated:
         return redirect("/service/not-denice")
-    return render(request, "service/index.html", {'ticks': float(time.time()-time_start)})
+    return render(request, "service/index.html", {'ticks': float(time.perf_counter()-time_start)})
 
 
 # страничка, на которую переадресует служебный интерфейс, если нет аутентификации.
 def not_denice(request):
-    time_start = time.time()
-    return render(request, "service/not_denice.html", {'ticks': float(time.time()-time_start)})
+    time_start = time.perf_counter()
+    return render(request, "service/not_denice.html", {'ticks': float(time.perf_counter()-time_start)})
 
 
 def tmp(request: HttpRequest) -> HttpResponse:
@@ -36,8 +36,8 @@ def tmp(request: HttpRequest) -> HttpResponse:
     :param request:
     :return:   
     """
-    t_start = time.time()
-    return render(request, "service/tmp.html", {'TAU': float(time.time()-t_start)})
+    t_start = time.perf_counter()
+    return render(request, "service/tmp.html", {'TAU': float(time.perf_counter()-t_start)})
 
 
 
@@ -59,7 +59,7 @@ def make_rating(request: HttpRequest) -> HttpResponse:
     :param request: HttpRequest -- запрос
     :return: HttpResponse -- ответ
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     msg = ""
     # ВЫЧИСЛЯЕМ РЕЙТИНГ ПРОФИЛЕЙ
     # устанавливаем рейтинг всех профилей в базе в ноль
@@ -364,5 +364,5 @@ def make_rating(request: HttpRequest) -> HttpResponse:
         obj.save()
         # print u"id:",i["id"], u"\tRank:", i["TmpRating"], u"\tRate:", obj.fSetRating, u"\tSet:", i["sSetName"], i["fProfileRating"], i["fGlazingRating"]
     to_template.update({'msg': msg})
-    to_template.update({'ticks': float(time.time()-time_start)})
+    to_template.update({'ticks': float(time.perf_counter()-time_start)})
     return render(request, "service/make_rating.html", to_template)

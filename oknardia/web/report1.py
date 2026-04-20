@@ -80,7 +80,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
     :param to_compare: str -- список ,через запятую, id оконных наборов (Set) для сравнения
     :return: HttpResponse --
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}
     try:
         # Этот блок нужен для 302-переадресации, когда разные URL отдают одинаковые страницы.
@@ -539,7 +539,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
         # получаем последние визиты всех посетителей из базы
         # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
+        'ticks': float(time.perf_counter() - time_start)
     })
     return render(request, "report/report_compare_set.html", to_template)
 
@@ -551,7 +551,7 @@ def show_rating_components(request: HttpRequest, win_set: str = "1") -> HttpResp
     :param win_set: str -- id оконного набора, для которого показать состав рейтинга
     :return: HttpResponse --
     """
-    time_start = time.time()
+    time_start = time.perf_counter()
     to_template = {}
     try:
         win_set = int(win_set)
@@ -596,5 +596,5 @@ def show_rating_components(request: HttpRequest, win_set: str = "1") -> HttpResp
                                                                 "коммерческое предложение, коммерческих предложения,"
                                                                 " коммерческих предложений"),
                         'TEST': win_set,
-                        'ticks': float(time.time() - time_start)})
+                        'ticks': float(time.perf_counter() - time_start)})
     return render(request, "report/show_rating_components.html", to_template)
