@@ -16,7 +16,7 @@ def catalog_root(request: HttpRequest) -> HttpResponse:
     """
     time_start = time.perf_counter()
     # получаем из cookies последние визиты клиента
-    to_template = {
+    to_template: dict[str, object] = {
         'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start)}

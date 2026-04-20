@@ -326,7 +326,7 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.perf_counter()
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         # т.к. для вызова GetFlapDim4BigPictures нужно иметь внутри queryset поле iQuantity нельзя использовать
         # простой запрос (см. следующую строку).
@@ -453,7 +453,7 @@ def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
     :return: HttpResponse --
     """
     time_start = time.perf_counter()
-    to_template = report_price_frame(0, 1, 0, 0, int(frame_begin_n), 0, int(win_id))
+    to_template: dict[str, object] = report_price_frame(0, 1, 0, 0, int(frame_begin_n), 0, int(win_id))
     to_template.update({'MOUNT_DIM_PER_OFFER': 1,
                         'WIN_ID': int(win_id),
                         'ticks': float(time.perf_counter() - time_start)})
@@ -472,7 +472,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     """
     time_start = time.perf_counter()
     msg = ""
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         build_id = int(build_id)
         apart_id = int(apart_id)
@@ -706,7 +706,7 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
     # получаем данные для фрейма ценовых предложений
     price_frame = report_price_frame(int(apart_id), int(mount_dim_per_offer), float(address_longitude),
                                     float(address_latitude), int(frame_begin_n))
-    to_template = price_frame
+    to_template: dict[str, object] = price_frame
     to_template.update({'APPARTMENT_ID': apart_id,
                         'MOUNT_DIM_PER_OFFER': mount_dim_per_offer,
                         'ADDRESS_LAT': address_latitude,

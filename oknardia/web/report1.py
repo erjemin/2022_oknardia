@@ -81,7 +81,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
     :return: HttpResponse --
     """
     time_start = time.perf_counter()
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         # Этот блок нужен для 302-переадресации, когда разные URL отдают одинаковые страницы.
         # Например, такое происходит для страницы: /compare_offers/1,2 и /compare_offers/2,1
@@ -552,7 +552,7 @@ def show_rating_components(request: HttpRequest, win_set: str = "1") -> HttpResp
     :return: HttpResponse --
     """
     time_start = time.perf_counter()
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         win_set = int(win_set)
     except ValueError:

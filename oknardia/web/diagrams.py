@@ -61,7 +61,7 @@ def statistic_menu(request: HttpRequest) -> HttpResponse:
     :return: HttpResponse -- исходящий http-ответ
     """
     time_start = time()
-    to_template = {}
+    to_template: dict[str, object] = {}
     seria_id, for_seria_nav = seria_nav(0)
     to_template.update(for_seria_nav)
     # проверяем какой JS с картами и PieCharts: упакованные или нет (откуда берётся не упакованный -- не помню)
