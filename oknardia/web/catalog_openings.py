@@ -12,7 +12,7 @@ import pytils
 
 def standard_opening(request: HttpRequest) -> HttpResponse:
     time_start = time.perf_counter()
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     q_seria = Seria_Info.objects.raw('SELECT oknardia_seria_info.id, oknardia_seria_info.sName '
                                      'FROM oknardia_seria_info '
                                      'WHERE oknardia_seria_info.id = oknardia_seria_info.kRoot_id '

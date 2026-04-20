@@ -19,7 +19,7 @@ def main_init(request: HttpRequest) -> HttpResponse:
     :param request: входящий http-запрос
     :return response: исходящий http-ответ
     """
-    to_template = {}  # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}  # словарь, для передачи шаблону
     num_viz = 0  # как будто первый визит
     # проверяем куки числа визита
     if "NumVisit" in request.COOKIES:
@@ -55,7 +55,7 @@ def tariff(request: HttpRequest) -> HttpResponse:
     :param request: входящий http-запрос
     :return response: исходящий http-ответ
     """
-    to_template = {}      # для передачи в шаблон
+    to_template: dict[str, object] = {}      # для передачи в шаблон
     if request.method == 'POST':
         # print request.POST
         if 'tariff' in request.POST and 'email_' in request.POST \
@@ -119,7 +119,7 @@ def get_address(request: HttpRequest) -> HttpResponse:
     if 'address' not in request.POST:
         return redirect("/")
     addr = request.POST['address']
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         q = Building_Info.objects.get(sAddress=addr)
         # Если QuerySet не содержит GeoCode (такое бывает, что в Яндекс-Картах не было каких-то данных),

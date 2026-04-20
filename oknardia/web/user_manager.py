@@ -38,7 +38,7 @@ def menu_login_logout(request: HttpRequest) -> HttpResponse:
     # В дальнейшем, в случае высоких нагрузок на сервис, возможна простая деградация
     # с помощью отключения этого блока. Также возможен перенос исполнения функционала
     # LOGIN-LOGOUT на отдельный сервер.
-    to_template = {}        # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}        # словарь, для передачи шаблону
     template = "user_manager/login-logout.html"    # шаблон для подгрузки GOOGLE CAPTCHA
     if request.user.is_authenticated:
         to_template.update({'LOGGED_USER': request.user.username})
@@ -56,7 +56,7 @@ def confirm_email(request: HttpRequest, user_id: str = "1", hash_part_12: str = 
     :return response: исходящий http-ответ
     """
     time_start = time()
-    to_template = {}          # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}          # словарь, для передачи шаблону
     to_template.update({'CONFIRM_OK': "NO"})
     template = "index.html"      # шаблон, о том, что email не подтвержден
     try:
@@ -100,7 +100,7 @@ def restore_password(request: HttpRequest, user_id: str = "1", hash_part_12: str
     :return response: исходящий http-ответ
     """
     time_start = time()
-    to_template = {}          # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}          # словарь, для передачи шаблону
     to_template.update({'CONFIRM_OK': "NO"})
     template = "index.html"      # шаблон, о том, что email не подтвержден
     try:
@@ -138,7 +138,7 @@ def change_password(request: HttpRequest) -> HttpResponse:
     if request.method != 'POST':
         return HttpResponseRedirect("/")
     try:
-        to_template = {}          # словарь, для передачи шаблону
+        to_template: dict[str, object] = {}          # словарь, для передачи шаблону
         to_template.update({'CONFIRM_OK': "NO"})
         template = "user_manager/popup_confirm_email_or_restore_password_bad.html"   # шаблон, о том, что всякие ошибки
         try:
@@ -189,7 +189,7 @@ def form_user_menu_processing(request: HttpRequest) -> HttpResponse:
         return HttpResponseRedirect("/")
     if request.POST['status'] == "":
         return HttpResponseRedirect("/")
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     template = "user_manager/login-logout_after.html"    # шаблон для подгрузки GOOGLE CAPTCHA
 
     # БЛОК -- LOGOUT

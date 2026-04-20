@@ -16,7 +16,7 @@ import pytils
 
 def catalog_company(request: HttpRequest) -> HttpResponse:
     time_start = time.perf_counter()
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     q_company = MerchantBrand.objects.raw('SELECT'
                                           '  oknardia_merchantbrand.id,'
                                           '  oknardia_merchantbrand.sMerchantName,'
@@ -72,7 +72,7 @@ def catalog_company(request: HttpRequest) -> HttpResponse:
 
 def catalog_company_detail(request: HttpRequest, company_id: str, company_name_slug: str) -> HttpResponse:
     time_start = time.perf_counter()
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     company_id = int(company_id)
     q_by_id = MerchantBrand.objects.get(id=company_id)
     if pytils.translit.slugify(q_by_id.sMerchantName) != company_name_slug:

@@ -38,7 +38,7 @@ def blog_list_posts(request: HttpRequest, page: str = "0") -> HttpResponse:
     except ValueError:
         page = 0
     dim_blogposts = []   # массив блог-постов для формирования списка
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     template = "blog/blog_list.html"      # шаблон
     in_list = NUM_BLOG_TIZER_IN_PAGE  # длина списка блогов в выдачe
     # проверяем нужно ли ставить кнопку BACK и куда она ссылается
@@ -141,7 +141,7 @@ def blog_post(request: HttpRequest, post_id: str = "0", page_back: str = None) -
             back_page = int(request.GET["page-back"])
         except (TypeError, KeyError):
             back_page = 0
-    to_template = {}   # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}   # словарь, для передачи шаблону
     template = "blog/blog_post.html"      # шаблон
 
     q = BlogPosts.objects.get(id=post_id)

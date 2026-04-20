@@ -215,8 +215,6 @@ def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id
         seria_name = Seria_Info.objects.get(id=seria_id).sName
         to_template.update({'THIS_SERIA_NAME': seria_name})
 
-    # to_template.update({'LOG_VISIT': GetLastAllUserVisitSeriaList(SeriaName),
-    #                     'ticks': float(time.perf_counter()-time_start)})
     _append_visit_context(to_template, request, time_start)
     return render(request, light_template, to_template)
 

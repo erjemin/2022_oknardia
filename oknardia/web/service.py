@@ -64,7 +64,7 @@ def make_rating(request: HttpRequest) -> HttpResponse:
     # ВЫЧИСЛЯЕМ РЕЙТИНГ ПРОФИЛЕЙ
     # устанавливаем рейтинг всех профилей в базе в ноль
     profile_all_num = PVCprofiles.objects.all().update(fProfileRating=0.0)
-    to_template = {'NUM_PROFILE_TOTAL': profile_all_num}    # засовываем данные в шаблон
+    to_template: dict[str, object] = {'NUM_PROFILE_TOTAL': profile_all_num}    # засовываем данные в шаблон
     q = PVCprofiles.objects.raw("SELECT"
                                 "  oknardia_pvcprofiles.*,"
                                 "  COUNT(oknardia_priceoffer.id) AS NumOffer "
