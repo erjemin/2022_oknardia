@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from time import time
 from oknardia.settings import *
 from oknardia.models import Seria_Info
-from web.catalog import all_seria_nav
+from web.catalog_series import all_seria_nav
 # from oknardia.catalog import all_seria_nav
 import math
 import os
