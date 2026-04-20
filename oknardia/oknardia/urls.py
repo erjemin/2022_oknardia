@@ -19,7 +19,8 @@ from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
 from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service, \
-    catalog_profiles
+    catalog_profiles, catalog_series, catalog_openings, catalog_companies
+
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -55,23 +56,26 @@ urlpatterns = [
     re_path(r'^stat/series/geo[/*]$', diagrams.statistic_menu),     # дубль для старых ссылок
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
-    # --- Каталог
+    # --- КАТАЛОГ
     re_path(r'^catalog[/*]$', catalog.catalog_root),
-    # --- --- Каталог профилей
+    # --- --- КАТАЛОГ ПРОФИЛЕЙ
     re_path(r'^catalog/profile[/*]$', catalog_profiles.catalog_profile),
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
-            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$', catalog_profiles.catalog_profile_model),
+            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
+            catalog_profiles.catalog_profile_model),
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
             catalog_profiles.catalog_profile_manufacture),
     # --- --- Каталог серий типового строительства
-    re_path(r'^catalog/seria[/*]$', catalog.catalog_seria),
-    re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$', catalog.catalog_seria_info),
+    re_path(r'^catalog/seria[/*]$', catalog_series.catalog_seria),
+    re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$',
+            catalog_series.catalog_seria_info),
     re_path(r'^seria_[^/]*/all(?P<seria_id>\d+)/\S*$', catalog.report_all_info_seria_redirect),   # для старых ссылок
     # --- --- Каталог стандартных проёмов и схем открывания длч типовых серий строительства
-    re_path(r'^catalog/standard_opening[/*]$', catalog.standard_opening),
+    re_path(r'^catalog/standard_opening[/*]$', catalog_openings.standard_opening),
     # --- --- Каталог производителей окон
-    re_path(r'^catalog/company[/*]$', catalog.catalog_company),
-    re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$', catalog.catalog_company_detail),
+    re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company),
+    re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
+            catalog_companies.catalog_company_detail),
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
     # --- Одиночное окно
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',

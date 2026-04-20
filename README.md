@@ -10,7 +10,9 @@
 * Проект получает настройки и секреты через переменные окружения (`.env`) вместо `my_secret*.py`.
 * Рефакторинг создания `sitemap.xml`: raw ⟶ ORM, создание через Django-команду `generate_sitemaps` в медиа-файлы.
 * Рефакторинг URL `/catalog/profil/`: raw SQL ⟶ ORM, убран `last_update`, измененs SEO `description` и `keywords`.
+* Распилен `oknardia/web/catalog.py` на тематические модули (`catalog_companies.py`, `catalog_profiles.py`, `catalog_series.py`, `catalog_openings.py`) с вынесением общей логики в `catalog_utils.py`; маршруты обновлены без изменения внешних URL.
 * Рефакторинг `catalog_profile_model` (`/catalog/profile/...`): raw SQL ⟶ ORM, упрощена логика, вынесены helper-функции, сокращено дублирование расчёта цветов рейтинга, нормализована подготовка `LIST_OTHER`/`MERCHANTS`/`PROFILES`/`PROFILE_DETAIL`, сохранена совместимость шаблонов.
+* Рефакторинг `catalog_profile_manufacture` (`/catalog/profile/<id>-<manufacturer>`): упрощена валидация URL, убран дублирующий код маппинга для `PROFILES` и `MERCHANTS` через общие хелперы, стандартизирован хвост контекста (`LAST_VISIT`, `LOG_VISIT`, `ticks`) через `_append_visit_context`.
 
 #### Планы, задачи, маркеры и идеи на будущее:
 

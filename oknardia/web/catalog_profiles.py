@@ -6,13 +6,57 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.settings import *
-from oknardia.models import Catalog2Profile, PVCprofiles,  PriceOffer
+from oknardia.models import Catalog2Profile, PVCprofiles, PriceOffer
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars
 import time
 import json
 import re
 import pytils
+
+# ---------------------------------------------------------------------------
+# Модульные хелперы, общие для всех вьюх этого файла
+# ---------------------------------------------------------------------------
+
+def make_slug(value: str) -> str:
+    """Транслитерирует строку в slug (pytils)."""
+    return pytils.translit.slugify(value).lower()
+
+
+def _merchant_row_to_dict(row: dict) -> dict:
+    """Преобразует ORM-строку с данными партнёра в словарь для шаблона."""
+    merchant_name = row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]
+    return {
+        "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
+        "MERCHANT_NAME": merchant_name,
+        "MERCHANT_NAME_T": make_slug(merchant_name),
+        "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
+        "MERCHANT_OFFERS": row["offers_by_merchant"],
+    }
+
+
+def _profile_row_to_dict(profile: dict) -> dict:
+    """Преобразует ORM-строку профиля в словарь для шаблона."""
+    return {
+        "PROFILE_NAME": profile["sProfileBriefDescription"],
+        "PROFILE_ID": profile["id"],
+        "PROFILE_URL": make_slug(profile["sProfileName"]),
+        "PROFILE_RATING": profile["fProfileRating"],
+        "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
+    }
+
+
+def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
+    """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
+    to_template.update({
+        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
+        'LOG_VISIT': get_last_all_user_visit_list(),
+        'ticks': float(time.time() - time_start),
+    })
+
+
+# ---------------------------------------------------------------------------
+
 
 def catalog_profile(request: HttpRequest) -> HttpResponse:
     """
@@ -37,9 +81,6 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
     to_template: dict[str, object] = {
         'CATALOG_PROFILE_NUM': pytils.numeral.get_plural(profile_count, "профиль,профиля,профилей")
     }
-    # Локальный помощник: slug нужен несколько раз, а повторять одну и ту же строку не хочется.
-    def make_slug(value: str) -> str:
-        return pytils.translit.slugify(value).lower()
 
     list_profile_manufactures = []
     tmp_profile_manufacture = ""
@@ -76,10 +117,8 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
             pytils.numeral.sum_string(len(list_profile_manufactures), pytils.numeral.MALE, ("производитель",
                                                                                             "производителя",
                                                                                             "производителей")),
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start),
     })
+    _append_visit_context(to_template, request, time_start)
     return render(request, "catalog/catalog_of_profiles.html", to_template)
 
 
@@ -108,9 +147,6 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
                         f"{model_id}-{model_slug}")
 
     # Локальные помощники держат вьюху короче и не размазывают однотипную логику по коду.
-    def make_slug(value: str) -> str:
-        return pytils.translit.slugify(value).lower()
-
     def build_other_list(value: str) -> list[str]:
         # Убираем пустые куски, чтобы не плодить «пустые» характеристики в шаблоне.
         result = []
@@ -141,27 +177,6 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
                 to_template[template_key] = f"{color},{color},{color}"
             else:
                 to_template[template_key] = f"{color},255,{color}"
-
-    def merchant_row_to_dict(row: dict) -> dict:
-        # Один маппер для строки с партнёром: ключи шаблона остаются как были.
-        merchant_name = row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]
-        return {
-            "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
-            "MERCHANT_NAME": merchant_name,
-            "MERCHANT_NAME_T": make_slug(merchant_name),
-            "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
-            "MERCHANT_OFFERS": row["offers_by_merchant"],
-        }
-
-    def profile_row_to_dict(profile: dict) -> dict:
-        # И то же самое для списка соседних профилей производителя.
-        return {
-            "PROFILE_NAME": profile["sProfileBriefDescription"],
-            "PROFILE_ID": profile["id"],
-            "PROFILE_URL": make_slug(profile["sProfileName"]),
-            "PROFILE_RATING": profile["fProfileRating"],
-            "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
-        }
 
     to_template: dict[str, object] = {"CATALOG_MODEL": q_pvc_by_id,
                                       "CATALOG_MAN2URL": manufacture_name,
@@ -208,7 +223,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         .annotate(offers_by_merchant=Count("id"))
         .order_by("-offers_by_merchant", "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName")
     )
-    to_template.update({'MERCHANTS': [merchant_row_to_dict(row) for row in q_merchant]})
+    to_template.update({'MERCHANTS': [_merchant_row_to_dict(row) for row in q_merchant]})
     # Близкие профили этого же производителя нужны для быстрых переходов по карточкам.
     q_profiles = (
         PVCprofiles.objects.filter(sProfileManufacturer=q_pvc_by_id.sProfileManufacturer)
@@ -216,7 +231,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         .values("id", "fProfileRating", "sProfileBriefDescription", "sProfileName")
         .order_by("fProfileRating")
     )
-    to_template.update({'PROFILES': [profile_row_to_dict(profile) for profile in q_profiles]})
+    to_template.update({'PROFILES': [_profile_row_to_dict(profile) for profile in q_profiles]})
     # Описание профиля берём через связку каталог -> блог: это один ORM-запрос вместо сырого SQL.
     q_profiles_detail = (
         Catalog2Profile.objects.filter(
@@ -241,13 +256,7 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
         profile_blog_dat: datetime | None = max((post.dPostDataModify for post in profile_blog_posts), default=pub_dat)
         pub_dat = update_pub_dat(pub_dat, profile_blog_dat) or pub_dat
     to_template['PUB_DAT'] = pub_dat
-    to_template.update(
-        {
-            'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-            'LOG_VISIT': get_last_all_user_visit_list(),
-            'ticks': float(time.time() - time_start),
-        }
-    )
+    _append_visit_context(to_template, request, time_start)
     return render(request, "catalog/catalog_of_profiles_model.html", to_template)
 
 
@@ -272,120 +281,76 @@ def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manuf
         if q_pvc_by_id.id != manufacture_id:
             return redirect(f'/catalog/profile/{q_pvc_by_id.id}-'
                             f'{pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)}')
-    to_template = {'CATALOG_MANUFACT': q_pvc_by_id.sProfileManufacturer,
-                   'CATALOG_MAN2URL': manufacture_name,
-                   'CATALOG_URL': f"{manufacture_id}-{manufacture_name}"}
+    to_template: dict[str, object] = {'CATALOG_MANUFACT': q_pvc_by_id.sProfileManufacturer,
+                                      'CATALOG_MAN2URL': manufacture_name,
+                                      'CATALOG_URL': f"{manufacture_id}-{manufacture_name}"}
     try:
-        # получаем информацию о производителе (статью из блога)
-        manufacture_description = list(PVCprofiles.objects.raw(
-            f"SELECT "
-            f"  oknardia_blogposts.* "
-            f"FROM oknardia_catalog2profile"
-            f"  RIGHT OUTER JOIN oknardia_pvcprofiles"
-            f"    ON oknardia_catalog2profile.kProfile_id = oknardia_pvcprofiles.id"
-            f"  LEFT OUTER JOIN oknardia_blogposts"
-            f"    ON oknardia_catalog2profile.kBlogCatalog_id = oknardia_blogposts.id "
-            f"WHERE oknardia_catalog2profile.sCatalogCardType = {CATALOG_RECORD_FOR_PROFILE_MANUFACTURER} "
-            f"  AND oknardia_pvcprofiles.sProfileManufacturer = '{q_pvc_by_id.sProfileManufacturer}'"
-            f"  AND oknardia_blogposts.bCatalog IS TRUE "
-            f"GROUP BY oknardia_blogposts.bCatalog "
-            f"LIMIT 1;"
-        ))[0]
-        to_template.update({'PUB_DAT': manufacture_description.dPostDataModify})
-        if PATH_FOR_IMG_BLOG in manufacture_description.sImgForBlogSocial:
-            to_template.update({'IMG_FOR_BLOG': manufacture_description.sImgForBlogSocial})
-        to_template.update({'HEADER': manufacture_description.sPostHeader,
-                            'CONTENT': re.sub(r'<cut[\s\S]*>', '', manufacture_description.sPostContent,
-                                              0, re.IGNORECASE)})
-        to_template.update({'TIZER': re.sub(r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<iframe[\s\S]*?</iframe>',
-                                            '', to_template["CONTENT"], 0, re.IGNORECASE)})
-    except (ObjectDoesNotExist, IndexError, TypeError, KeyError,):
-        pass
-    q_profiles = PVCprofiles.objects.raw(
-        f"SELECT oknardia_pvcprofiles.id,"
-        f"  oknardia_pvcprofiles.fProfileRating,"
-        f"  oknardia_pvcprofiles.sProfileBriefDescription,"
-        f"  oknardia_pvcprofiles.sProfileName "
-        f"FROM oknardia_pvcprofiles "
-        f"WHERE oknardia_pvcprofiles.sProfileManufacturer = '{q_pvc_by_id.sProfileManufacturer}' "
-        f"ORDER BY oknardia_pvcprofiles.fProfileRating;"
-    )
-    list_profiles = []
-    for i in q_profiles:
-        list_profiles.append({
-            "PROFILE_NAME": i.sProfileBriefDescription,
-            "PROFILE_ID": i.id,
-            "PROFILE_URL": pytils.translit.slugify(i.sProfileName).lower(),
-            "PROFILE_RATING": i.fProfileRating,
-            "PROFILE_RATING_STARS": get_rating_set_for_stars(i.fProfileRating),
-        })
-    to_template.update({'PROFILES': list_profiles})
-    try:
-        q_share_of_offers = list(PVCprofiles.objects.raw(
-            f"SELECT"
-            f"  1 AS id,"
-            f"  SUM(Q1.offers_by_model) AS offers_by_maufacture,"
-            f"  Q2.tatal_offers-SUM(Q1.offers_by_model) AS offers_other "
-            f"FROM (SELECT COUNT(oknardia_priceoffer.id) AS offers_by_model"
-            f"       FROM oknardia_priceoffer"
-            f"         LEFT OUTER JOIN oknardia_setkit"
-            f"           ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
-            f"         RIGHT OUTER JOIN oknardia_pvcprofiles"
-            f"           ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
-            f"       WHERE oknardia_pvcprofiles.sProfileManufacturer = '{q_pvc_by_id.sProfileManufacturer}') Q1,"
-            f"     (SELECT COUNT(oknardia_priceoffer.id) AS tatal_offers"
-            f"       FROM oknardia_priceoffer) AS Q2 "
-            f"LIMIT 1;"
-        ))[0]
-        to_template.update({
-            'OFFERS_BY_MAUFACTURE': q_share_of_offers.offers_by_maufacture,
-            'OFFERS_OTHER': q_share_of_offers.offers_other,
-            'OFFERS_ANGLE': 90 + 180 * normalize(q_share_of_offers.offers_by_maufacture,
-                                                 q_share_of_offers.offers_other + q_share_of_offers.offers_by_maufacture)
-        })
-        if q_share_of_offers is not None and q_share_of_offers.offers_by_maufacture != 0:
-            q_merchant = PVCprofiles.objects.raw(
-                f"SELECT"
-                f"  COUNT(oknardia_priceoffer.id) AS offers_by_merchant,"
-                f"  oknardia_merchantbrand.sMerchantName,"
-                f"  oknardia_merchantbrand.pMerchantLogo,"
-                f"  oknardia_merchantbrand.id "
-                f"FROM oknardia_priceoffer"
-                f"  INNER JOIN oknardia_setkit"
-                f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
-                f"  INNER JOIN oknardia_pvcprofiles"
-                f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
-                f"  INNER JOIN oknardia_ouruser"
-                f"    ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id"
-                f"  INNER JOIN oknardia_merchantoffice"
-                f"    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id"
-                f"  INNER JOIN oknardia_merchantbrand"
-                f"    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id "
-                f"WHERE oknardia_pvcprofiles.sProfileManufacturer = '{q_pvc_by_id.sProfileManufacturer}' "
-                f"GROUP BY oknardia_merchantbrand.sMerchantName,"
-                f"         oknardia_merchantbrand.pMerchantLogo,"
-                f"         oknardia_merchantbrand.id "
-                f"ORDER BY offers_by_merchant DESC;"
+        # Получаем статью-описание производителя через Catalog2Profile → BlogPosts.
+        # GROUP BY из оригинального SQL здесь не нужен: нас устраивает любая первая запись.
+        catalog_entry = (
+            Catalog2Profile.objects.filter(
+                kProfile__sProfileManufacturer=q_pvc_by_id.sProfileManufacturer,
+                sCatalogCardType=CATALOG_RECORD_FOR_PROFILE_MANUFACTURER,
+                kBlogCatalog__bCatalog=True,
             )
-            list_merchant = []
-            for i in q_merchant:
-                list_merchant.append({
-                    "MERCHANT_ID": i.id,
-                    "MERCHANT_NAME": i.sMerchantName,
-                    "MERCHANT_NAME_T": pytils.translit.slugify(i.sMerchantName),
-                    "MERCHANT_LOGO_URL": i.pMerchantLogo,
-                    "MERCHANT_OFFERS": i.offers_by_merchant
-                })
-            to_template.update({'MERCHANTS': list_merchant})
-    except (ObjectDoesNotExist, IndexError, TypeError):  # вообще-то, запрос q_share_of_offers всегда что-то вернёт,
-        pass  # но на всякий случай
-    to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.time() - time_start)
-    })
+            .select_related("kBlogCatalog")
+            .first()
+        )
+        if catalog_entry is None or catalog_entry.kBlogCatalog is None:
+            raise ObjectDoesNotExist
+        manufacture_description = catalog_entry.kBlogCatalog
+        to_template.update({'PUB_DAT': manufacture_description.dPostDataModify})
+        if PATH_FOR_IMG_BLOG in (manufacture_description.sImgForBlogSocial or ""):
+            to_template.update({'IMG_FOR_BLOG': manufacture_description.sImgForBlogSocial})
+        content = re.sub(r'<cut[\s\S]*>', '', manufacture_description.sPostContent, 0, re.IGNORECASE)
+        to_template.update({'HEADER': manufacture_description.sPostHeader, 'CONTENT': content})
+        to_template.update({'TIZER': re.sub(
+            r'<script[\s\S]*?</script>|<style[\s\S]*?</style>|<iframe[\s\S]*?</iframe>',
+            '', content, 0, re.IGNORECASE,
+        )})
+    except (ObjectDoesNotExist, IndexError, TypeError, KeyError):
+        pass
+
+    # Список всех профилей этого производителя для навигации по карточкам.
+    q_profiles = (
+        PVCprofiles.objects.filter(sProfileManufacturer=q_pvc_by_id.sProfileManufacturer)
+        .values("id", "fProfileRating", "sProfileBriefDescription", "sProfileName")
+        .order_by("fProfileRating")
+    )
+    to_template.update({'PROFILES': [_profile_row_to_dict(p) for p in q_profiles]})
+
+    try:
+        # Доля предложений этого производителя относительно всех предложений в базе.
+        offers_by_manufacture = PriceOffer.objects.filter(
+            kOffer2SetKit__kSet2PVCprofiles__sProfileManufacturer=q_pvc_by_id.sProfileManufacturer,
+        ).count()
+        total_offers = PriceOffer.objects.count()
+        offers_other = total_offers - offers_by_manufacture
+        to_template.update({
+            'OFFERS_BY_MAUFACTURE': offers_by_manufacture,
+            'OFFERS_OTHER': offers_other,
+            'OFFERS_ANGLE': 90 + 180 * normalize(offers_by_manufacture, total_offers),
+        })
+        if offers_by_manufacture > 0:
+            # Партнёры, у которых есть предложения с профилями этого производителя.
+            q_merchant = (
+                PriceOffer.objects.filter(
+                    kOffer2SetKit__kSet2PVCprofiles__sProfileManufacturer=q_pvc_by_id.sProfileManufacturer,
+                )
+                .values(
+                    "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id",
+                    "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName",
+                    "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo",
+                )
+                .annotate(offers_by_merchant=Count("id"))
+                .order_by(
+                    "-offers_by_merchant",
+                    "kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName",
+                )
+            )
+            to_template.update({'MERCHANTS': [_merchant_row_to_dict(row) for row in q_merchant]})
+    except (ObjectDoesNotExist, IndexError, TypeError):
+        pass
+    _append_visit_context(to_template, request, time_start)
     return render(request, "catalog/catalog_of_profiles_manufacture.html", to_template)
 
