@@ -218,7 +218,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CAPTCHA_PUBLIC_KEY = env('CAPTCHA_PUBLIC_KEY', default='')
 CAPTCHA_PRIVATE_KEY = env('CAPTCHA_PRIVATE_KEY', default='')
 
-# количество коммерческих предложений во фреме отчета
+# если непонятно какая серия выбрана через каталог (finger fix) выбираем серию типового строения:
+DEFAULT_SERIA_ID_FOR_CATALOG = 843 # СЕРИЯ 1-515/9 -- дом в котором я живу
+
+# количество коммерческих предложений во фрейме отчета
 OFFER_PER_FRAME = 5
 OFFER_PER_FRAME_FOR_ONE_FLAP = 10
 # папка для хранения изображений
