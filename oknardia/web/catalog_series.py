@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import F
+from django.db.models import Count, F, IntegerField, Value
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
 from oknardia.settings import *
 from oknardia.models import (
+    Apartment_Type,
+    MountDim2Apartment,
+    PriceOffer,
     Seria_Info,
     Win_MountDim,
     Building_Info,
@@ -31,10 +34,10 @@ def _append_visit_context(to_template: dict, request: HttpRequest, time_start: f
         'ticks': float(time.perf_counter() - time_start),
     })
 
-# Каталог типовых серий зданий (пока переадресация)
+# Каталог типовых серий зданий.
 def catalog_seria(request: HttpRequest) -> HttpResponse:
     """
-    КАТАЛОГ ТИПОВЫЙ СЕРИЙ: страница со всеми сериями зданий в базе окнардии
+    КАТАЛОГ ТИПОВЫХ СЕРИЙ: выводит список корневых серий из каталога.
 
     :param request: HttpRequest -- входящий http-запрос
     :return response: HttpResponse -- исходящий http-ответ
@@ -61,180 +64,175 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
     return render(request, "catalog/catalog_seria.html", to_template)
 
 
-def catalog_seria_info(request: HttpRequest, seria_name_translit: None, seria_id: int = 843) -> HttpResponse:
+def catalog_seria_info(
+    request: HttpRequest,
+    seria_name_translit: str | None,
+    seria_id: int = DEFAULT_SERIA_ID_FOR_CATALOG,
+) -> HttpResponse:
     """
-    КАТАЛОГ ТИПОВЫЙ СЕРИЙ: страница детальной информацией по серии зданий
+    КАТАЛОГ ТИПОВОЙ СЕРИИ: детальная страница по серии домов.
+
+    Что делает вьюха:
+    - канонизирует URL (root-id серии + корректный slug),
+    - собирает таблицу окон по типам квартир,
+    - для "тяжелого" режима дополнительно готовит навигацию/график/гео-данные
+      и сохраняет pre-render include-шаблон для последующих быстрых ответов.
 
     :param request: HttpRequest -- входящий http-запрос
-    :param seria_name_translit: str -- имя серии здания (транслитерированное pytils.translit.slugify())
+    :param seria_name_translit: str -- имя серии здания (транслитерированное через pytils)
     :param seria_id: int -- id серии
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.perf_counter()
-    msg = ""
+    # Канонизируем URL: страница серии должна открываться только по корневой серии и правильному slug.
     try:
         seria_id = int(seria_id)
-        q_seria = Seria_Info.objects.get(id=seria_id)
+        q_seria = Seria_Info.objects.only("id", "kRoot_id", "sName").get(id=seria_id)
         if q_seria.id != q_seria.kRoot_id or seria_name_translit != pytils.translit.slugify(q_seria.sName):
             return redirect(f"/catalog/seria/{pytils.translit.slugify(q_seria.sName)}/all{seria_id}")
-    except(ObjectDoesNotExist, ValueError,):
+    except (ObjectDoesNotExist, ValueError):
         return redirect("/catalog/")
-    # если есть "облегченный" шаблон с частичным пре-рендером, то используем его.
-    light_template = f"{PATH_FOR_SERIA_INFO_HTML_INCLUDE}{str(seria_id)}_id.html"
+
+    # Если есть "облегченный" шаблон с частичным pre-render, используем его.
+    light_template = f"{PATH_FOR_SERIA_INFO_HTML_INCLUDE}{seria_id}_id.html"
     light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
-    # print(f"{TEMPLATES[0]['DIRS'][0]}/{light_template}")
-    # print(light_template_w_path)
-    # print(light_template_w_path)
-    if os.path.isfile(light_template_w_path):
-        is_hard_template = False
-    else:
-        is_hard_template = True
-    to_template: dict[str, object] ={}
-    # получаем проемы использующиеся в данной серии домов
-    q_windows_in_seria = Win_MountDim.objects.raw(
-        f"SELECT DISTINCT"
-        f"  oknardia_win_mountdim.iWinWidth,   oknardia_win_mountdim.iWinHight,"
-        f"  oknardia_win_mountdim.sDescripion, oknardia_win_mountdim.bIsDoor,"
-        f"  oknardia_win_mountdim.bIsNearDoor, oknardia_win_mountdim.sFlapConfig,"
-        f"  oknardia_win_mountdim.iWinDepth,   oknardia_win_mountdim.id,"
-        f"  1 AS iQuantity "
-        f"FROM oknardia_mountdim2apartment"
-        f"  INNER JOIN oknardia_win_mountdim"
-        f"    ON oknardia_mountdim2apartment.kMountDim_id = oknardia_win_mountdim.id"
-        f"  INNER JOIN oknardia_apartment_type"
-        f"    ON oknardia_mountdim2apartment.kApartment_id = oknardia_apartment_type.id "
-        f"WHERE oknardia_apartment_type.kSeria_id = {seria_id}"
-        f"  ORDER BY oknardia_win_mountdim.bIsNearDoor DESC,"
-        f"           oknardia_win_mountdim.bIsDoor DESC,"
-        f"           oknardia_win_mountdim.iWinWidth,"
-        f"           oknardia_win_mountdim.iWinHight DESC;")
+    is_hard_template = not os.path.isfile(light_template_w_path)
+
+    to_template: dict[str, object] = {}
+    # Получаем все уникальные проемы серии и сразу добавляем iQuantity=1
+    # для совместимости с get_flaps_for_big_pictures().
+    list_win_in_seria = list(
+        Win_MountDim.objects.filter(kApartment__kSeria_id=seria_id)
+        .annotate(iQuantity=Value(1, output_field=IntegerField()))
+        .only(
+            "id",
+            "iWinWidth",
+            "iWinHight",
+            "sDescripion",
+            "bIsDoor",
+            "bIsNearDoor",
+            "sFlapConfig",
+            "iWinDepth",
+        )
+        .order_by("-bIsNearDoor", "-bIsDoor", "iWinWidth", "-iWinHight", "id")
+        .distinct()
+    )
+
     if is_hard_template:
-        # Получаем данные для отрисовки больших картинок с проёмами и передаём в "тяжёлый" шаблон
-        to_template.update(get_flaps_for_big_pictures(q_windows_in_seria))
-    # формируем строку для включения в SQL-запрос вида "(2,8,16,46,1)"
-    str_for_sql_in = "("
-    for count in q_windows_in_seria:
-        str_for_sql_in += str(count.id) + ","
-    str_for_sql_in = str_for_sql_in[:-1] + ")"
-    # print StringForSqlIN
-    # Получаем данные для таблички Окон по типам квартирах в серии дома
-    # "  IFNULL(oknardia_mountdim2apartment.iQuantity, 0) AS iQuantity," \
-    # tStart2 = time.perf_counter()     # замер времени
-    q_win_in_apartment_in_seria = Win_MountDim.objects.raw(
-        f"SELECT"
-        f"  oknardia_win_mountdim.id,"
-        f"  oknardia_apartment_type.sNameApartment,"
-        f"  oknardia_win_mountdim.iWinWidth,"
-        f"  oknardia_win_mountdim.iWinHight,"
-        f"  oknardia_apartment_type.id AS id_apart,"
-        f"  IFNULL(oknardia_mountdim2apartment.iQuantity, 0) AS iQuantity,"
-        f"  COUNT(oknardia_priceoffer.id) AS NumOffers "
-        f"FROM oknardia_apartment_type"
-        f"  INNER JOIN oknardia_win_mountdim"
-        f"  LEFT OUTER JOIN oknardia_mountdim2apartment"
-        f"    ON oknardia_mountdim2apartment.kMountDim_id = oknardia_win_mountdim.id"
-        f"    AND oknardia_mountdim2apartment.kApartment_id = oknardia_apartment_type.id"
-        f"  LEFT OUTER JOIN oknardia_priceoffer"
-        f"    ON oknardia_priceoffer.kOffer2MountDim_id = oknardia_win_mountdim.id"
-        f"  LEFT OUTER JOIN oknardia_ouruser"
-        f"    ON oknardia_ouruser.id = oknardia_priceoffer.kOfferFromUser_id "
-        f"WHERE oknardia_apartment_type.kSeria_id = {seria_id} "
-        f"AND oknardia_win_mountdim.id IN {str_for_sql_in} "
-        f"GROUP BY oknardia_apartment_type.id,"
-        f"         oknardia_apartment_type.sNameApartment,"
-        f"         oknardia_win_mountdim.id,"
-        f"         oknardia_mountdim2apartment.iQuantity "
-        f"ORDER BY oknardia_apartment_type.iSort,"
-        f"         oknardia_win_mountdim.bIsNearDoor DESC,"
-        f"         oknardia_win_mountdim.bIsDoor DESC,"
-        f"         oknardia_win_mountdim.iWinWidth,"
-        f"         oknardia_win_mountdim.iWinHight DESC;")
-    list_win_in_seria = list(q_windows_in_seria)
+        # Для "тяжелого" шаблона нужны большие картинки схем окон.
+        to_template.update(get_flaps_for_big_pictures(list_win_in_seria))
+
+    window_ids = [win.id for win in list_win_in_seria]
+    apartments_in_seria = list(
+        Apartment_Type.objects.filter(kSeria_id=seria_id)
+        .values("id", "sNameApartment")
+        .order_by("iSort", "id")
+    )
+    apartment_ids = [apartment["id"] for apartment in apartments_in_seria]
+
+    # Кэшируем количество проемов по паре (квартира, проем), чтобы не делать N*M обращений к БД.
+    quantities_by_pair = {
+        (row["kApartment_id"], row["kMountDim_id"]): row["iQuantity"]
+        for row in MountDim2Apartment.objects.filter(
+            kApartment_id__in=apartment_ids,
+            kMountDim_id__in=window_ids,
+        ).values("kApartment_id", "kMountDim_id", "iQuantity")
+    }
+    # Число офферов считаем один раз по каждому проему и переиспользуем при сборке таблицы.
+    offers_by_window = {
+        row["kOffer2MountDim_id"]: row["num_offers"]
+        for row in PriceOffer.objects.filter(kOffer2MountDim_id__in=window_ids)
+        .values("kOffer2MountDim_id")
+        .annotate(num_offers=Count("id"))
+    }
+
     total_column = len(list_win_in_seria) - 1
-    count_column = 0
-    min_offer_in_row = 1000000000
     table_of_win_in_seria_by_apartmment = []
-    row_for_table = []
     offer_and_merchant_per_win = [
         {
-            "WIN_OFFER": 0,
+            "WIN_OFFER": offers_by_window.get(list_win_in_seria[i].id, 0),
             "WIN_MERCHANT": 0,
             "WIN_W": list_win_in_seria[i].iWinWidth,
             "WIN_H": list_win_in_seria[i].iWinHight,
-            "WIN_ID": list_win_in_seria[i].id
-        } for i in range(total_column + 1)]
-    for count in q_win_in_apartment_in_seria:
-        if count.iQuantity != 0:
-            row_for_table.append({
-                "WIN_NUM": [chr(65 + count_column)],
-                "WIN_Q": count.iQuantity,
-                "WIN_ID": count.id,
-                "WIN_WIDTH": list_win_in_seria[count_column].iWinWidth,
-                "WIN_HEIGHT": list_win_in_seria[count_column].iWinHight,
-                "WIN_DESCRIPTION": list_win_in_seria[count_column].sDescripion,
-                "WIN_FLAPCFG": list_win_in_seria[count_column].sFlapConfig
-            })
-            if min_offer_in_row > count.NumOffers:
-                min_offer_in_row = count.NumOffers
-            if offer_and_merchant_per_win[count_column]["WIN_OFFER"] < count.NumOffers:
-                offer_and_merchant_per_win[count_column]["WIN_OFFER"] = count.NumOffers
-        else:
-            row_for_table.append({"WIN_NUM": "—"})
-        if count_column < total_column:
-            count_column += 1
-        else:
-            # print row_for_table
-            table_of_win_in_seria_by_apartmment.append({"WIN_IN_APART": row_for_table,
-                                                        "APART_NAME": count.sNameApartment,
-                                                        "APART_ID": count.id_apart,
-                                                        "NUM_OFFERS": min_offer_in_row})
-            count_column = 0
-            min_offer_in_row = 10000
-            row_for_table = []
-    # print(table_of_win_in_seria_by_apartmment)
-    # print(f"==============>{float(time.perf_counter()-tStart2)}<==============")
-    # print NumOffersPerColumn, NumMerchantPerColumn
-    to_template.update({"WIN_OFFER_AND_MERCHANT": offer_and_merchant_per_win,
-                        "TABLE_OF_WINDOWS": table_of_win_in_seria_by_apartmment})
-    # для "тяжелого шаблона" получаем навигацию страницы, данные для карты и графика ввода в эксплуатацию
+            "WIN_ID": list_win_in_seria[i].id,
+        }
+        for i in range(total_column + 1)
+    ]
+
+    for apartment in apartments_in_seria:
+        row_for_table = []
+        # None = в строке квартиры еще не встретилось ни одного окна.
+        min_offer_in_row = None
+        for count_column, window in enumerate(list_win_in_seria):
+            quantity = quantities_by_pair.get((apartment["id"], window.id), 0)
+            if quantity != 0:
+                num_offers = offers_by_window.get(window.id, 0)
+                row_for_table.append(
+                    {
+                        "WIN_NUM": [chr(65 + count_column)],
+                        "WIN_Q": quantity,
+                        "WIN_ID": window.id,
+                        "WIN_WIDTH": window.iWinWidth,
+                        "WIN_HEIGHT": window.iWinHight,
+                        "WIN_DESCRIPTION": window.sDescripion,
+                        "WIN_FLAPCFG": window.sFlapConfig,
+                    }
+                )
+                if min_offer_in_row is None or min_offer_in_row > num_offers:
+                    min_offer_in_row = num_offers
+            else:
+                row_for_table.append({"WIN_NUM": "—"})
+
+        table_of_win_in_seria_by_apartmment.append(
+            {
+                "WIN_IN_APART": row_for_table,
+                "APART_NAME": apartment["sNameApartment"],
+                "APART_ID": apartment["id"],
+                # Если у серии нет ни одного окна, показываем 0 вместо служебного sentinel.
+                "NUM_OFFERS": 0 if min_offer_in_row is None else min_offer_in_row,
+            }
+        )
+
+    to_template.update(
+        {
+            "WIN_OFFER_AND_MERCHANT": offer_and_merchant_per_win,
+            "TABLE_OF_WINDOWS": table_of_win_in_seria_by_apartmment,
+        }
+    )
+
+    # Для "тяжелого" шаблона получаем навигацию, карту и график, затем кэшируем pre-render.
     if is_hard_template:
-        # если вызывается "тяжелый" шаблон, то нужно подготовить тяжелые данные для построения навигации
         seria_id, for_seria_nav = seria_nav(seria_id)
-        to_template.update(for_seria_nav)  # данные для навигации по сериям
-        to_template.update(seria_info_year(seria_id))  # данные для графика ввода зданий серии в эксплуатацию
-        to_template.update(seria_info_geo_code(seria_id))  # данные для карты
-        # т.к. обрабатывается "тяжелый шаблон" надо создать "легкий шаблон"
-        # для его использования в будущем.
+        to_template.update(for_seria_nav)
+        to_template.update(seria_info_year(seria_id))
+        to_template.update(seria_info_geo_code(seria_id))
         string_prerender = render_to_string("seria_info/all_seria_info_pre_light.html", to_template)
-        file = open(light_template_w_path, 'w')
-        # file.write(AA.encode('utf-8'))
-        file.write(string_prerender)
-        file.close()
+        with open(light_template_w_path, "w", encoding="utf-8") as file:
+            file.write(string_prerender)
         touch_reload_wsgi(light_template_w_path)
     else:
-        seria_name = Seria_Info.objects.get(id=seria_id).sName
-        to_template.update({'THIS_SERIA_NAME': seria_name})
+        to_template.update({"THIS_SERIA_NAME": q_seria.sName})
 
     _append_visit_context(to_template, request, time_start)
     return render(request, light_template, to_template)
 
 
-def seria_nav(seria_id: int = 12) -> (int, dict):
+def seria_nav(seria_id: int = DEFAULT_SERIA_ID_FOR_CATALOG) -> tuple[int, dict]:
     """
-    Возвращает корректный seria_id и кортеж для построения навигации по сериям дома
+    Возвращает корректный seria_id и данные навигации по корневым сериям.
+
+    Если переданный seria_id невалиден, подбирает ближайший допустимый root-id.
 
     :param seria_id: id серии
-    :return:
+    :return: tuple[int, dict] -- (seria_id, {"SERIA_NAV_DIM": ..., "THIS_SERIA_*": ...})
     """
-    q_seria = Seria_Info.objects.raw(
-        'SELECT  oknardia_seria_info.id,'
-        '        oknardia_seria_info.sName,'
-        '        oknardia_seria_info.sSeriaDescription,'
-        '        oknardia_seria_info.kRoot_id,'
-        '        oknardia_seria_info.kParent_id '
-        'FROM oknardia_seria_info '
-        'WHERE oknardia_seria_info.id = oknardia_seria_info.kRoot_id '
-        'ORDER BY oknardia_seria_info.sName;')
+    q_seria = list(
+        Seria_Info.objects.filter(id=F("kRoot_id"))
+        .only("id", "sName", "sSeriaDescription", "kRoot_id", "kParent_id")
+        .order_by("sName")
+    )
+    if not q_seria:
+        return seria_id, {"SERIA_NAV_DIM": []}
     error_seria = True
     for count_seria in q_seria:
         if count_seria.id == int(seria_id):
@@ -248,9 +246,9 @@ def seria_nav(seria_id: int = 12) -> (int, dict):
                 # базовая серия прописана в kRoot_id
                 seria_id = query.kRoot_id
             else:
-                # == корневой нет
-                # == ищем методом наименьших расстояний"
-                min_min = 100000000
+                # Корневой серии нет.
+                # Ищем методом наименьших расстояний
+                min_min = 100_000_000
                 min_id = seria_id
                 for count_seria in q_seria:
                     if math.fabs(int(seria_id) - count_seria.id) < min_min:
@@ -259,33 +257,46 @@ def seria_nav(seria_id: int = 12) -> (int, dict):
                 seria_id = min_id
         except ObjectDoesNotExist:
             seria_id = q_seria[0].id
-    # print(f"-->{seria_id}<--")
     return all_seria_nav(seria_id, q_seria)
 
 
-def all_seria_nav(seria_id: int, q_seria) -> (int, dict):
+def all_seria_nav(seria_id: int, q_seria) -> tuple[int, dict]:
+    """
+    Формирует структуру навигации по сериям для шаблонов.
+
+    :param seria_id: активный id серии
+    :param q_seria: коллекция серий (ORM-объекты или dict из values())
+    :return: tuple[int, dict] -- (seria_id, словарь с SERIA_NAV_DIM и данными активной серии)
+    """
     seria_nav_dim = []
     this_return = {}
+    # Поддерживаем оба формата входных элементов: ORM-объекты и dict из values().
     for count_seria in q_seria:
-        one_seria = {}
-        one_seria.update({"SERIA_R": count_seria.sName, "ID2URL": count_seria.id})
-        if count_seria.id == seria_id:
-            this_return.update({"THIS_SERIA_NAME": count_seria.sName,
-                                "THIS_SERIA_DESCRIPTION": count_seria.sSeriaDescription})
-            # one_seria.update({"SERIA_L": ""})
-            one_seria.update({"SERIA_L": pytils.translit.slugify(count_seria.sName)})
-        else:
-            one_seria.update({"SERIA_L": pytils.translit.slugify(count_seria.sName)})
+        seria_name = count_seria["sName"] if isinstance(count_seria, dict) else count_seria.sName
+        seria_id_value = count_seria["id"] if isinstance(count_seria, dict) else count_seria.id
+        seria_description = (
+            count_seria.get("sSeriaDescription")
+            if isinstance(count_seria, dict)
+            else count_seria.sSeriaDescription
+        )
+        one_seria = {
+            "SERIA_R": seria_name,
+            "ID2URL": seria_id_value,
+            "SERIA_L": pytils.translit.slugify(seria_name),
+        }
+        if seria_id_value == seria_id:
+            this_return.update({"THIS_SERIA_NAME": seria_name,
+                                "THIS_SERIA_DESCRIPTION": seria_description})
         seria_nav_dim.append(one_seria)
     this_return.update({"SERIA_NAV_DIM": seria_nav_dim})
     return seria_id, this_return
 
 
-def seria_info_year(seria_id: int = 12) -> dict:
-    """  Возвращает данные для графика распределения сдачи серии в эксплуатацию
+def seria_info_year(seria_id: int = DEFAULT_SERIA_ID_FOR_CATALOG) -> dict:
+    """Возвращает данные для графика ввода домов серии в эксплуатацию.
 
-    :param seria_id: int -- id серии для которой нужно получить данные
-    :return: dict -- данные для графика распределения сдачи серии в эксплуатацию типа:
+    :param seria_id: int -- id корневой серии
+    :return: dict -- данные для графика по годам вида:
                      {"DATA4GRAPH": [{'YEAR': 1997, 'NUMS': 1, 'CLRS': '99'},
                                      {'YEAR': 1998, 'NUMS': 15, 'CLRS': 'сс'},
                                      {'YEAR': 1998, 'NUMS': 10, 'CLRS': 'a9'}
@@ -293,43 +304,52 @@ def seria_info_year(seria_id: int = 12) -> dict:
                      }
     """
     seria_in_years = []
-    query = Seria_Info.objects.raw(
-        f"SELECT oknardia_building_info.iCommissioning_year as id,"
-        f"       COUNT(oknardia_building_info.iCommissioning_year) AS NumInYear "
-        f"FROM oknardia_building_info"
-        f"  INNER JOIN oknardia_seria_info"
-        f"    ON oknardia_building_info.kSeria_Link_id = oknardia_seria_info.id "
-        f"WHERE oknardia_seria_info.kRoot_id = {seria_id} "
-        f"GROUP BY oknardia_building_info.iCommissioning_year;"
+    query = list(
+        Building_Info.objects.filter(kSeria_Link__kRoot_id=seria_id)
+        .values("iCommissioning_year")
+        .annotate(NumInYear=Count("iCommissioning_year"))
+        .order_by("iCommissioning_year")
     )
     max_per_year = 0
     graph_color_light = 0xCC  # самый светлый цвет на графике (максимальное значение)
     graph_color_dark = 0x99  # самый темный цвет на графике (минимальное значение)
-    for YearCount in query:
-        if int(YearCount.NumInYear) > max_per_year:
-            max_per_year = int(YearCount.NumInYear)
-    # print("max", MaxPerYear)
-    for YearCount in query:
+    for year_count in query:
+        if int(year_count["NumInYear"]) > max_per_year:
+            max_per_year = int(year_count["NumInYear"])
+    for year_count in query:
         data_of_year = {}
         try:
             data_of_year.update({
-                "YEAR": int(YearCount.id),
-                "NUMS": YearCount.NumInYear,
-                "CLRS": str(hex(int(graph_color_dark + YearCount.NumInYear * (
+                "YEAR": int(year_count["iCommissioning_year"]),
+                "NUMS": year_count["NumInYear"],
+                "CLRS": str(hex(int(graph_color_dark + year_count["NumInYear"] * (
                         graph_color_light - graph_color_dark) / max_per_year)))[2:]
             })
         except ValueError:
             continue
         seria_in_years.append(data_of_year)
-    # print(seria_in_years)
     return {"DATA4GRAPH": seria_in_years}
 
 
-def seria_info_geo_code(seria_id: str = '12') -> dict:
-    """ Возвращает массив геокоординат зданий одной серии
+def seria_info_geo_code(seria_id: int | str = DEFAULT_SERIA_ID_FOR_CATALOG) -> dict:
+    """Возвращает гео-точки и агрегированную статистику по серии.
 
-    :param seria_id: str -- id серии для которой нужно получить данные
-    :return: dict -- массив геокоординат зданий серии
+    Кроме массива координат, функция считает суммарные показатели серии:
+    жилые/муниципальные/государственные площади, число жителей, квартир,
+    лицевых счетов и диапазон показателя состояния домов.
+
+    :param seria_id: int | str -- id серии, для которой нужно получить данные
+    :return: dict -- {
+        "DATA4GEO": [...],
+        "MUNICIPAL_M2": ...,
+        "RESIDENTIAL_M2": ...,
+        "GOVERNMENT_M2": ...,
+        "RESIDENTS": ...,
+        "APARTMENTS": ...,
+        "ACCOUNTS": ...,
+        "CONDITION_MAX": ...,
+        "CONDITION_MIN": ...,
+    }
     """
     data_return = {}
     seria_to_geo = []
@@ -337,57 +357,61 @@ def seria_info_geo_code(seria_id: str = '12') -> dict:
     residential_m2 = 0  # жилой фонд (кв.м)
     government_m2 = 0  # государственные учреждения занимают (кв.м.)
     residents = 0  # количество жильцов
-    apartments = 0  # число квартиры
+    apartments = 0  # число квартир
     accounts = 0  # количество лицевых счетов
     condition_max = 0  # максимальное значение показателя состояния здания
-    condition_min = 1000000  # минимальное значение показателя состояния здания
-    query = Building_Info.objects.raw(
-        f"SELECT"
-        f"  oknardia_building_info.id,"
-        f"  oknardia_seria_info.kRoot_id as SerId,"
-        f"  oknardia_building_info.sAddress,"
-        f"  oknardia_building_info.fResidential_Area,"
-        f"  oknardia_building_info.fMunicipal_Area,"
-        f"  oknardia_building_info.fGovernment_Area,"
-        f"  oknardia_building_info.iNum_Residents,"
-        f"  oknardia_building_info.iNum_Apartments,"
-        f"  oknardia_building_info.iNum_Accounts,"
-        f"  oknardia_building_info.fCondition_House,"
-        f"  oknardia_building_info.fGeoCode_Latitude,"
-        f"  oknardia_building_info.fGeoCode_Longitude "
-        f"FROM oknardia_building_info"
-        f"  INNER JOIN oknardia_seria_info"
-        f"    ON oknardia_building_info.kSeria_Link_id = oknardia_seria_info.id "
-        f"WHERE oknardia_seria_info.kRoot_id IN ({seria_id});"
+    condition_min = 1_000_000  # минимальное значение показателя состояния здания
+    query = Building_Info.objects.filter(kSeria_Link__kRoot_id=int(seria_id)).values(
+        "id",
+        "kSeria_Link__kRoot_id",
+        "sAddress",
+        "fResidential_Area",
+        "fMunicipal_Area",
+        "fGovernment_Area",
+        "iNum_Residents",
+        "iNum_Apartments",
+        "iNum_Accounts",
+        "fCondition_House",
+        "fGeoCode_Latitude",
+        "fGeoCode_Longitude",
     )
-    for count in query:
-        if int(count.fGeoCode_Latitude) != 0 and int(count.fGeoCode_Longitude) != 0:
-            seria_to_geo.append({"LATITUDE": count.fGeoCode_Latitude,
-                                 "LONGITUDE": count.fGeoCode_Longitude,
-                                 "ADDR_ID": count.id,
-                                 "ADDR_LAT": pytils.translit.slugify(count.sAddress),
-                                 "ADDR_RUS": count.sAddress,
-                                 "SER_ID": count.SerId
+    # iterator() уменьшает пиковое потребление памяти на больших сериях домов.
+    for count in query.iterator(chunk_size=500):
+        latitude = count["fGeoCode_Latitude"] or 0
+        longitude = count["fGeoCode_Longitude"] or 0
+        municipal_area = count["fMunicipal_Area"] or 0
+        residential_area = count["fResidential_Area"] or 0
+        government_area = count["fGovernment_Area"] or 0
+        num_residents = count["iNum_Residents"] or 0
+        num_apartments = count["iNum_Apartments"] or 0
+        num_accounts = count["iNum_Accounts"] or 0
+        house_condition = count["fCondition_House"] or 0
+
+        if int(latitude) != 0 and int(longitude) != 0:
+            seria_to_geo.append({"LATITUDE": latitude,
+                                 "LONGITUDE": longitude,
+                                 "ADDR_ID": count["id"],
+                                 "ADDR_LAT": pytils.translit.slugify(count["sAddress"]),
+                                 "ADDR_RUS": count["sAddress"],
+                                 "SER_ID": count["kSeria_Link__kRoot_id"]
                                  })
-        if count.fMunicipal_Area > 0:
-            municipal_m2 += count.fMunicipal_Area
-        if count.fResidential_Area > 0:
-            residential_m2 += count.fResidential_Area
-        if count.fGovernment_Area > 0:
-            government_m2 += count.fGovernment_Area
-        if count.iNum_Residents > 0:
-            residents += count.iNum_Residents
-        if count.iNum_Residents > 0:
-            residents += count.iNum_Residents
-        if count.iNum_Apartments > 0:
-            apartments += count.iNum_Apartments
-        if count.iNum_Accounts > 0:
-            accounts += count.iNum_Accounts
-        if count.fCondition_House > 0:
-            if count.fCondition_House > condition_max:
-                condition_max = count.fCondition_House
-            if count.fCondition_House < condition_min:
-                condition_min = count.fCondition_House
+        if municipal_area > 0:
+            municipal_m2 += municipal_area
+        if residential_area > 0:
+            residential_m2 += residential_area
+        if government_area > 0:
+            government_m2 += government_area
+        if num_residents > 0:
+            residents += num_residents
+        if num_apartments > 0:
+            apartments += num_apartments
+        if num_accounts > 0:
+            accounts += num_accounts
+        if house_condition > 0:
+            if house_condition > condition_max:
+                condition_max = house_condition
+            if house_condition < condition_min:
+                condition_min = house_condition
     data_return.update({"DATA4GEO": seria_to_geo,
                         "MUNICIPAL_M2": municipal_m2,
                         "RESIDENTIAL_M2": residential_m2,
@@ -397,5 +421,4 @@ def seria_info_geo_code(seria_id: str = '12') -> dict:
                         "ACCOUNTS": accounts,
                         "CONDITION_MAX": condition_max,
                         "CONDITION_MIN": condition_min})
-    # print(seria_to_geo)
     return data_return
