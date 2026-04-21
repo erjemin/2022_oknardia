@@ -233,6 +233,26 @@ python manage.py remove_stale_contenttypes  # Удалить устаревши�
 # Служебные
 python manage.py check                   # Проверить конфигурацию
 python manage.py check --deploy          # Проверка для продакшена
+python manage.py generate_sitemaps       # Оффлайн генерация sitemap XML
+python manage.py regenerate_seria_prerender --dry-run  # Проверка пересборки pre-render шаблонов серий
+python manage.py regenerate_seria_prerender --force    # Принудительная пересборка pre-render шаблонов серий
+```
+
+### Пересборка pre-render шаблонов серий (рекомендуемый сценарий)
+
+Шаблоны для `catalog_seria_info` пересобираются оффлайн management-командой, без reload из кода Django.
+
+```bash
+cd /path/to/project
+poetry run python oknardia/manage.py regenerate_seria_prerender --force
+# затем (опционально) один внешний reload процесса приложения, если это требуется вашей конфигурацией
+# sudo systemctl reload gunicorn
+```
+
+Для выборочной пересборки используйте `--seria-id` несколько раз:
+
+```bash
+poetry run python oknardia/manage.py regenerate_seria_prerender --seria-id 843 --seria-id 2100 --force
 ```
 
 ## 📚 Дополнительные ресурсы
@@ -240,7 +260,6 @@ python manage.py check --deploy          # Проверка для продак�
 - [Django документация](https://docs.djangoproject.com/en/stable/)
 - [AGENTS.md](./AGENTS.md) — архитектура и конвенции проекта
 - [README.md](./README.md) — основная информация о проекте
-- [SECURITY_AUDIT_REPORT.md](./SECURITY_AUDIT_REPORT.md) — отчёт безопасности
 
 ## ❓ Решение проблем
 

@@ -14,7 +14,7 @@ from oknardia.models import (
     Building_Info,
 )
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
-from web.add_func import get_flaps_for_big_pictures, touch_reload_wsgi
+from web.add_func import get_flaps_for_big_pictures
 import time
 import os
 import math
@@ -217,7 +217,6 @@ def catalog_seria_info(
             string_prerender = render_to_string("seria_info/all_seria_info_pre_light.html", to_template)
             with open(light_template_w_path, "w", encoding="utf-8") as file:
                 file.write(string_prerender)
-            touch_reload_wsgi(light_template_w_path)
     else:
         to_template.update({"THIS_SERIA_NAME": q_seria.sName})
 
@@ -346,7 +345,7 @@ def seria_info_geo_code(seria_id: int | str = DEFAULT_SERIA_ID_FOR_CATALOG) -> d
     жилые/муниципальные/государственные площади, число жителей, квартир,
     лицевых счетов и диапазон показателя состояния домов.
 
-    :param seria_id: int | str -- id серии, для которой нужно получить данные
+    :param seria_id: int | str -- id серии, для которой нужно получить данные.
     :return: dict -- {
         "DATA4GEO": [...],
         "MUNICIPAL_M2": ...,
