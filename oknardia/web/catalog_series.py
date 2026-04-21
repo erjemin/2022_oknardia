@@ -93,10 +93,17 @@ def catalog_seria_info(
     except (ObjectDoesNotExist, ValueError):
         return redirect("/catalog/")
 
-    # Если есть "облегченный" шаблон с частичным pre-render, используем его.
-    light_template = f"{PATH_FOR_SERIA_INFO_HTML_INCLUDE}{seria_id}_id.html"
-    light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
-    is_hard_template = not os.path.isfile(light_template_w_path)
+    # В DEV отключаем pre-render cache: всегда рендерим «тяжелый» шаблон напрямую,
+    # чтобы тестировать актуальную серверную логику, а не сохраненный html-файл.
+    if DEBUG:
+        light_template = "seria_info/all_seria_info_pre_light.html"
+        light_template_w_path = ""
+        is_hard_template = True
+    else:
+        # В PROD используем существующий pre-render include при наличии на диске.
+        light_template = f"{PATH_FOR_SERIA_INFO_HTML_INCLUDE}{seria_id}_id.html"
+        light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
+        is_hard_template = not os.path.isfile(light_template_w_path)
 
     to_template: dict[str, object] = {}
     # Получаем все уникальные проемы серии и сразу добавляем iQuantity=1
@@ -206,10 +213,11 @@ def catalog_seria_info(
         to_template.update(for_seria_nav)
         to_template.update(seria_info_year(seria_id))
         to_template.update(seria_info_geo_code(seria_id))
-        string_prerender = render_to_string("seria_info/all_seria_info_pre_light.html", to_template)
-        with open(light_template_w_path, "w", encoding="utf-8") as file:
-            file.write(string_prerender)
-        touch_reload_wsgi(light_template_w_path)
+        if not DEBUG:
+            string_prerender = render_to_string("seria_info/all_seria_info_pre_light.html", to_template)
+            with open(light_template_w_path, "w", encoding="utf-8") as file:
+                file.write(string_prerender)
+            touch_reload_wsgi(light_template_w_path)
     else:
         to_template.update({"THIS_SERIA_NAME": q_seria.sName})
 
