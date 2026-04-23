@@ -3,8 +3,6 @@ __author__ = 'Sergei Erjemin'
 
 from PIL import Image, ImageDraw
 from oknardia.settings import *
-import django.utils.dateformat
-import django.utils.timezone
 import os
 import math
 import re
@@ -586,11 +584,4 @@ def sum_through(string_w_slash: str) -> int:
     return sum_result
 
 
-def touch_reload_wsgi(s: str = ''):
-    """ Функция перезагружает WSGI-сервер.
-
-    :return: None
-    """
-    with open(TOUCH_RELOAD, 'a', encoding="utf-8") as f:
-        f.write(f'\nreload wsgi by cash-template - {s} - '
-                f'{django.utils.dateformat.format(django.utils.timezone.now(), "Y-m-d H:i:s")}')
+# Удалить: touch_reload_wsgi() — серверный reload теперь оркестрируется внешним процесс-менеджером.
