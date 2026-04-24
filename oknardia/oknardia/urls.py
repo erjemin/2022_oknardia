@@ -57,21 +57,21 @@ urlpatterns = [
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
     # --- КАТАЛОГ
-    re_path(r'^catalog[/*]$', catalog.catalog_root),
+    re_path(r'^catalog[/*]$', catalog.catalog_root),  # ГЛАВНАЯ СТРАНИЦА КАТАЛОГА
     # --- --- КАТАЛОГ ПРОФИЛЕЙ
-    re_path(r'^catalog/profile[/*]$', catalog_profiles.catalog_profile),
+    re_path(r'^catalog/profile[/*]$', catalog_profiles.catalog_profile), # СПИСОК ВСЕХ ПРОФИЛЕЙ И ПРОИЗВОДИТЕЛЕЙ
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
             r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
-            catalog_profiles.catalog_profile_model),
+            catalog_profiles.catalog_profile_model), # КАРТОЧКА ПРОФИЛЯ (ИЛИ ПРОИЗВОДИТЕЛЯ)
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
             catalog_profiles.catalog_profile_manufacture),
-    # --- --- Каталог серий типового строительства
-    re_path(r'^catalog/seria[/*]$', catalog_series.catalog_seria),
+    # --- --- КАТАЛОГ СЕРИЙ ТИПОВОГО СТРОИТЕЛЬСТВА
+    re_path(r'^catalog/seria[/*]$', catalog_series.catalog_seria), # СПИСОК ВСЕХ СЕРИЙ ЗДАНИЙ
     re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$',
-            catalog_series.catalog_seria_info),
+            catalog_series.catalog_seria_info), # КАРТОЧКА СЕРИИ ДОМА И ЕЕ СТАТИСТИКА
     re_path(r'^seria_[^/]*/all(?P<seria_id>\d+)/\S*$', catalog.report_all_info_seria_redirect),   # для старых ссылок
-    # --- --- Каталог стандартных проёмов и схем открывания длч типовых серий строительства
-    re_path(r'^catalog/standard_opening[/*]$', catalog_openings.standard_opening),
+    # --- --- КАТАЛОГ СТАНДАРТНЫХ ПРОЁМОВ И СХЕМ ОТКРЫВАНИЯ ДЛЧ ТИПОВЫХ СЕРИЙ СТРОИТЕЛЬСТВА
+    re_path(r'^catalog/standard_opening[/*]$', catalog_openings.standard_opening), # СТРАНИЦА С ТАБЛИЦЕЙ ПРОЁМОМ
     # --- --- Каталог производителей окон
     re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company),
     re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
