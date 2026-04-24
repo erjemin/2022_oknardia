@@ -16,7 +16,7 @@
 * Рефакторинг `catalog_seria` (`/catalog/seria/`): raw SQL ⟶ ORM для списка корневых серий, подготовка данных упрощена, хвост контекста с визитами и `ticks` вынесен в общий helper внутри `catalog_series.py`.
 * Рефакторинг `catalog_seria_info` и связанных функций в `catalog_series.py`: raw SQL ⟶ ORM (`catalog_seria_info`, `seria_nav`, `seria_info_year`, `seria_info_geo_code`), снижена нагрузка на БД за счёт предвыборки и переиспользования агрегатов (`quantities_by_pair`, `offers_by_window`), добавлены безопасные fallback-значения для пустых выборок, включена потоковая обработка `iterator(chunk_size=500)` для гео-данных, обновлены комментарии и docstring под фактическую логику (таблица окон, pre-render light/heavy шаблонов, гео+статистика серии).
 * Добавлена management-команда `regenerate_seria_prerender` для оффлайн-пересборки pre-render шаблонов `catalog_seria_info` (все или выбранные root-серии), с режимами `--dry-run` и `--force`; серверный reload (Gunicon? uWSGI или что там еще будет) должен быть вынесен из кода приложения в оркестрацию (cron/systemd/deploy step).
-* 
+* Рефакторинг `standard_opening`: raw SQL -> ORM, упрощена дедублекация, убраны лишние запросы и переменные контекста, добавлены комментарии, SEO-описание и keywords, стандартизирован хвост контекста с визитами и `ticks` через общий helper внутри `catalog_openings.py`.
 * 
 * 
 * 
@@ -36,7 +36,6 @@
 * [`AGENTS.md`](AGENTS.md) – контекст проекта для AI-ассистентов (архитектура, конвенции, рабочие сценарии).
 * [`SETUP.md`](SETUP.md) – пошаговая настройка окружения, запуск проекта и базовые команды разработки.
 * [`MANAGEMENT_RUNBOOK.md`](MANAGEMENT_RUNBOOK.md) – единый runbook по management-командам и batch-операциям.
-
 
 
 ---

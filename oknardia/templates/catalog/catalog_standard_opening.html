@@ -1,12 +1,12 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %} Стандартные оконные проёмы типовых серий домов :: каталог{% endblock %}
+{% block Title %}Стандартные оконные проёмы и балконные блоки для типовых серий домов: размеры, схемы, каталог{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов...{% endblock %}
+{% block Description %}Найдите точные размеры (ширину и высоту) и схемы стандартных оконных проёмов и балконных блоков для самых распространённых типовых серий домов в России. Удобный каталог для подбора окон.{% endblock %}
 
-{% block Keywords %}оконные проёмы, стандартные окна, стандартные оконные проемы, каталог, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}типовые окна, размеры окон, оконные проемы, балконный блок, стандартные окна, размеры окон в панельном доме, серия дома, каталог окон, схемы открывания окон, П-44, II-49, 1-515, oknardia, окнардия{% endblock %}
 
 {% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
 
@@ -58,18 +58,18 @@
       <ol class="breadcrumb">
         <li><a href="/">Главная</a></li>
         <li><a href="/catalog">Каталог</a></li>
-        <li>Оконные проёмы и балконные блоки</li>
+        <li>Оконные проёмы и&nbsp;балконные блоки</li>
       </ol>
     </div>
   </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
   <dIv class="row">
     {# ПЕРВЫЙ РАЗДЕЛ #}<div class="col-md-9 col-xs-8">
-      <h1>Стандартные оконные проёмы и&nbsp;балконные блоки</h1>
-      <p>Ценовая выдача «Окнардии» основана на базе стандартных оконных проёмов в типовых сериях домов. Для каждого проёма существуют рекомендованные организациями-проектировщиками схемы открывание, но партнёры «Окнардии» могут предложить свои, более расширенные или наоборот сокращенные. В таблице приведены параметры стандартных проёмов базы.</p>
+    <h1>Стандартные оконные проёмы и&nbsp;балконные блоки</h1>
+    <p>Ценовая выдача «Окнардии» основана на&nbsp;базе стандартных оконных проёмов в&nbsp;типовых сериях домов. Для&nbsp;каждого проёма существуют рекоме&shy;ндованные органи&shy;зациями-проекти&shy;ровщиками схемы открывание, но&nbsp;партнёры «Окнардии» могут предложить свои, более расширенные или наоборот сокращенные. В&nbsp;таблице приведены параметры стандартных проёмов базы.</p>
     </div>
     {# реклама Oknardia 250x250 СБОКУ #}<div class="col-md-3 col-xs-4 float-right">{% include "ad/bannet-250x250.html" %}</div>
     <div class="col-md-11 col-xs-12 catalog scrolled">
-      <table class="table-striped table-hover table-responsive flap-catalog">
+      <table class="table-striped table-hover table-responsive flap-catalog" style="margin-top: 1em">
         <thead>
         <tr>
           <th colspan="3" class="c">Размеры (мм)</th>
@@ -98,24 +98,15 @@
           <td>{{ i.DESCRIPTION }}</td>
           <td>{% for j in i.INCLUDING_IN_SERIA  %}<a href="/catalog/seria/{{ j.NAME_T }}/all{{ j.ID }}">{{ j.NAME }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
           <td><a class="btn btn-default btn-xs" href="/tsena-odnogo-okna/{{ i.W|stringformat:".0f" }}x{{ i.H|stringformat:".0f" }}mm/tip{{ i.ID }}">цены</a></td>
-{#          {% for j in SERIAS %}#}
-{#          <td>{% if j.id in i.INCLUDING_IN_SERIA %}#{% endif %}</td>{% endfor %}#}
         </tr>{% endfor %}
         </tbody>
       </table>
     </div>
-
-
     <DIV  class="col-xs-12" style="height:6em;"></DIV>
   </dIv>
-
-  {# --- Баннер: НАЧАЛО --- #}
-  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
-  {# --- Баннер: конец --- #}
+  {# --- Баннер: НАЧАЛО --- #}<div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>{# --- Баннер: конец --- #}
 <div class="row">
 {% include "report/report_last_user_visit.html" %}
 {% include "report/report_log_user_visit.html" %}
 </div>
 </div>{% endblock %}
-
-
