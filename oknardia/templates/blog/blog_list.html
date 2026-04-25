@@ -8,9 +8,9 @@
 
 {% block Keywords %}oknardia, окнардия, blogs, блоги, публикации, цены пластиковых окон, стоимость пластиковых окон, скидки на пластиковые окна, предложения пластиковых окон, {{ META_KEYWORDS|default:"" }} {% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
 {% block Author4Meta %}: Блоги{% endblock %}
 

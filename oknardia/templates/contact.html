@@ -4,9 +4,9 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
 {% block Description %}Контактная информация маркетплейс-агрегатора «Окнардии»: адрес, телефоны и email для связи, персоны.{% endblock %}
 

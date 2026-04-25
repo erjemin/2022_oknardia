@@ -7,9 +7,9 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{# block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock #}
+{# block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock #}
 
-{# block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock #}
+{# block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock #}
 
 {% block Description %}Статистика типового строительства СССР и России. Географи, график ввода в эксплуатацтяю, метраж. Здания проектов серии: {% for CountSeria in SERIA_NAV_DIM %}{{ CountSeria.SERIA_R }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endblock %}
 
