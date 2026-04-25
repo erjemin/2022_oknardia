@@ -9,9 +9,9 @@
 
 {% block Keywords %}{{ CATALOG_MANUFACT }}, оконные профили {{ CATALOG_MANUFACT }}, производитель {{ CATALOG_MANUFACT }}, {% for i in PROFILES %}{{ i.PROFILE_NAME }}, {% endfor %}каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
 
-{% block Date4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+{% block Date4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ PUB_DAT|date:"c" }}{% endblock %}
+{% block Last4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
 
 {% block Author4Meta %}: Каталог{% endblock %}
 
@@ -22,7 +22,7 @@
   <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
   <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
   <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"c" }}" />
+  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"Y-m-d" }}" />
   <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»: оконные профили" /></span>
   <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
   <meta itemprop="articleSection" content="Каталог «Окнардия»: оконные профили {{ CATALOG_MANUFACT }}" />

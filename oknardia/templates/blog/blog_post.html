@@ -8,9 +8,9 @@
 
 {% block Keywords %}oknardia, окнардия, blog, блог, публикация, {{ HEADER|striptags }}{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
 {% block Author4Meta %}: {{ USERNAME }}{% if NAME1 != "" or NAME2 != "" %} ({{ NAME1 }}{% if NAME2 != "" %}&nbsp;{{ NAME2 }}{% endif %}){% endif %}{% endblock %}
 
@@ -20,7 +20,7 @@
   {# <!-- Дополнительные Metatags --> #}{% if NAME1 != '' or NAME2 != '' %}
   <meta itemprop="author" content="{{ NAME1 }} {{ NAME2 }}" />{% endif %}
   <meta itemprop="image" content="https://oknardia.ru/media/{{ USER_AVATAR }}" />
-  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
+  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}" />
   <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="ОКНАРДИЯ: сборник цен на пластиковые окна" /></span>
   <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="{% if NAME1 != '' or NAME2 != '' %}{{ NAME1 }}{% if NAME2 != '' %} {{ NAME2 }}{% endif %}{% endif %}" /></span>
   <meta itemprop="articleSection" content="ОКНАРДИЯ: Блог «{{ USERNAME }}»" />

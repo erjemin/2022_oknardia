@@ -6,9 +6,9 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
 
 {% block Description %}Сравнение характеристик окон от поставщиков: {% for MERCANT in LIST_MERCHANT %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ MERCANT }}{% endfor %}. Сравнение профилей пластиковых окон: {% for PROFILE in LIST_PROFILE %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ PROFILE }}{% endfor %}. Сравнение характеристик стеклопакетов: {% for GLAZING in LIST_GLAZING %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ GLAZING }}{% endfor %}.{% endblock %}

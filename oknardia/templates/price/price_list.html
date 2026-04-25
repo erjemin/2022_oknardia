@@ -6,9 +6,9 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
 {% block Description %}Цены на окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}. Размер окон (см.): {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}{% if forloop.last %}.{% else %}; {% endif %}{% endfor %} Оконные наборы: {% for CurOffer in PRICE_FRAME %}{{ CurOffer.SETS_NAME }} – {{ CurOffer.FIN_PRICE|stringformat:".0f" }} рублей{% if forloop.last %}.{% else %}; {% endif %}{% endfor %}{% endblock %}
 

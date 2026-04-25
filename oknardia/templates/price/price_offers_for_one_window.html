@@ -5,9 +5,9 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
 {% block Top_JS4 %}
   <script type="text/javascript" src="//www.gstatic.com/charts/loader.js"></script>
