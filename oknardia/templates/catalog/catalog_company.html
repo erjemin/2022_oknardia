@@ -1,56 +1,79 @@
 {% extends "base.html" %}
 {% load static %}{% load filters %}
 
-{% block Title %}Каталог изготовителей и поставщиков окон{% endblock %}
+{% block Title %}Каталог оконных компаний: производители и поставщики окон, рейтинг и цены{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Каталог изготовителей окон, партнёры «Окнардия», рейтинг, {% for i in COMPANIES %}{{ i.sMerchantName }}, {% endfor %}  средняя цена окна{% endblock %}
+{% block Description %}Актуальный каталог оконных компаний России. Сравните производителей и поставщиков пластиковых окон по рейтингу, ассортименту, средней цене и дате последнего обновления.{% endblock %}
 
-{% block Keywords %}Оконные компании, {% for i in COMPANIES %}{{ i.sMerchantName }}, {% endfor %} изготовители окон, производители окон, постащики окон, партнёры, каталог компаний, каталог оконных компаний, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}оконные компании, каталог компаний, производители окон, поставщики окон, рейтинг оконных компаний, сравнить цены на окна, oknardia, окнардия{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Author4Meta %}: Каталог «Окнардия»{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
-
-{% block Author4Meta %}: Каталог изготовителей окон{% endblock %}
-
-{% block CopyrightAuthor4Meta %}: Каталог изготовителей окон{% endblock %}
+{% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог производителей окон" />
-  <meta itemprop="headline" content="Компании-партнёры «Окнардии», их рейтинг, число оконных наборов и вариантов расчёта цен для типовых проёмов, средняя цена окна..." />
-  <meta name="news_keywords" content="{{ HEADER }}" />
   <link rel="canonical" href="https://oknardia.ru/catalog/company/" />
-  <link rel="standout"  href="https://oknardia.ru/catalog/company/" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
-  <meta property="fb:admins" name="admins" content="100000084781830" />
-  <meta property="fb:pages" content="276108456054163" />
-  <meta property="fb:app_id" content="258354027974262" />
-  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/company/" />
+  <meta property="og:url" content="https://oknardia.ru/catalog/company/" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Каталог производителей окон | oknardia.ru" />
-  <meta property="og:description" content="Компании-партнеры «Окнардии», их средний рейтинг, число оконных наборов и вариантов расчета цен для типовых проёмов, средняя цена окна..." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta property="og:title" content="Каталог оконных компаний: производители и поставщики окон, рейтинг и цены | oknardia.ru" />
+  <meta property="og:description" content="Актуальный каталог оконных компаний России. Сравните производителей и поставщиков пластиковых окон по рейтингу, ассортименту, средней цене и дате последнего обновления." />
+  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="Каталог производителей окон | oknardia.ru" />
-  <meta name="twitter:description" content="Компании-партнеры «Окнардии», их средний рейтинг, число оконных наборов и вариантов расчета цен для типовых проёмов, средняя цена окна..." />
+  <meta name="twitter:title" content="Каталог оконных компаний: производители и поставщики окон, рейтинг и цены | oknardia.ru" />
+  <meta name="twitter:description" content="Актуальный каталог оконных компаний России. Сравните производителей и поставщиков пластиковых окон по рейтингу, ассортименту, средней цене и дате последнего обновления." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+  {# Удалить: <meta name="twitter:domain"> — устаревший тег #}
+  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+
+{% block ADD_TO_HEAD %}{% comment %}
+JSON-LD для страницы-списка компаний: CollectionPage + ItemList с элементами Organization.
+Это понятнее для поисковиков, чем legacy microdata на метатегах.
+{% endcomment %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Каталог оконных компаний: производители и поставщики окон",
+  "description": "Актуальный каталог оконных компаний России с рейтингами, средней ценой и составом наборов.",
+  "url": "https://oknardia.ru/catalog/company/",
+  "inLanguage": "ru-RU",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Окнардия",
+    "url": "https://oknardia.ru"
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": "Производители и поставщики окон",
+    "numberOfItems": {{ COMPANIES|length }},
+    "itemListElement": [
+      {% for i in COMPANIES %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "item": {
+          "@type": "Organization",
+          "name": "{{ i.sMerchantName|escapejs }}",
+          "url": "https://oknardia.ru/catalog/company/{{ i.id }}-{{ i.sMerchantMainURL }}",
+          "logo": "https://oknardia.ru/media/{{ i.pMerchantLogo }}"
+        }
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}
+</script>
+{% endblock %}
 
 
 {% block Main_Content %}
@@ -90,7 +113,3 @@
   {% include "report/report_log_user_visit.html" %}
   </div>
 </div>{% endblock %}
-
-
-
-
