@@ -17,7 +17,7 @@
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
   {# Microdata (itemprop) убрана — заменена на JSON-LD в блоке ADD_TO_HEAD ниже (чище, надёжнее) #}
   <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
   {# Удалить: <link rel="standout"> — тег Google News 2011 г., отменён в 2014, поисковики игнорируют #}
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
@@ -26,20 +26,20 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Окна «{{ COMPANY }}» | oknardia.ru" />
   <meta property="og:description" content="«{{ COMPANY }}» — оконные наборы, состав и характеристики, независимый рейтинг качества, средние цены на установку. Агрегатор Окнардия." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Производитель окон «{{ COMPANY }}» | oknardia.ru" />
   <meta name="twitter:description" content="«{{ COMPANY }}» в каталоге Окнардии: наборы, характеристики, рейтинг и цены на установку окон в типовых домах." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
   {# Удалить: <meta name="twitter:domain"> — устарело с 2015, Twitter его не использует #}
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
 
 {% block Top_JS5 %}
@@ -58,11 +58,11 @@
   "@type": "LocalBusiness",
   "name": "{{ COMPANY|escapejs }}",
   "description": "Производитель окон «{{ COMPANY|escapejs }}»: оконные наборы, характеристики профилей и стеклопакетов, цены на установку в типовых домах.",
-  "url": "https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}",
-  "image": "{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{{ IMG_FOR_BLOG }}{% else %}https://oknardia.ru/static/img/MerDY3gpU0w.jpg{% endif %}",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}",
+  "image": "{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}",
   "logo": {
     "@type": "ImageObject",
-    "url": "{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{{ IMG_FOR_BLOG }}{% else %}https://oknardia.ru/static/img/MerDY3gpU0w.jpg{% endif %}"
+    "url": "{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}"
   }{% if SETS %},
   "telephone": "{{ SETS.0.sOfficePhones|striptags|escapejs }}",
   "address": {

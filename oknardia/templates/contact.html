@@ -39,7 +39,7 @@ img {background-color: whitesmoke;}
 
 <div class="row">
 	<div class="col-md-3" >
-    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/avatar_eserg_160x160.png" width="160" height="160" alt="Сергей Еремин — CEO/CTO «Окнардия», организационные вопросы, технические решения, партнерство" />
+    <img class="img-circle" src="{{ request.scheme }}://{{ request.get_host }}/media/img_avatar/avatar_eserg_160x160.png" width="160" height="160" alt="Сергей Еремин — CEO/CTO «Окнардия», организационные вопросы, технические решения, партнерство" />
     <h3>Сергей Еремин</h3>
     <h4>CEO/CTO</h4>
     <h5>организационные вопросы, технические решения, партнерство</h5>
@@ -61,7 +61,7 @@ img {background-color: whitesmoke;}
     </dl>
   </div>
   <div class="col-md-3" >
-    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/timofei_molodovanin.jpg" width="160" height="160" alt="Тимофей Молдованин — CFO/COO «Окнардия», финансовые и коммерческие вопросы" />
+    <img class="img-circle" src="{{ request.scheme }}://{{ request.get_host }}/media/img_avatar/timofei_molodovanin.jpg" width="160" height="160" alt="Тимофей Молдованин — CFO/COO «Окнардия», финансовые и коммерческие вопросы" />
     <h3>Тимофей Молдованин</h3>
     <h4>CFO/COO</h4>
     <h5>финансовые и коммерческие вопросы</h5>

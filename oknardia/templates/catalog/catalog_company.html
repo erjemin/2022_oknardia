@@ -14,24 +14,24 @@
 {% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <link rel="canonical" href="https://oknardia.ru/catalog/company/" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/company/" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru/catalog/company/" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/company/" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Каталог оконных компаний: производители и поставщики окон, рейтинг и цены | oknardia.ru" />
   <meta property="og:description" content="Актуальный каталог оконных компаний России. Сравните производителей и поставщиков пластиковых окон по рейтингу, ассортименту, средней цене и дате последнего обновления." />
-  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Каталог оконных компаний: производители и поставщики окон, рейтинг и цены | oknardia.ru" />
   <meta name="twitter:description" content="Актуальный каталог оконных компаний России. Сравните производителей и поставщиков пластиковых окон по рейтингу, ассортименту, средней цене и дате последнего обновления." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
   {# Удалить: <meta name="twitter:domain"> — устаревший тег #}
-  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg">
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
 
 
@@ -45,12 +45,12 @@ JSON-LD для страницы-списка компаний: CollectionPage + 
   "@type": "CollectionPage",
   "name": "Каталог оконных компаний: производители и поставщики окон",
   "description": "Актуальный каталог оконных компаний России с рейтингами, средней ценой и составом наборов.",
-  "url": "https://oknardia.ru/catalog/company/",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/company/",
   "inLanguage": "ru-RU",
   "isPartOf": {
     "@type": "WebSite",
     "name": "Окнардия",
-    "url": "https://oknardia.ru"
+    "url": "{{ request.scheme }}://{{ request.get_host }}"
   },
   "mainEntity": {
     "@type": "ItemList",
@@ -64,8 +64,8 @@ JSON-LD для страницы-списка компаний: CollectionPage + 
         "item": {
           "@type": "Organization",
           "name": "{{ i.sMerchantName|escapejs }}",
-          "url": "https://oknardia.ru/catalog/company/{{ i.id }}-{{ i.sMerchantMainURL }}",
-          "logo": "https://oknardia.ru/media/{{ i.pMerchantLogo }}"
+          "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/company/{{ i.id }}-{{ i.sMerchantMainURL }}",
+          "logo": "{{ request.scheme }}://{{ request.get_host }}/media/{{ i.pMerchantLogo }}"
         }
       }{% if not forloop.last %},{% endif %}
       {% endfor %}

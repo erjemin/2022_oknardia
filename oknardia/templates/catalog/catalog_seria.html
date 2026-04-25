@@ -15,7 +15,7 @@
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
   {# Legacy microdata (itemprop/itemscope) удалена: используем JSON-LD в ADD_TO_HEAD #}
-  <link rel="canonical" href="https://oknardia.ru/catalog/seria/" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -23,20 +23,20 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru/catalog/seria/" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Каталог типовых серий домов | oknardia.ru" />
   <meta property="og:description" content="Серии типового строительства, планировки и ссылки на подробные страницы серий домов с данными по стандартным оконным проёмам." />
-  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Каталог типовых серий домов | oknardia.ru" />
   <meta name="twitter:description" content="Каталог типовых серий домов России: список серий и переходы на подробные страницы с планировками и окнами." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta property="twitter:url" content="https://oknardia.ru/catalog/seria/" />
-  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg">
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
 
 
@@ -50,12 +50,12 @@ CollectionPage + ItemList помогают поисковику трактова
   "@type": "CollectionPage",
   "name": "Каталог серий типового строительства",
   "description": "Список типовых серий домов России с переходом на подробные страницы серий.",
-  "url": "https://oknardia.ru/catalog/seria/",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/",
   "inLanguage": "ru-RU",
   "isPartOf": {
     "@type": "WebSite",
     "name": "Окнардия",
-    "url": "https://oknardia.ru"
+    "url": "{{ request.scheme }}://{{ request.get_host }}"
   },
   "mainEntity": {
     "@type": "ItemList",
@@ -69,8 +69,8 @@ CollectionPage + ItemList помогают поисковику трактова
         "item": {
           "@type": "Thing",
           "name": "Серия {{ i.NAME|escapejs }}",
-          "url": "https://oknardia.ru/catalog/seria/{{ i.NAME_T }}/all{{ i.ID }}",
-          "image": "https://oknardia.ru/media/{{ i.URL }}"
+          "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ i.NAME_T }}/all{{ i.ID }}",
+          "image": "{{ request.scheme }}://{{ request.get_host }}/media/{{ i.URL }}"
         }
       }{% if not forloop.last %},{% endif %}
       {% endfor %}

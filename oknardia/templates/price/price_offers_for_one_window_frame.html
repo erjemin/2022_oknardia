@@ -39,7 +39,7 @@
         </span>
         <span itemprop="brand" itemscope itemtype="http://schema.org/Brand">
 				  <meta itemprop="name" content="{{ CurOffer.MERCHANT }}" />
-				  <meta itemprop="logo" content="https://oknardia.ru/media/{{ CurOffer.MERCHANT_LOGO }}" />
+				  <meta itemprop="logo" content="{{ request.scheme }}://{{ request.get_host }}/media/{{ CurOffer.MERCHANT_LOGO }}" />
         </span></td>
       <!--- Конец большой ячейки со спецификацией оконного предложения --->
     {% endif %}
