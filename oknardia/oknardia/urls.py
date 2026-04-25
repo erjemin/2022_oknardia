@@ -72,10 +72,10 @@ urlpatterns = [
     re_path(r'^seria_[^/]*/all(?P<seria_id>\d+)/\S*$', catalog.report_all_info_seria_redirect),   # для старых ссылок
     # --- --- КАТАЛОГ СТАНДАРТНЫХ ПРОЁМОВ И СХЕМ ОТКРЫВАНИЯ ДЛЧ ТИПОВЫХ СЕРИЙ СТРОИТЕЛЬСТВА
     re_path(r'^catalog/standard_opening[/*]$', catalog_openings.standard_opening), # СТРАНИЦА С ТАБЛИЦЕЙ ПРОЁМОМ
-    # --- --- Каталог производителей окон
-    re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company),
+    # --- --- КАТАЛОГ ПРОИЗВОДИТЕЛЕЙ ОКОН
+    re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company), # СПИСОК ВСЕХ ПРОИЗВОДИТЕЛЕЙ ОКОН
     re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
-            catalog_companies.catalog_company_detail),
+            catalog_companies.catalog_company_detail), # КАРТОЧКА ПРОИЗВОДИТЕЛЯ ОКОН
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
     # --- Одиночное окно
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
