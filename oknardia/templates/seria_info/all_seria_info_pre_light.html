@@ -12,7 +12,7 @@
 {% block Keywords %}{{ THIS_SERIA_NAME }}, серия {{ THIS_SERIA_NAME }}, проект {{ THIS_SERIA_NAME }}, года постройки зданий серии {{ THIS_SERIA_NAME }}, размеры окон в домах серии {{ THIS_SERIA_NAME }}, оконные проемы зданий серии {{ THIS_SERIA_NAME }}, дома серии {{ THIS_SERIA_NAME }} на карте, установка окон, цены на пластиковые окна{% endblock %}
 
 {% block Top_Meta1 %}
-    {# Canonical — предотвращает дубли при возможных GET-параметрах #}<link rel="canonical" href="https://oknardia.ru/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+    {# Canonical — предотвращает дубли при возможных GET-параметрах #}<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
     <!-- Разметка для соц-сетей Facebook Open Graph -->
     <meta property="fb:admins" name="admins" content="100000084781830" />
     <meta property="fb:pages" content="276108456054163" />
@@ -21,21 +21,21 @@
     <meta property="og:type"        content="article" />
     <meta property="og:site_name"   content="oknardia.ru" />
     <meta property="og:locale"      content="ru_RU" />
-    <meta property="og:url"         content="https://oknardia.ru/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+    <meta property="og:url"         content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
     <meta property="og:title"       content="Серия {{ THIS_SERIA_NAME }}: размеры окон, планировки и карта домов | oknardia.ru" />
     <meta property="og:description" content="Типовые размеры и схемы открывания оконных проёмов в домах серии {{ THIS_SERIA_NAME }}. Карта зданий, статистика ввода в эксплуатацию по годам и цены на замену окон." />{% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
-    <meta property="og:image"       content="https://oknardia.ru/media/{{ THIS_SERIA_IMAGE_URL }}" />
-    <link rel="image_src"           href="https://oknardia.ru/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
-    <meta property="og:image"       content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-    <link rel="image_src"           href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
+    <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />
+    <link rel="image_src"           href="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
+    <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+    <link rel="image_src"           href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />{% endif %}
     <!-- Разметка для соц-сетей Twitter Card -->
     <meta name="twitter:card"        content="summary" />
     <meta name="twitter:site"        content="@oknardia" />
     <meta name="twitter:title"       content="Серия {{ THIS_SERIA_NAME }}: размеры окон, планировки и карта домов | oknardia.ru" />
     <meta name="twitter:description" content="Типовые оконные проёмы, схемы открывания и цены на замену окон в домах серии {{ THIS_SERIA_NAME }}." />{% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
-    <meta name="twitter:image"       content="https://oknardia.ru/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
-    <meta name="twitter:image"       content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-    <meta property="twitter:url"     content="https://oknardia.ru/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+    <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
+    <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />{% endif %}
+    <meta property="twitter:url"     content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
 {% endblock %}
 
 {% block ADD_TO_HEAD %}{% comment %}
@@ -53,25 +53,25 @@ TechArticle: описывает страницу как технический �
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Главная",
-                "item": "https://oknardia.ru/"
+                "item": "{{ request.scheme }}://{{ request.get_host }}/"
             },
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Каталог",
-                "item": "https://oknardia.ru/catalog/"
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/"
             },
             {
                 "@type": "ListItem",
                 "position": 3,
                 "name": "Типовые серии домов",
-                "item": "https://oknardia.ru/catalog/seria/"
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/"
             },
             {
                 "@type": "ListItem",
                 "position": 4,
                 "name": "Серия {{ THIS_SERIA_NAME|escapejs }}",
-                "item": "https://oknardia.ru/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/"
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/"
             }
         ]
     }
@@ -83,9 +83,9 @@ TechArticle: описывает страницу как технический �
         "inLanguage": "ru-RU",
         "headline": "Серия {{ THIS_SERIA_NAME|escapejs }}: типовые размеры оконных проёмов, схемы открывания и карта зданий",
         "description": "Технические характеристики оконных проёмов в домах типовой серии {{ THIS_SERIA_NAME|escapejs }}: размеры, схемы открывания, планировки квартир, карта зданий на территории России. Статистика ввода зданий в эксплуатацию по годам.",
-        "url": "https://oknardia.ru/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/", {% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
-        "image": "https://oknardia.ru/media/{{ THIS_SERIA_IMAGE_URL }}",{% else %}
-        "image": "https://oknardia.ru/static/img/MerDY3gpU0w.jpg",{% endif %}
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/", {% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
+        "image": "{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}",{% else %}
+        "image": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg",{% endif %}
         "about": {
             "@type": "Thing",
             "name": "Серия типового строительства {{ THIS_SERIA_NAME|escapejs }}",
@@ -94,16 +94,16 @@ TechArticle: описывает страницу как технический �
         "publisher": {
             "@type": "Organization",
             "name": "Окнардия",
-            "url": "https://oknardia.ru",
+            "url": "{{ request.scheme }}://{{ request.get_host }}",
             "logo": {
                 "@type": "ImageObject",
-                "url": "https://oknardia.ru/static/img/MerDY3gpU0w.jpg"
+                "url": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg"
             }
         },
         "isPartOf": {
             "@type": "WebSite",
             "name": "Окнардия — агрегатор цен на замену окон",
-            "url": "https://oknardia.ru"
+            "url": "{{ request.scheme }}://{{ request.get_host }}"
         }
     }
     </script>

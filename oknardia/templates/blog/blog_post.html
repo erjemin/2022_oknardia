@@ -19,35 +19,35 @@
 {% block Top_Meta1 %}
   {# <!-- Дополнительные Metatags --> #}{% if NAME1 != '' or NAME2 != '' %}
   <meta itemprop="author" content="{{ NAME1 }} {{ NAME2 }}" />{% endif %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ USER_AVATAR }}" />
+  <meta itemprop="image" content="{{ request.scheme }}://{{ request.get_host }}/media/{{ USER_AVATAR }}" />
   <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}" />
   <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="ОКНАРДИЯ: сборник цен на пластиковые окна" /></span>
   <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="{% if NAME1 != '' or NAME2 != '' %}{{ NAME1 }}{% if NAME2 != '' %} {{ NAME2 }}{% endif %}{% endif %}" /></span>
   <meta itemprop="articleSection" content="ОКНАРДИЯ: Блог «{{ USERNAME }}»" />
   <meta itemprop="headline" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
   <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="https://oknardia.ru/blogpost/{{ ID }}/{{ HEADER_T }}" />
-  <link rel="standout" href="https://oknardia.ru/blogpost/{{ ID }}/{{ HEADER_T }}" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
+  <link rel="standout" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
   {# <!-- Разметка для соц-сетей Facebook Open Graph --> #}<meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
   <meta property="fb:app_id" content="258354027974262" />
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   {# <!-- Разметка OG-теги для соц-сетей и мессенджеров --> #}<meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru/blogpost/{{ ID }}/{{ HEADER_T }}" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="{{ HEADER|striptags }} | oknardia.ru" />
   <meta property="og:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="{{ HEADER|striptags }} | oknardia.ru" />
   <meta name="twitter:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
   <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
 
 {% block Top_JS3%}
   <script type="text/javascript">$(window).load(function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});</script>{% endblock %}

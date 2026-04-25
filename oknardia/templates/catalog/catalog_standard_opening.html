@@ -17,7 +17,7 @@
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
   {# Legacy microdata (itemprop/itemscope) удалена: используем JSON-LD в ADD_TO_HEAD #}
   <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="https://oknardia.ru/catalog/standard_opening" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -25,19 +25,19 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru/catalog/standard_opening" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов | oknardia.ru" />
   <meta property="og:description" content="Каталог стандартных оконных проёмов и балконных блоков: размеры, схемы открывания и серии домов, в которых они встречаются." />
-  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Стандартные оконные проёмы и балконные блоки | oknardia.ru"/>
   <meta name="twitter:description" content="Размеры, схемы открывания и типовые серии домов для стандартных оконных проёмов в каталоге Окнардии." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
-  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
 {# <!-- END Дополнительные Metатags -->  #}{% endblock %}
 
 {% block ADD_TO_HEAD %}{% comment %}
@@ -50,12 +50,12 @@ CollectionPage + ItemList помогают поисковику понять с�
   "@type": "CollectionPage",
   "name": "Стандартные оконные проёмы и балконные блоки",
   "description": "Каталог стандартных оконных проёмов и балконных блоков с размерами, схемами открывания и привязкой к типовым сериям домов.",
-  "url": "https://oknardia.ru/catalog/standard_opening",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening",
   "inLanguage": "ru-RU",
   "isPartOf": {
     "@type": "WebSite",
     "name": "Окнардия",
-    "url": "https://oknardia.ru"
+    "url": "{{ request.scheme }}://{{ request.get_host }}"
   },
   "mainEntity": {
     "@type": "ItemList",
@@ -70,8 +70,8 @@ CollectionPage + ItemList помогают поисковику понять с�
           "@type": "Thing",
           "name": "{{ i.DESCRIPTION|escapejs }}",
           "description": "{{ i.DESCRIPTION_L|escapejs }}",
-          "url": "https://oknardia.ru/tsena-odnogo-okna/{{ i.W|stringformat:'.0f' }}x{{ i.H|stringformat:'.0f' }}mm/tip{{ i.ID }}",
-          "image": "https://oknardia.ru{% static i.URL2IMG %}",
+          "url": "{{ request.scheme }}://{{ request.get_host }}/tsena-odnogo-okna/{{ i.W|stringformat:'.0f' }}x{{ i.H|stringformat:'.0f' }}mm/tip{{ i.ID }}",
+          "image": "{{ request.scheme }}://{{ request.get_host }}{% static i.URL2IMG %}",
           "additionalProperty": [
             {"@type": "PropertyValue", "name": "Ширина", "value": "{{ i.W|stringformat:'.0f' }} мм"},
             {"@type": "PropertyValue", "name": "Высота", "value": "{{ i.H|stringformat:'.0f' }} мм"},
