@@ -5,30 +5,20 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}«{{ COMPANY }}», описание компании «{{ COMPANY }}», оконные наборы от «{{ COMPANY }}» и их состав, характеристики «{{ COMPANY }}», рейтинг «{{ COMPANY }}», средние цены и отклонение цен «{{ COMPANY }}».{% endblock %}
+{% block Description %}Производитель окон «{{ COMPANY }}» в каталоге Окнардии: оконные наборы, их состав и характеристики, независимый рейтинг качества, средние цены на замену оконных конструкций в типовых домах.{% endblock %}
 
-{% block Keywords %}{{ COMPANY }}, компания {{ COMPANY }}, окна {{ COMPANY }}, изготовитель окон {{ COMPANY }}, производитель окон {{ COMPANY }}, поставщик окон {{ COMPANY }}, партнёр, каталог компаний, каталог оконных компаний, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}{{ COMPANY }}, компания {{ COMPANY }}, окна {{ COMPANY }}, изготовитель окон {{ COMPANY }}, производитель окон {{ COMPANY }}, поставщик окон {{ COMPANY }}, партнёр, каталог компаний, каталог оконных компаний, oknardia, окнардия{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Author4Meta %}Каталог изготовителей окон{% endblock %}
 
-{% block Author4Meta %}: Каталог изготовителей окон{% endblock %}
-
-{% block CopyrightAuthor4Meta %}: Каталог изготовителей окон{% endblock %}
+{% block CopyrightAuthor4Meta %}Каталог изготовителей окон{% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог производителей окон" />
-  <meta itemprop="headline" content="Изготовитель окон «{{ COMPANY }}», описание, производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  {# Microdata (itemprop) убрана — заменена на JSON-LD в блоке ADD_TO_HEAD ниже (чище, надёжнее) #}
   <meta name="news_keywords" content="{{ HEADER|striptags }}" />
   <link rel="canonical" href="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
-  <link rel="standout"  href="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  {# Удалить: <link rel="standout"> — тег Google News 2011 г., отменён в 2014, поисковики игнорируют #}
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -36,24 +26,59 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
+  <meta property="og:url" content="https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Окна «{{ COMPANY }}» | oknardia.ru" />
-  <meta property="og:description" content="Окна «{{ COMPANY }}», описание окон «{{ COMPANY }}», производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  <meta property="og:description" content="«{{ COMPANY }}» — оконные наборы, состав и характеристики, независимый рейтинг качества, средние цены на установку. Агрегатор Окнардия." />
   <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
   <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
   <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="Производителей окон «{{ COMPANY }}» | oknardia.ru" />
-  <meta name="twitter:description" content="Изготовитель окон «{{ COMPANY }}», описание, производимые им оконные наборы и их состав, характеристики, рейтинг, средние цены и отклонение цен." />
+  <meta name="twitter:title" content="Производитель окон «{{ COMPANY }}» | oknardia.ru" />
+  <meta name="twitter:description" content="«{{ COMPANY }}» в каталоге Окнардии: наборы, характеристики, рейтинг и цены на установку окон в типовых домах." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
+  {# Удалить: <meta name="twitter:domain"> — устарело с 2015, Twitter его не использует #}
   <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
   <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
 
+{% block Top_JS5 %}
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>{% endblock %}
 
-{% block Top_JS5 %}<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>{% endblock %}
+{% block ADD_TO_HEAD %}{% comment %}
+   JSON-LD разметка Schema.org для страницы производителя окон.
+   Тип LocalBusiness описывает компанию-поставщика окон: название, контакты, адрес, геокоординаты,
+   логотип и ссылку на официальный сайт производителя.
+   Данные берутся из первого набора в SETS (все наборы принадлежат одному офису/бренду),
+   поэтому достаточно SETS.0 для контактной информации.
+   Документация: https://schema.org/LocalBusiness #}{% endcomment %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "{{ COMPANY|escapejs }}",
+  "description": "Производитель окон «{{ COMPANY|escapejs }}»: оконные наборы, характеристики профилей и стеклопакетов, цены на установку в типовых домах.",
+  "url": "https://oknardia.ru/catalog/company/{{ COMPANY_ID }}-{{ COMPANY_T }}",
+  "image": "{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{{ IMG_FOR_BLOG }}{% else %}https://oknardia.ru/static/img/MerDY3gpU0w.jpg{% endif %}",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{{ IMG_FOR_BLOG }}{% else %}https://oknardia.ru/static/img/MerDY3gpU0w.jpg{% endif %}"
+  }{% if SETS %},
+  "telephone": "{{ SETS.0.sOfficePhones|striptags|escapejs }}",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "{{ SETS.0.sOfficeAddress|escapejs }}",
+    "addressCountry": "RU"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": {{ SETS.0.fOfficeGeoCode_Latitude|stringformat:".7f" }},
+    "longitude": {{ SETS.0.fOfficeGeoCode_Longitude|stringformat:".7f" }}
+  },
+  "sameAs": "{{ SETS.0.sMerchantMainURL.URL|escapejs }}"{% endif %}
+}
+</script>
+{% endblock %}
 
 
 {% block Main_Content %}
