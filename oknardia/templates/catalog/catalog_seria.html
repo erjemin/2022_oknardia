@@ -5,30 +5,17 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Каталог серий зданий и типовое панельное строительство оконного агрегатора Окнардия{% endblock %}
+{% block Description %}Каталог типовых серий домов России: панельные и блочные серии, ссылки на подробные страницы серий, их планировки и стандартные оконные проёмы.{% endblock %}
 
-{% block Keywords %}типовое строительство, панельные серии, серии домов, серии зданий, типовые дома, типовые здания, каталог серий типового строительства, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
-
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
-
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Keywords %}типовое строительство, панельные серии, серии домов, серии зданий, типовые дома, типовые здания, каталог серий типового строительства, oknardia, окнардия{% endblock %}
 
 {% block Author4Meta %}Серии домов : {% endblock %}
 
 {% block CopyrightAuthor4Meta %}Cерии домов : {% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"Y-m-d" }}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
-  <meta itemprop="headline" content="Серии типового строительства | oknardia.ru" />
-  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="https://oknardia.ru//catalog/seria/" />
-  <link rel="standout"  href="https://oknardia.ru//catalog/seria/" />
+  {# Legacy microdata (itemprop/itemscope) удалена: используем JSON-LD в ADD_TO_HEAD #}
+  <link rel="canonical" href="https://oknardia.ru/catalog/seria/" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -36,21 +23,62 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/seria/" />
+  <meta property="og:url" content="https://oknardia.ru/catalog/seria/" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
-  <meta property="og:description" content="Серии типового строительства, типовые проекты жилого строительства, вхождение стандартных оконных проёмов и балконных блоков в планировки типовых квартир серии, графики ввода в эксплуатацию зданий серии, география строительства, износ жилого фонда..." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
+  <meta property="og:title" content="Каталог типовых серий домов | oknardia.ru" />
+  <meta property="og:description" content="Серии типового строительства, планировки и ссылки на подробные страницы серий домов с данными по стандартным оконным проёмам." />
+  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Каталог типовых серий домов | oknardia.ru" />
-  <meta name="twitter:description" content="Серии типового строительства, типовые проекты жилого строительства, вхождение стандартных оконных проёмов и балконных блоков в планировки типовых квартир серии, графики ввода в эксплуатацию зданий серии, география строительства, износ жилого фонда..." />
+  <meta name="twitter:description" content="Каталог типовых серий домов России: список серий и переходы на подробные страницы с планировками и окнами." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}">
+  <meta property="twitter:url" content="https://oknardia.ru/catalog/seria/" />
+  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+
+
+{% block ADD_TO_HEAD %}{% comment %}
+JSON-LD для страницы списка типовых серий домов.
+CollectionPage + ItemList помогают поисковику трактовать страницу как каталог сущностей.
+{% endcomment %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Каталог серий типового строительства",
+  "description": "Список типовых серий домов России с переходом на подробные страницы серий.",
+  "url": "https://oknardia.ru/catalog/seria/",
+  "inLanguage": "ru-RU",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Окнардия",
+    "url": "https://oknardia.ru"
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": "Типовые серии домов",
+    "numberOfItems": {{ SERIAS|length }},
+    "itemListElement": [
+      {% for i in SERIAS %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "item": {
+          "@type": "Thing",
+          "name": "Серия {{ i.NAME|escapejs }}",
+          "url": "https://oknardia.ru/catalog/seria/{{ i.NAME_T }}/all{{ i.ID }}",
+          "image": "https://oknardia.ru/media/{{ i.URL }}"
+        }
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}
+</script>
+{% endblock %}
 
 
 {% block Main_Content %}

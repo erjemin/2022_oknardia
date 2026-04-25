@@ -5,30 +5,18 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Каталог «Окнардия»{% endblock %}
+{% block Description %}Каталог «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитура, типовые серии домов, стандартные проёмы и партнёры-поставщики окон.{% endblock %}
 
 {% block Keywords %}Каталог, каталог оконных профилей, каталог стеклопакетов, каталог фурнитуры, каталог серий домов, каталог оконных проёмов, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
-
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
-
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
 {% block Author4Meta %}: Каталог «Окнардия»{% endblock %}
 
 {% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
 
-{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
-  <meta itemprop="headline" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
-  <meta name="news_keywords" content="{{ HEADER }}" />
-  <link rel="canonical" href="https://oknardia.ru//catalog/" />
-  <link rel="standout"  href="https://oknardia.ru//catalog/" />
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags --> #}
+  {# Удалить: itemprop microdata, rel=standout, twitter:domain — устаревшие теги #}
+  <meta name="news_keywords" content="каталог окон, каталог оконных профилей, серии домов, стандартные проёмы" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -36,21 +24,76 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/" />
-  <meta property="og:type" content="article" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/" />
+  <meta property="og:type" content="website" />
   <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
-  <meta property="og:description" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta property="og:description" content="Оконные и дверные профили, стеклопакеты, типовые серии домов, стандартные проёмы и партнёры-поставщики окон." />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="{{ HEADER }}"/>
-  <meta name="twitter:description" content="Главная страница каталога «Окнардия»: оконные и дверные профили, стеклопакеты, фурнитуов, типовые серии домов, стандартные проемы, партнёры..." />
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Каталог «Окнардия» | oknardia.ru" />
+  <meta name="twitter:description" content="Оконные и дверные профили, стеклопакеты, типовые серии домов, стандартные проёмы и партнёры-поставщики окон." />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{# <!-- END Дополнительные Metатags --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}
+  {# JSON-LD: корневая страница каталога — CollectionPage + BreadcrumbList + структура разделов #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Каталог «Окнардия»",
+    "description": "Оконные и дверные профили, стеклопакеты, типовые серии домов, стандартные проёмы и партнёры-поставщики окон.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/",
+    "hasPart": [
+      {
+        "@type": "CollectionPage",
+        "name": "Оконные и дверные профили",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/"
+      },
+      {
+        "@type": "CollectionPage",
+        "name": "Каталог серий домов",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/"
+      },
+      {
+        "@type": "CollectionPage",
+        "name": "Стандартные оконные проёмы и балконные блоки",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening/"
+      },
+      {
+        "@type": "CollectionPage",
+        "name": "Производители и поставщики окон",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/company/"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Каталог",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
 
 {% block Main_Content %}
 <div class="container-fluid">
@@ -66,7 +109,7 @@
   <dIv class="row -catalog2-">
     {# ПЕРВЫЙ РАЗДЕЛ С РЕКЛАМОЙ СБОКУ #}<div class="col-md-9 col-xs-8">
       {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/profile">Оконные и&nbsp;дверные профили</a></h2>
-        <p class="col-md-offset-1 col-xs-offset-1">Каталог систем оконных и&nbsp;дверных профилей и&nbsp;описание <nobr>компаний-производителей</nobr>. Каталог содержит детальные характеристики профилей: сопротивление теплопередаче <nobr><i>Ro</i>&nbsp;(<i>м&sup2;&times;&deg;C/Вт</i>)</nobr>, коэффициент звукоизоляции (<i>дБ</i>), число камер рамы и&nbsp;створки, тип и&nbsp;армирования, монтажная ширина и&nbsp;другие. Пластиковые (ПВХ), деревянные, комбинированные и&nbsp;другие системы профилей.</p>
+        <p class="col-md-offset-1 col-xs-offset-1">Каталог систем оконных и&nbsp;дверных профилей и&nbsp;описание <nobr>компаний-производителей</nobr>. Каталог содержит детальные характеристики профилей: сопротивление теплопередаче <nobr><i>Ro</i>&nbsp;(<i>м&sup2;&times;&deg;C/Вт</i>)</nobr>, коэффициент звукоизоляции (<i>дБ</i>), число камер рамы и&nbsp;створки, тип и&nbsp;армирование, монтажная ширина и&nbsp;другие. Пластиковые (ПВХ), деревянные, комбинированные и&nbsp;другие системы профилей.</p>
       {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/seria">Каталог серий домов</a></h2>
       <p class="col-md-offset-1 col-xs-offset-1">Типовые проекты жилого строительства, вхождение стандартных оконных проёмов и&nbsp;балконных блоков в&nbsp;планировки типовых квартир серии, графики ввода в&nbsp;эксплуатацию зданий серии, география строительства, износ жилого фонда&hellip;</p>
     </div>
@@ -77,7 +120,7 @@
     </div>
     {# И ОПЯТЬ РАЗДЕЛ С РЕКЛАМОЙ СБОКУ #}<div class="col-md-9 col-xs-8">
       {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="/catalog/company">Производители и&nbsp;поставщики окон</a> <small style="font-size:xx-small;">(в&nbsp;разработке)</small></h2>
-      <p class="col-md-offset-1 col-xs-offset-1">Компании-партнеры &laquo;Окнардии&raquo;, контатная информация, условия и скидки, конфигурации и рейтинги их оконных предложений.</p>
+      <p class="col-md-offset-1 col-xs-offset-1">Компании-партнеры &laquo;Окнардии&raquo;, контактная информация, условия и скидки, конфигурации и рейтинги их оконных предложений.</p>
     {# ВТОРОЙ РАЗДЕЛ #}
       {# И ЕЩЁ ОДИН РАЗДЕЛ #}<h2 class="header"><a href="javascript://" class="not-ready">Каталог стеклопакетов</a> <small style="font-size:xx-small;">(в&nbsp;разработке)</small></h2>
       <p class="col-md-offset-1 col-xs-offset-1">Стеклопакеты и&nbsp;описание <nobr>компаний-производителей</nobr> стекла. Каталог содержит детальные характеристики: схемы стеклопакетов, наличие напыления k- и&nbsp;<nobr>i-микропленок</nobr>, тип <nobr>газа-заполнителя</nobr>, сопротивление теплопередаче <nobr><i>Ro</i>&nbsp;(<i>м&sup2;&times;&deg;C/Вт</i>)</nobr>, коэффициент звукоизоляции (<i>дБ</i>), число камер, тонирование&hellip;</p>
@@ -98,5 +141,3 @@
 {% include "report/report_log_user_visit.html" %}
 </div>
 </div>{% endblock %}
-
-

@@ -8,26 +8,16 @@
 
 {% block Keywords %}типовые окна, размеры окон, оконные проемы, балконный блок, стандартные окна, размеры окон в панельном доме, серия дома, каталог окон, схемы открывания окон, П-44, II-49, 1-515, oknardia, окнардия{% endblock %}
 
-{% block Date4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
-
-{% block Last4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
+{# Date4Meta/Last4Meta не переопределяем: используем дефолт из base.html #}
 
 {% block Author4Meta %}: Каталог «Окнардия»{% endblock %}
 
 {% block CopyrightAuthor4Meta %}: Каталог «Окнардия»{% endblock %}
 
 {% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags -->  #}
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"Y-m-d" }}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог «Окнардия»" />
-  <meta itemprop="headline" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
+  {# Legacy microdata (itemprop/itemscope) удалена: используем JSON-LD в ADD_TO_HEAD #}
   <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="https://oknardia.ru//catalog/" />
-  <link rel="standout"  href="https://oknardia.ru//catalog/" />
+  <link rel="canonical" href="https://oknardia.ru/catalog/standard_opening" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -35,21 +25,67 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/" />
+  <meta property="og:url" content="https://oknardia.ru/catalog/standard_opening" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="Каталог «Окнардия» | oknardia.ru" />
-  <meta property="og:description" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta property="og:title" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов | oknardia.ru" />
+  <meta property="og:description" content="Каталог стандартных оконных проёмов и балконных блоков: размеры, схемы открывания и серии домов, в которых они встречаются." />
+  <meta property="og:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
   <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов... | oknardia.ru"/>
-  <meta name="twitter:description" content="Каталог «Окнардия»: стандартные оконные проёмы типовых серий домов..." />
+  <meta name="twitter:title" content="Стандартные оконные проёмы и балконные блоки | oknardia.ru"/>
+  <meta name="twitter:description" content="Размеры, схемы открывания и типовые серии домов для стандартных оконных проёмов в каталоге Окнардии." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:'https://oknardia.ru/static/img/MerDY3gpU0w.jpg' }}" />
-{# <!-- END Дополнительные Metatags -->  #}{% endblock %}
+  <meta name="twitter:image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />
+{# <!-- END Дополнительные Metатags -->  #}{% endblock %}
+
+{% block ADD_TO_HEAD %}{% comment %}
+JSON-LD для страницы-списка типовых оконных проемов.
+CollectionPage + ItemList помогают поисковику понять структуру каталога.
+{% endcomment %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Стандартные оконные проёмы и балконные блоки",
+  "description": "Каталог стандартных оконных проёмов и балконных блоков с размерами, схемами открывания и привязкой к типовым сериям домов.",
+  "url": "https://oknardia.ru/catalog/standard_opening",
+  "inLanguage": "ru-RU",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Окнардия",
+    "url": "https://oknardia.ru"
+  },
+  "mainEntity": {
+    "@type": "ItemList",
+    "name": "Типовые оконные проёмы",
+    "numberOfItems": {{ LIST_WIN_OPENING|length }},
+    "itemListElement": [
+      {% for i in LIST_WIN_OPENING %}
+      {
+        "@type": "ListItem",
+        "position": {{ forloop.counter }},
+        "item": {
+          "@type": "Thing",
+          "name": "{{ i.DESCRIPTION|escapejs }}",
+          "description": "{{ i.DESCRIPTION_L|escapejs }}",
+          "url": "https://oknardia.ru/tsena-odnogo-okna/{{ i.W|stringformat:'.0f' }}x{{ i.H|stringformat:'.0f' }}mm/tip{{ i.ID }}",
+          "image": "https://oknardia.ru{% static i.URL2IMG %}",
+          "additionalProperty": [
+            {"@type": "PropertyValue", "name": "Ширина", "value": "{{ i.W|stringformat:'.0f' }} мм"},
+            {"@type": "PropertyValue", "name": "Высота", "value": "{{ i.H|stringformat:'.0f' }} мм"},
+            {"@type": "PropertyValue", "name": "Балконный блок: окно", "value": "{% if i.IS_NEAR_DOOR %}да{% else %}нет{% endif %}"},
+            {"@type": "PropertyValue", "name": "Балконный блок: дверь", "value": "{% if i.IS_DOOR %}да{% else %}нет{% endif %}"}
+          ]
+        }
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}
+</script>
+{% endblock %}
 
 {% block Main_Content %}
 <div class="container-fluid">

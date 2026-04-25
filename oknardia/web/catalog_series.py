@@ -235,7 +235,8 @@ def seria_nav(seria_id: int = DEFAULT_SERIA_ID_FOR_CATALOG) -> tuple[int, dict]:
     """
     q_seria = list(
         Seria_Info.objects.filter(id=F("kRoot_id"))
-        .only("id", "sName", "sSeriaDescription", "kRoot_id", "kParent_id")
+        # sURL2IMG нужен для OG-image в шаблоне seria_info
+        .only("id", "sName", "sSeriaDescription", "kRoot_id", "kParent_id", "sURL2IMG")
         .order_by("sName")
     )
     if not q_seria:
@@ -292,8 +293,21 @@ def all_seria_nav(seria_id: int, q_seria) -> tuple[int, dict]:
             "SERIA_L": pytils.translit.slugify(seria_name),
         }
         if seria_id_value == seria_id:
-            this_return.update({"THIS_SERIA_NAME": seria_name,
-                                "THIS_SERIA_DESCRIPTION": seria_description})
+            # Изображение серии: используется в OG-image в шаблоне seria_info
+            seria_image = (
+                count_seria.get("sURL2IMG")
+                if isinstance(count_seria, dict)
+                else count_seria.sURL2IMG
+            )
+            this_return.update({
+                "THIS_SERIA_NAME": seria_name,
+                "THIS_SERIA_DESCRIPTION": seria_description,
+                # ID и slug серии нужны для canonical URL и JSON-LD в шаблоне
+                "THIS_SERIA_ID": seria_id_value,
+                "THIS_SERIA_NAME_T": pytils.translit.slugify(seria_name),
+                # URL изображения серии для OG-тегов (путь относительно /media/)
+                "THIS_SERIA_IMAGE_URL": str(seria_image) if seria_image else "",
+            })
         seria_nav_dim.append(one_seria)
     this_return.update({"SERIA_NAV_DIM": seria_nav_dim})
     return seria_id, this_return

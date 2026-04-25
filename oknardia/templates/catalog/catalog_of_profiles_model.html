@@ -5,31 +5,17 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Характеристики оконного профиля {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}{% endblock %}
+{% block Description %}Оконный профиль {{ CATALOG_MODEL.sProfileName }} от {{ CATALOG_MODEL.sProfileManufacturer }}: характеристики, рейтинг, комплектация и применение в оконных предложениях партнёров Окнардии.{% endblock %}
 
 {% block Keywords %}оконный профиль {{ CATALOG_MODEL.sProfileName }}, характеристики профиля {{ CATALOG_MODEL.sProfileName }}, описание профиля {{ CATALOG_MODEL.sProfileName }}, производитель оконный профилей {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия {{ META_KEYWORDS|default:"" }} {% endblock %}
-
-{% block Date4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
-
-{% block Last4Meta %}{{ PUB_DAT|date:"Y-m-d" }}{% endblock %}
 
 {% block Author4Meta %}: Каталог{% endblock %}
 
 {% block CopyrightAuthor4Meta %}: Каталог{% endblock %}
 
-{% block Top_Meta1 %}
-  <!-- Дополнительные Metatags -->
-  <meta itemprop="author" content="Каталог «Окнардия»" />{% if IMG_FOR_BLOG %}
-  <meta itemprop="image" content="https://oknardia.ru/media/{{ IMG_FOR_BLOG }}" />{% else %}
-  <meta itemprop="image" content="https://oknardia.ru/static/img/MerDY3gpU0w.jpg" />{% endif %}
-  <meta itemprop="datePublished" content="{{ PUB_DAT|date:"Y-m-d" }}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="Каталог «Окнардия»: оконные профили" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="Каталог «Окнардия»" /></span>
-  <meta itemprop="articleSection" content="Каталог «Окнардия»: оконные профили {{ CATALOG_MODEL.sProfileName }}" />
-  <meta itemprop="headline" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
-  <meta name="news_keywords" content="{{ CATALOG_MODEL.sProfileName }}, характеристики {{ CATALOG_MODEL.sProfileName }}, описание {{ CATALOG_MODEL.sProfileName }}, оконные профили {{ CATALOG_MODEL.sProfileName }}, {{ CATALOG_MODEL.sProfileManufacturer }}, производитель {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, каталог производителей оконных профилей, каталог профилей, оконные профили, oknardia, окнардия" />
-  <link rel="canonical" href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}/" />
-  <link rel="standout"  href="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}/" />
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags --> #}
+  <meta name="news_keywords" content="{{ CATALOG_MODEL.sProfileName }}, {{ CATALOG_MODEL.sProfileManufacturer }}, каталог оконных профилей, оконные профили" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL2 }}" />
   <!-- Разметка для соц-сетей Facebook Open Graph -->
   <meta property="fb:admins" name="admins" content="100000084781830" />
   <meta property="fb:pages" content="276108456054163" />
@@ -37,20 +23,100 @@
   <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
   <meta property="og:locale" content="ru_RU" />
   <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="https://oknardia.ru//catalog/profile/{{ CATALOG_URL2 }}" />
-  <meta property="og:type" content="article" />
-  <meta property="og:title" content="Оконные профили {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
-  <meta property="og:description" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL2 }}" />
+  <meta property="og:type" content="product" />
+  <meta property="og:title" content="Оконный профиль {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
+  <meta property="og:description" content="Оконный профиль {{ CATALOG_MODEL.sProfileName }} от {{ CATALOG_MODEL.sProfileManufacturer }}: характеристики, рейтинг и описание в каталоге Окнардии." />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
   <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="Оконные профили {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
-  <meta name="twitter:description" content="Описание и характеристики оконных профилей {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}" />
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Оконный профиль {{ CATALOG_MODEL.sProfileName }} | oknardia.ru" />
+  <meta name="twitter:description" content="Характеристики, рейтинг и описание профиля {{ CATALOG_MODEL.sProfileName }} производства {{ CATALOG_MODEL.sProfileManufacturer }}." />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}https://oknardia.ru/media/{% endif %}{{ IMG_FOR_BLOG|default:"https://oknardia.ru/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL2 }}" />
+  <meta name="twitter:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}">
+{# <!-- END Дополнительные Metатags --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}
+  {# JSON-LD для карточки оконного профиля и хлебных крошек #}<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "{{ CATALOG_MODEL.sProfileName|escapejs }}",
+    "description": "Оконный профиль {{ CATALOG_MODEL.sProfileName|escapejs }} производства {{ CATALOG_MODEL.sProfileManufacturer|escapejs }}. Характеристики, рейтинг и применение в наборах партнёров Окнардии.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL2 }}",
+    "image": "{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}",
+    "brand": {
+      "@type": "Brand",
+      "name": "{{ CATALOG_MODEL.sProfileManufacturer|escapejs }}"
+    },
+    "manufacturer": {
+      "@type": "Organization",
+      "name": "{{ CATALOG_MODEL.sProfileManufacturer|escapejs }}"
+    },
+    "category": "Оконные профили",
+    "subjectOf": {
+      "@type": "CreativeWork",
+      "name": "Рейтинг Окнардии и как он устроен",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/blogpost/13/rejting-oknardii-i-kak-on-ustroen-2"
+    },
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "Метод ранжирования",
+        "value": "Mann-Whitney (Манна-Уитни)"
+      }
+    ]{% if CATALOG_MODEL.fProfileRating > -0.1 %},
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "{{ CATALOG_MODEL.fProfileRating|stringformat:'.2f' }}",
+      "bestRating": "5",
+      "worstRating": "0"{% if PROFILE_RATING_SAMPLE_SIZE > 0 %},
+      "ratingCount": "{{ PROFILE_RATING_SAMPLE_SIZE }}"{% endif %}
+    }{% endif %}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Каталог",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/catalog"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Оконные профили",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "{{ CATALOG_MODEL.sProfileManufacturer|escapejs }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 5,
+        "name": "Профиль {{ CATALOG_MODEL.sProfileName|escapejs }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ CATALOG_URL2 }}"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
 
 
 {% block Main_Content %}<div class="container-fluid">
@@ -125,7 +191,12 @@
             <td colspan="3" {% if not CATALOG_MODEL.sProfileColor == "" %} title="Цвет оконного профиля: {{ CATALOG_MODEL.sProfileColor|capfirst }}"{% endif %}>{% if CATALOG_MODEL.sProfileColor == "" %}—{% else %}<small>{{ CATALOG_MODEL.sProfileColor|capfirst }}{% endif %}</small></td>
           </tr>
         </tbody>
-      </table>{% if LIST_OTHER|length > 1 %}
+      </table>{% if CATALOG_MODEL.fProfileRating > -0.1 %}
+      <p class="small-note">Рейтинг модели рассчитан алгоритмом «Окнардии» по статистическому ранжированию
+        характеристик (метод Манна-Уитни){% if PROFILE_RATING_SAMPLE_SIZE > 0 %} на выборке из
+        {{ PROFILE_RATING_SAMPLE_SIZE }} моделей профилей{% endif %}. Методика расчёта:
+        <a href="/blogpost/13/rejting-oknardii-i-kak-on-ustroen-2" target="_blank"
+           rel="nofollow">«Рейтинг Окнардии и как он устроен»</a>.</p>{% endif %}{% if LIST_OTHER|length > 1 %}
       <h4>Прочие характеристики профиля:</h4>
       <ul>{% for LI_BULL in LIST_OTHER %}
         <li>{{ LI_BULL|safe }}</li>{% endfor %}
