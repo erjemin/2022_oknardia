@@ -183,6 +183,9 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
                                       "CATALOG_URL": f"{manufacture_id}-{manufacture_name}",
                                       "CATALOG_URL2": f"{manufacture_id}-{manufacture_name}/{model_id}-{model_name}",
                                       "PROFILE_RATING_STARS": get_rating_set_for_stars(q_pvc_by_id.fProfileRating)}
+    # Размер выборки для алгоритмического рейтинга: количество моделей профилей в каталоге.
+    # Используется в JSON-LD (ratingCount) и поясняющем тексте на странице.
+    to_template["PROFILE_RATING_SAMPLE_SIZE"] = PVCprofiles.objects.count()
     try:
         got_json = json.loads(q_pvc_by_id.sProfileDescription)
         # раскрашиваем кружочки рейтинга напротив характеристик профиля
@@ -299,7 +302,8 @@ def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manuf
         if catalog_entry is None or catalog_entry.kBlogCatalog is None:
             raise ObjectDoesNotExist
         manufacture_description = catalog_entry.kBlogCatalog
-        to_template.update({'PUB_DAT': manufacture_description.dPostDataModify})
+        # PUB_DAT убран: на странице производителя дата меняется и от рейтинга, и от статьи,
+        # поэтому Date4Meta/Last4Meta удалены из шаблона — base.html использует {% now %} по умолчанию.
         if PATH_FOR_IMG_BLOG in (manufacture_description.sImgForBlogSocial or ""):
             to_template.update({'IMG_FOR_BLOG': manufacture_description.sImgForBlogSocial})
         content = re.sub(r'<cut[\s\S]*>', '', manufacture_description.sPostContent, 0, re.IGNORECASE)

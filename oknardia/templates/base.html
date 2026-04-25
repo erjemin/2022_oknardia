@@ -16,7 +16,6 @@
   <meta name="document-state" content="{{ META_DOCUMENT_STATE|default:"Dynamic" }}" />
   <meta name="generator" content="OKNARDIA 0.3β by Python/Django" />
   <title>{% block Title %}{% endblock %} : ОКНАРДИЯ</title>
-  <link rel="alternate" href="https://oknardia.ru" hreflang="ru-ru" />
   <link rel="icon" href="https://oknardia.ru/favicon.svg" type="image/svg+xml ">
   <link rel="icon" href="https://oknardia.ru/favicon.png" type="image/png">
   <link rel="icon" href="https://oknardia.ru/favicon.gif" type="image/gif">
@@ -26,7 +25,7 @@
   <link href="{% static 'css/oknardia1.css' %}" rel="stylesheet" type="text/css"  />{% block Top_CSS1 %}{% endblock %}{% block Top_CSS2 %}{% endblock %}{% block Top_CSS3 %}{% endblock %}
   <script src="{% static 'js/jquery-2.1.1.min.js' %}" type="text/javascript"></script>{#  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>#}
   <script src="{% static 'js/bootstrap.min.js' %}" type="text/javascript"></script>{#  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>#}{% block Top_JS1 %}{% endblock %}{% block Top_JS2 %}{% endblock %}{% block Top_JS3 %}{% endblock %}{% block Top_JS4 %}{% endblock %}{% block Top_JS5 %}{% endblock %}{% block Top_Meta1 %}{% endblock %}
-  <script type="text/javascript">$(document).ready(function(){ $('#login-logout').load('/login-logout' ); })</script>{% block ADD_TO_HEAD %}{% endblock %}
+    <script type="text/javascript">$(document).ready(function(){ $('#login-logout').load('/login-logout' ); })</script>{% block ADD_TO_HEAD %}{% endblock %}
 </head>
 
 <body{% block Add_Body_Attribute %}{% endblock %}>
