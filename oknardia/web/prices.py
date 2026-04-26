@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
-from oknardia.models import Win_MountDim, PriceOffer, Apartment_Type, Seria_Info, LogVisitPriceReport
+from django.utils import timezone
+from oknardia.models import Win_MountDim, PriceOffer, Apartment_Type, Seria_Info, LogVisitPriceReport, MountDim2Apartment
 from oknardia.settings import *
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures, \
@@ -12,7 +14,24 @@ import time
 import os
 import re
 import json
+from types import SimpleNamespace
 import pytils
+
+
+def _one_win_price_canonical_path(win_width_mm: int | str, win_height_mm: int | str, win_id: int | str) -> str:
+    """Возвращает канонический путь страницы цен для одного типового окна."""
+    return f"/catalog/standard_opening/price-{int(win_width_mm)}x{int(win_height_mm)}mm-tip{int(win_id)}/"
+
+
+def redirect_one_win_price_legacy(request: HttpRequest,
+                                  win_width_mm: str | int = DEFAULT_WIN_WIDTH_MM,
+                                  win_height_mm: str | int = DEFAULT_WIN_HEIGHT_MM,
+                                  win_id: str | int = DEFAULT_WIN_ID) -> HttpResponse:
+    """301-редирект со старого URL /tsena-odnogo-okna/... на канонический URL."""
+    return redirect(
+        _one_win_price_canonical_path(win_width_mm=win_width_mm, win_height_mm=win_height_mm, win_id=win_id),
+        permanent=True,
+    )
 
 
 def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_longitude: float, address_latitude: float,
@@ -49,65 +68,219 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
         add_to_sql_for_widget = f"  AND oknardia_merchantbrand.id = {brand_id} "
         offer_per_frame = 1000  # Фреймовый вывод не нужен... фигачим сразу целую 1000 предложений.
     if int(apartment_id) == 0 and int(win_id) != 0:
-        # если выводим цены только для одного проема
+        # ORM-ветка для одиночного типового окна.
+        # Здесь можно полностью уйти от raw SQL, потому что все связи линейные и хорошо покрываются select_related.
+        # Контракт ответа сохраняем прежним: META_DATA_PUBLISH, PRICE_FRAME, N и все вложенные ключи оферов.
         offer_per_frame = OFFER_PER_FRAME_FOR_ONE_FLAP
-        q_price_offer = PriceOffer.objects.raw(
-            f"SELECT"
-            f"  oknardia_priceoffer.id,                     oknardia_priceoffer.iOfferImpressions,"
-            f"  oknardia_priceoffer.fOfferPrice,            oknardia_priceoffer.dOfferModify,"
-            f"  oknardia_priceoffer.fOfferRating,           oknardia_priceoffer.sOfferFlapConfig,"
-            f"  oknardia_priceoffer.iOfferViews,            oknardia_priceoffer.sOfferActive,"
-            f"  oknardia_win_mountdim.sDescripion,          oknardia_win_mountdim.id AS mID, "
-            f"  oknardia_win_mountdim.bIsNearDoor,          oknardia_win_mountdim.bIsDoor,"
-            f"  oknardia_win_mountdim.iWinWidth,            oknardia_win_mountdim.iWinHight,"
-            f"  oknardia_setkit.id AS setID,"
-            f"  oknardia_setkit.sSetName,                   oknardia_setkit.dSetModify,"
-            f"  oknardia_setkit.sSetClimateControl,         oknardia_setkit.sSetSill,"
-            f"  oknardia_setkit.sSetImplementAll,           oknardia_setkit.sSetImplementHandles,"
-            f"  oknardia_setkit.sSetImplementHinges,        oknardia_setkit.sSetImplementLatch,"
-            f"  oknardia_setkit.sSetImplementLimiter,       oknardia_setkit.sSetImplementCatch,"
-            f"  oknardia_setkit.sSetPanes,                  oknardia_setkit.sSetSlope,"
-            f"  oknardia_setkit.sSetOtherConditions,        oknardia_setkit.sSetActive,"
-            f"  oknardia_setkit.bSetDelivery,               oknardia_setkit.sSetDelivery,"
-            f"  oknardia_setkit.sSetUninstallInstall,       oknardia_setkit.bSetUninstallInstall,"
-            f"  oknardia_setkit.fSetRating,                 oknardia_setkit.iSetNumEval,"
-            f"  oknardia_setkit.iSetImpressions,            oknardia_setkit.iSetViews,"
-            f"  (oknardia_setkit.dSetCommercialUntil > NOW()) AS bCommercial,"
-            f"  oknardia_merchantoffice.sOfficePhones,      "
-            f"  oknardia_merchantoffice.sOfficeDiscountMetaFormula,"
-            f"  oknardia_merchantoffice.sOfficeName,        oknardia_merchantoffice.sOfficeAddress,"
-            f"  oknardia_glazing.fGlazingRating,"
-            f"  oknardia_glazing.sGlazingName,              oknardia_glazing.sGlazingBriefDescription,"
-            f"  oknardia_glazing.sGlazingMark,              oknardia_glazing.sGlazingToning,"
-            f"  oknardia_pvcprofiles.sProfileBriefDescription, oknardia_pvcprofiles.id AS pwc_id,"
-            f"  oknardia_pvcprofiles.sProfileReinforcement, oknardia_pvcprofiles.sProfileSealDescription,"
-            f"  oknardia_pvcprofiles.sProfileName,          oknardia_pvcprofiles.sProfileColor,"
-            f"  oknardia_pvcprofiles.fProfileRating,        oknardia_pvcprofiles.sProfileManufacturer,"
-            f"  oknardia_merchantbrand.sMerchantName,       oknardia_merchantbrand.pMerchantLogo,"
-            f"  oknardia_merchantbrand.sMerchantMainURL,    oknardia_merchantbrand.id AS brand_id,"
-            f"  1 AS iQuantity, 0 AS fOfficeGeoCode_Longitude, 0 AS fOfficeGeoCode_Latitude "
-            f"FROM oknardia_priceoffer"
-            f"  INNER JOIN oknardia_win_mountdim"
-            f"    ON oknardia_priceoffer.kOffer2MountDim_id = oknardia_win_mountdim.id"
-            f"  INNER JOIN oknardia_setkit"
-            f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
-            f"  INNER JOIN oknardia_ouruser"
-            f"    ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id"
-            f"  INNER JOIN oknardia_merchantoffice"
-            f"    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id"
-            f"  INNER JOIN oknardia_glazing"
-            f"    ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id"
-            f"  INNER JOIN oknardia_pvcprofiles"
-            f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
-            f"  INNER JOIN oknardia_merchantbrand"
-            f"    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id "
-            f"WHERE oknardia_priceoffer.sOfferActive IS TRUE"
-            f"  AND oknardia_setkit.sSetActive IS TRUE "
-            f"  AND oknardia_win_mountdim.id = {int(win_id)}"
-            f"  {add_to_sql_for_widget} "
-            f"ORDER BY"
-            f"  oknardia_priceoffer.dOfferModify DESC "
-            f"LIMIT {int(frame_begin_n)}, 10000;")
+        if brand_id != 0:
+            offer_per_frame = 1000
+
+        q_price_offer = (
+            PriceOffer.objects.filter(
+                sOfferActive=True,
+                kOffer2MountDim_id=win_id,
+                kOffer2SetKit__sSetActive=True,
+                kOffer2SetKit__kSet2User__kMerchantOffice__isnull=False,
+                kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__isnull=False,
+                kOffer2SetKit__kSet2Glazing__isnull=False,
+                kOffer2SetKit__kSet2PVCprofiles__isnull=False,
+            )
+            .values(
+                'id',
+                'fOfferPrice',
+                'dOfferModify',
+                'sOfferFlapConfig',
+                'kOffer2MountDim__sDescripion',
+                'kOffer2MountDim__iWinWidth',
+                'kOffer2MountDim__iWinHight',
+                'kOffer2SetKit__id',
+                'kOffer2SetKit__sSetName',
+                'kOffer2SetKit__dSetModify',
+                'kOffer2SetKit__dSetCommercialUntil',
+                'kOffer2SetKit__sSetClimateControl',
+                'kOffer2SetKit__sSetSill',
+                'kOffer2SetKit__sSetImplementAll',
+                'kOffer2SetKit__sSetImplementHandles',
+                'kOffer2SetKit__sSetImplementHinges',
+                'kOffer2SetKit__sSetImplementLatch',
+                'kOffer2SetKit__sSetImplementLimiter',
+                'kOffer2SetKit__sSetImplementCatch',
+                'kOffer2SetKit__sSetPanes',
+                'kOffer2SetKit__sSetSlope',
+                'kOffer2SetKit__sSetOtherConditions',
+                'kOffer2SetKit__sSetDelivery',
+                'kOffer2SetKit__bSetDelivery',
+                'kOffer2SetKit__sSetUninstallInstall',
+                'kOffer2SetKit__bSetUninstallInstall',
+                'kOffer2SetKit__fSetRating',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__sOfficePhones',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeDiscountMetaFormula',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeName',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeAddress',
+                'kOffer2SetKit__kSet2Glazing__sGlazingBriefDescription',
+                'kOffer2SetKit__kSet2Glazing__sGlazingMark',
+                'kOffer2SetKit__kSet2Glazing__sGlazingToning',
+                'kOffer2SetKit__kSet2PVCprofiles__id',
+                'kOffer2SetKit__kSet2PVCprofiles__sProfileName',
+                'kOffer2SetKit__kSet2PVCprofiles__sProfileManufacturer',
+                'kOffer2SetKit__kSet2PVCprofiles__sProfileSealDescription',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantMainURL',
+            )
+            .order_by("-dOfferModify")
+        )
+        if brand_id != 0:
+            q_price_offer = q_price_offer.filter(
+                kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName_id=brand_id,
+            )
+        q_price_offer = [
+            SimpleNamespace(
+                id=offer['id'],
+                fOfferPrice=offer['fOfferPrice'],
+                dOfferModify=offer['dOfferModify'],
+                sOfferFlapConfig=offer['sOfferFlapConfig'],
+                sDescripion=offer['kOffer2MountDim__sDescripion'],
+                iWinWidth=offer['kOffer2MountDim__iWinWidth'],
+                iWinHight=offer['kOffer2MountDim__iWinHight'],
+                setID=offer['kOffer2SetKit__id'],
+                sSetName=offer['kOffer2SetKit__sSetName'],
+                dSetModify=offer['kOffer2SetKit__dSetModify'],
+                dSetCommercialUntil=offer['kOffer2SetKit__dSetCommercialUntil'],
+                sSetClimateControl=offer['kOffer2SetKit__sSetClimateControl'],
+                sSetSill=offer['kOffer2SetKit__sSetSill'],
+                sSetImplementAll=offer['kOffer2SetKit__sSetImplementAll'],
+                sSetImplementHandles=offer['kOffer2SetKit__sSetImplementHandles'],
+                sSetImplementHinges=offer['kOffer2SetKit__sSetImplementHinges'],
+                sSetImplementLatch=offer['kOffer2SetKit__sSetImplementLatch'],
+                sSetImplementLimiter=offer['kOffer2SetKit__sSetImplementLimiter'],
+                sSetImplementCatch=offer['kOffer2SetKit__sSetImplementCatch'],
+                sSetPanes=offer['kOffer2SetKit__sSetPanes'],
+                sSetSlope=offer['kOffer2SetKit__sSetSlope'],
+                sSetOtherConditions=offer['kOffer2SetKit__sSetOtherConditions'],
+                sSetDelivery=offer['kOffer2SetKit__sSetDelivery'],
+                bSetDelivery=offer['kOffer2SetKit__bSetDelivery'],
+                sSetUninstallInstall=offer['kOffer2SetKit__sSetUninstallInstall'],
+                bSetUninstallInstall=offer['kOffer2SetKit__bSetUninstallInstall'],
+                fSetRating=offer['kOffer2SetKit__fSetRating'],
+                sOfficePhones=offer['kOffer2SetKit__kSet2User__kMerchantOffice__sOfficePhones'],
+                sOfficeDiscountMetaFormula=offer['kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeDiscountMetaFormula'],
+                sOfficeName=offer['kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeName'],
+                sOfficeAddress=offer['kOffer2SetKit__kSet2User__kMerchantOffice__sOfficeAddress'],
+                sGlazingBriefDescription=offer['kOffer2SetKit__kSet2Glazing__sGlazingBriefDescription'],
+                sGlazingMark=offer['kOffer2SetKit__kSet2Glazing__sGlazingMark'],
+                sGlazingToning=offer['kOffer2SetKit__kSet2Glazing__sGlazingToning'],
+                pwc_id=offer['kOffer2SetKit__kSet2PVCprofiles__id'],
+                sProfileName=offer['kOffer2SetKit__kSet2PVCprofiles__sProfileName'],
+                sProfileManufacturer=offer['kOffer2SetKit__kSet2PVCprofiles__sProfileManufacturer'],
+                sProfileSealDescription=offer['kOffer2SetKit__kSet2PVCprofiles__sProfileSealDescription'],
+                sMerchantName=offer['kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName'],
+                pMerchantLogo=offer['kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo'],
+                sMerchantMainURL=offer['kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantMainURL'],
+                iQuantity=1,
+            )
+            for offer in q_price_offer[frame_begin_n:frame_begin_n + 10000]
+        ]
+
+        price_frame = []
+        n_begin = int(frame_begin_n)
+        for offer in q_price_offer:
+            n_begin += 1
+            total = offer.fOfferPrice
+            image_file = get_flaps_for_mini_pictures(offer.sOfferFlapConfig)
+            dim_in_offer = [{
+                'PRICE': offer.fOfferPrice,
+                'FLAP': offer.sOfferFlapConfig,
+                'DESCRIPTION': offer.sDescripion,
+                'WIDTH': offer.iWinWidth,
+                'HIGHT': offer.iWinHight,
+                'ID': offer.id,
+                'IMG_MINI': image_file,
+                'QUANTITY': 1,
+                'BULLET': ['A'],
+                'SUBTOTAL': offer.fOfferPrice,
+            }]
+
+            discount = 0
+            try:
+                meta_keys = eval(offer.sOfficeDiscountMetaFormula)
+                if KEY_DICSOUNT in meta_keys:
+                    for CountVal in sorted(meta_keys[KEY_DICSOUNT]):
+                        if float(total) > float(CountVal):
+                            discount = meta_keys[KEY_DICSOUNT][CountVal]
+            except (ValueError, TypeError):
+                pass
+
+            fin_price = total * (100 - discount) / 100
+            if discount > 99 or discount < 0.1:
+                discount_color1 = ""
+                discount_color2 = ""
+            else:
+                color_ratio = (discount + 0.) / 100
+                discount_color1 = f"#{255 - int(color_ratio * 128):02x}ff{255 - int(color_ratio * 128):02x}"
+                discount_color2 = f"#{255 - int(color_ratio * 255):02x}ff{255 - int(color_ratio * 255):02x}"
+
+            price_frame.append({
+                'DISTANCE': -1,
+                'DIM': dim_in_offer,
+                'TOTAL': total,
+                'DISCOUNT': discount,
+                'DISCOUNT_COLOR1': discount_color1,
+                'DISCOUNT_COLOR2': discount_color2,
+                'FIN_PRICE': fin_price,
+                'OFFICE_NAME': offer.sOfficeName,
+                'OFFICE_ADDRESS': offer.sOfficeAddress,
+                'OFFICE_PHONES': offer.sOfficePhones,
+                'MERCHANT': offer.sMerchantName,
+                'MERCHANT_LOGO': offer.pMerchantLogo,
+                'MERCHANT_URL': offer.sMerchantMainURL,
+                'MERCHANT_URL_SHOT': re.sub(r"(^http://|^https://|/$|www\.)", "", offer.sMerchantMainURL),
+                'SETS_NAME': offer.sSetName,
+                'GLAZING_NAME_B': offer.sGlazingBriefDescription,
+                'GLAZING_MARK': offer.sGlazingMark,
+                'GLAZING_TONING': offer.sGlazingToning,
+                'PVC_ID': offer.pwc_id,
+                'PVC_NAME': offer.sProfileName,
+                'PVC_NAME_T': pytils.translit.slugify(offer.sProfileName).lower(),
+                'PVC_MANUFACTURER': offer.sProfileManufacturer,
+                'PVC_MANUFACTURER_T': pytils.translit.slugify(offer.sProfileManufacturer).lower(),
+                'PVC_SEAL': offer.sProfileSealDescription,
+                'SETS_CLIMATE_CONTROL': offer.sSetClimateControl,
+                'SETS_SILL': offer.sSetSill,
+                'SETS_IMPLEMENT': offer.sSetImplementAll,
+                'SETS_IMPLEMENT_R': offer.sSetImplementHandles,
+                'SETS_IMPLEMENT_P': offer.sSetImplementHinges,
+                'SETS_IMPLEMENT_Z': offer.sSetImplementLatch,
+                'SETS_IMPLEMENT_O': offer.sSetImplementLimiter,
+                'SETS_IMPLEMENT_F': offer.sSetImplementCatch,
+                'SETS_PANES': offer.sSetPanes,
+                'SETS_SLOPE': offer.sSetSlope,
+                'SETS_DELIVERY': offer.sSetDelivery,
+                'SETS_DELIVERY_B': offer.bSetDelivery,
+                'SETS_OTHER': offer.sSetOtherConditions,
+                'SETS_ID': offer.setID,
+                'SETS_UNINSTALL_INSTALL': offer.sSetUninstallInstall,
+                'SETS_UNINSTALL_INSTALL_B': offer.bSetUninstallInstall,
+                'SETS_RATING': offer.fSetRating,
+                'SETS_RATING_STARTS': get_rating_set_for_stars(offer.fSetRating),
+                'SETS_DATA_MODIFY': offer.dOfferModify,
+                'IS_COMMERCIAL': offer.dSetCommercialUntil > timezone.now(),
+            })
+
+            if time_for_meta == 0 or django.utils.dateformat.format(time_for_meta, 'U') < \
+                    django.utils.dateformat.format(offer.dOfferModify, 'U'):
+                time_for_meta = offer.dOfferModify
+            if time_for_meta == 0 or django.utils.dateformat.format(time_for_meta, 'U') < \
+                    django.utils.dateformat.format(offer.dSetModify, 'U'):
+                time_for_meta = offer.dSetModify
+
+            if len(price_frame) == offer_per_frame:
+                break
+
+        price_frame = sorted(price_frame, key=lambda item: item['DISTANCE'])
+        if len(price_frame) < offer_per_frame:
+            n_begin = '-1'
+        return {'META_DATA_PUBLISH': time_for_meta, 'PRICE_FRAME': price_frame, 'N': n_begin}
     else:
         # если выводим цены для типовой квартиры
         # print("Нужно несколько окон для квартиры")
@@ -123,7 +296,7 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
             f"  oknardia_mountdim2apartment.iQuantity,"
             f"  oknardia_win_mountdim.id  AS mID, "
             f"  oknardia_setkit.id        AS setID,"
-            f"  (oknardia_setkit.dSetCommercialUntil > NOW()) AS bCommercial,"
+            f"  (oknardia_setkit.dSetCommercialUntil > CURRENT_TIMESTAMP) AS bCommercial,"
             f"  oknardia_pvcprofiles.id   AS pwc_id,"
             f"  oknardia_merchantbrand.id AS brand_id "
             f"FROM oknardia_priceoffer"
@@ -314,8 +487,10 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
     return {'META_DATA_PUBLISH': time_for_meta, 'PRICE_FRAME': price_frame, 'N': n_begin}
 
 
-def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_height_mm: str = '2160',
-                         win_id: str = '16') -> HttpResponse:
+def report_one_win_price(request: HttpRequest,
+                         win_width_mm: str | int = DEFAULT_WIN_WIDTH_MM,
+                         win_height_mm: str | int = DEFAULT_WIN_HEIGHT_MM,
+                         win_id: str | int = DEFAULT_WIN_ID) -> HttpResponse:
     """ Формируем выдачу цен для единичного ТИПОВОГО окна (т.е. проема из серийного дома).
 
 
@@ -328,46 +503,78 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
     time_start = time.perf_counter()
     to_template: dict[str, object] = {}
     try:
-        # т.к. для вызова GetFlapDim4BigPictures нужно иметь внутри queryset поле iQuantity нельзя использовать
-        # простой запрос (см. следующую строку).
-        # qWinInfo = Win_MountDim.objects.filter(id=int(win_id))
-        # Придется сделать запрос немного сложнее:
-        q_win_info = Win_MountDim.objects.raw(
-            f'SELECT oknardia_win_mountdim.iWinWidth,'
-            f'  oknardia_win_mountdim.iWinHight,      oknardia_win_mountdim.iWinDepth,'
-            f'  oknardia_win_mountdim.sFlapConfig,    oknardia_win_mountdim.bIsNearDoor,'
-            f'  oknardia_win_mountdim.bIsDoor,        oknardia_win_mountdim.sDescripion,'
-            f'  oknardia_win_mountdim.id,             0 as iQuantity '
-            f'FROM  oknardia_win_mountdim '
-            f'WHERE oknardia_win_mountdim.id = {int(win_id)};'
+        win_info_rows = (
+            Win_MountDim.objects
+            .filter(id=int(win_id))
+            .values(
+                'id',
+                'iWinWidth',
+                'iWinHight',
+                'iWinDepth',
+                'sFlapConfig',
+                'bIsNearDoor',
+                'bIsDoor',
+                'sDescripion',
+            )
         )
-        list_win_info = list(q_win_info)
+        list_win_info = [
+            SimpleNamespace(
+                id=item['id'],
+                iWinWidth=item['iWinWidth'],
+                iWinHight=item['iWinHight'],
+                iWinDepth=item['iWinDepth'],
+                sFlapConfig=item['sFlapConfig'],
+                bIsNearDoor=item['bIsNearDoor'],
+                bIsDoor=item['bIsDoor'],
+                sDescripion=item['sDescripion'],
+                iQuantity=0,
+            )
+            for item in win_info_rows
+        ]
         # Если размеры типового проема не совпадают с размерами из базы, то подменяем
         # на правильные и перевызываем страницу
+        canonical_width_mm = int(list_win_info[0].iWinWidth * 10)
+        canonical_height_mm = int(list_win_info[0].iWinHight * 10)
         if (list_win_info[0].iWinWidth * 10 != int(win_width_mm)) or \
                 (list_win_info[0].iWinHight * 10 != int(win_height_mm)):
-            return redirect(f"/tsena-odnogo-okna/{list_win_info[0].iWinWidth * 10}x{list_win_info[0].iWinHight * 10}"
-                            f"mm/tip{win_id}")
+            return redirect(
+                _one_win_price_canonical_path(
+                    win_width_mm=canonical_width_mm,
+                    win_height_mm=canonical_height_mm,
+                    win_id=win_id,
+                ),
+                permanent=True,
+            )
     except (ObjectDoesNotExist, ValueError, IndexError, TypeError):
-        return redirect("/tsena-odnogo-okna/670x2160mm/tip16")
+        return redirect(
+            _one_win_price_canonical_path(
+                win_width_mm=DEFAULT_WIN_WIDTH_MM,
+                win_height_mm=DEFAULT_WIN_HEIGHT_MM,
+                win_id=DEFAULT_WIN_ID,
+            ),
+            permanent=True,
+        )
     # все хорошо, засылаем картинку в шаблон
     to_template.update(get_flaps_for_big_pictures(list_win_info))
     # получаем варианты схемы открывания (для графиков)
-    q_offer_flap_variation = PriceOffer.objects.raw(
-        f'SELECT'
-        f'  COUNT(oknardia_priceoffer.sOfferFlapConfig) AS id,'
-        f'  "" AS IMG_MINI,'
-        f'  "" AS STR_NUM,'
-        f'  oknardia_priceoffer.sOfferFlapConfig '
-        f'FROM oknardia_priceoffer '
-        f'WHERE oknardia_priceoffer.sOfferActive <> 0'
-        f'  AND oknardia_priceoffer.kOffer2MountDim_id = {int(win_id)} '
-        f'GROUP BY oknardia_priceoffer.sOfferFlapConfig,'
-        f'         oknardia_priceoffer.sOfferActive,'
-        f'         oknardia_priceoffer.kOffer2MountDim_id '
-        f'ORDER BY id DESC;'
+    flap_variations = (
+        PriceOffer.objects.filter(
+            sOfferActive=True,
+            kOffer2MountDim_id=int(win_id),
+        )
+        .values('sOfferFlapConfig')
+        .annotate(id=Count('sOfferFlapConfig'))
+        .order_by('-id')
     )
-    list_offer_flap_variation = list(q_offer_flap_variation)
+    list_offer_flap_variation = [
+        SimpleNamespace(
+            id=item['id'],
+            sOfferFlapConfig=item['sOfferFlapConfig'],
+            IMG_MINI='',
+            STR_NUM='',
+        )
+        for item in flap_variations
+    ]
     for i in range(0, len(list_offer_flap_variation)):
         if i < 3:
             list_offer_flap_variation[i].STR_NUM = "вариант " + pytils.numeral.in_words(i + 1)
@@ -387,15 +594,13 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
                                                                                  "варианта схем",
                                                                                  "вариантов схем"))})
     #
-    q = PriceOffer.objects.raw(f'SELECT'
-                               f'  COUNT(oknardia_priceoffer.kOfferFromUser_id) AS id,'
-                               f'  oknardia_priceoffer.kOfferFromUser_id,'
-                               f'  oknardia_priceoffer.kOffer2MountDim_id '
-                               f'FROM oknardia_priceoffer '
-                               f'WHERE oknardia_priceoffer.kOffer2MountDim_id = {int(win_id)} '
-                               f'GROUP BY oknardia_priceoffer.kOffer2MountDim_id,'
-                               f'         oknardia_priceoffer.kOfferFromUser_id;')
-    to_template.update({'NUM_TOTAL_FIRM_N_WORD': pytils.numeral.get_plural(len(list(q)),
+    firms_count = (
+        PriceOffer.objects.filter(kOffer2MountDim_id=int(win_id))
+        .values('kOfferFromUser_id')
+        .distinct()
+        .count()
+    )
+    to_template.update({'NUM_TOTAL_FIRM_N_WORD': pytils.numeral.get_plural(firms_count,
                                                                            ("компании", "компаний", "компаний"))})
     q = PriceOffer.objects.filter(kOffer2MountDim_id=int(win_id))
     to_template.update({'NUM_TOTAL_OFFER_N_WORD': pytils.numeral.get_plural(q.count(),
@@ -403,33 +608,36 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
                                                                              "готовых расчётов"))})
     to_template.update({'NUM_ARCHIVE_OFFER': q.filter(sOfferActive=0).count()})
     #
-    q_seria_for_win = PriceOffer.objects.raw(
-        f'SELECT'
-        f'  oknardia_seria_info.sName,  oknardia_seria_info.id AS id,'
-        f'  "" AS sNameLat,'
-        f'  COUNT(oknardia_mountdim2apartment.id) AS num_variation_of_apartment '
-        f'FROM oknardia_apartment_type'
-        f'  INNER JOIN oknardia_mountdim2apartment'
-        f'    ON oknardia_mountdim2apartment.kApartment_id = oknardia_apartment_type.id'
-        f'  INNER JOIN oknardia_win_mountdim'
-        f'    ON oknardia_mountdim2apartment.kMountDim_id = oknardia_win_mountdim.id'
-        f'  INNER JOIN oknardia_seria_info'
-        f'    ON oknardia_apartment_type.kSeria_id = oknardia_seria_info.id '
-        f'WHERE oknardia_win_mountdim.id = {int(win_id)} '
-        f'GROUP BY oknardia_win_mountdim.id,'
-        f'         oknardia_seria_info.sName,'
-        f'         oknardia_seria_info.id '
-        f'ORDER BY oknardia_seria_info.sName;'
+    seria_for_win = (
+        MountDim2Apartment.objects.filter(kMountDim_id=int(win_id), kApartment__kSeria__isnull=False)
+        .values('kApartment__kSeria__id', 'kApartment__kSeria__sName')
+        .annotate(num_variation_of_apartment=Count('id'))
+        .order_by('kApartment__kSeria__sName')
     )
-    list_seria_for_win = list(q_seria_for_win)
-    for i in list_seria_for_win:
-        i.sNameLat = pytils.translit.slugify(i.sName)
-        i.num_variation_of_apartment = pytils.numeral.sum_string(i.num_variation_of_apartment,
-                                                                 pytils.numeral.MALE,
-                                                                 ("типовую планировку квартиры",
-                                                                  "типовые планировки квартир",
-                                                                  "типовых планировок квартир"))
-    to_template.update(report_price_frame(0, 1, 0, 0, 0, 0, int(win_id)))
+    list_seria_for_win = []
+    for seria_item in seria_for_win:
+        seria_name = seria_item['kApartment__kSeria__sName']
+        list_seria_for_win.append(SimpleNamespace(
+            id=seria_item['kApartment__kSeria__id'],
+            sName=seria_name,
+            sNameLat=pytils.translit.slugify(seria_name),
+            num_variation_of_apartment=pytils.numeral.sum_string(
+                seria_item['num_variation_of_apartment'],
+                pytils.numeral.MALE,
+                ("типовую планировку квартиры",
+                 "типовые планировки квартир",
+                 "типовых планировок квартир"),
+            ),
+        ))
+    to_template.update(report_price_frame(apartment_id=0,
+                                          mount_dim_per_offer= 1,
+                                          address_longitude= 0,
+                                          address_latitude= 0,
+                                          frame_begin_n= 0,
+                                          brand_id= 0,
+                                          win_id=int(win_id)
+                                          )
+                       )
     to_template.update({
         'SERIA_FOR_WIN': list_seria_for_win,
         'WIN_ID': int(win_id),
@@ -444,16 +652,25 @@ def report_one_win_price(request: HttpRequest, win_width_mm: str = '670', win_he
     return render(request, "price/price_offers_for_one_window.html", to_template)
 
 
-def next_one_win_price(request: HttpRequest, win_id='16', frame_begin_n="0"):
+def next_one_win_price(request: HttpRequest,
+                       win_id: str | int = DEFAULT_WIN_ID,
+                       frame_begin_n: str | int = 0):
     """ Возвращает очередной фреймом ценовых предложений для выдачи с одиночным окном.
 
     :param request: HttpRequest -- входящий http-запрос
     :param win_id: str -- id типового окна
-    :param frame_begin_n: str -- Номер записи с которой начинается фрейм с ценами
+    :param frame_begin_n: str -- Номер записи, с которой начинается фрейм с ценами
     :return: HttpResponse --
     """
     time_start = time.perf_counter()
-    to_template: dict[str, object] = report_price_frame(0, 1, 0, 0, int(frame_begin_n), 0, int(win_id))
+    to_template: dict[str, object] = report_price_frame(apartment_id=0,
+                                                        mount_dim_per_offer=1,
+                                                        address_longitude=0,
+                                                        address_latitude=0,
+                                                        frame_begin_n=int(frame_begin_n),
+                                                        brand_id=0,
+                                                        win_id=int(win_id)
+                                                        )
     to_template.update({'MOUNT_DIM_PER_OFFER': 1,
                         'WIN_ID': int(win_id),
                         'ticks': float(time.perf_counter() - time_start)})
@@ -633,7 +850,11 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         return redirect("/")
 
     # получаем данные для фрейма ценовых предложений
-    price_frame = report_price_frame(apart_id, mount_dim_per_offer, address_longitude, address_latitude)
+    price_frame = report_price_frame(apartment_id=apart_id,
+                                     mount_dim_per_offer=mount_dim_per_offer,
+                                     address_longitude=address_longitude,
+                                     address_latitude=address_latitude
+                                     )
     to_template.update(price_frame)
     # print u"строк в querySet:", CountMountDimInFramePage
     # dimension_to_template.update({'DISCOUNT_TXT': DiscountTXT})
@@ -704,8 +925,12 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
     """
     time_start = time.perf_counter()
     # получаем данные для фрейма ценовых предложений
-    price_frame = report_price_frame(int(apart_id), int(mount_dim_per_offer), float(address_longitude),
-                                    float(address_latitude), int(frame_begin_n))
+    price_frame = report_price_frame(apartment_id=int(apart_id),
+                                     mount_dim_per_offer=int(mount_dim_per_offer),
+                                     address_longitude=float(address_longitude),
+                                     address_latitude=float(address_latitude),
+                                     frame_begin_n=int(frame_begin_n)
+                                     )
     to_template: dict[str, object] = price_frame
     to_template.update({'APPARTMENT_ID': apart_id,
                         'MOUNT_DIM_PER_OFFER': mount_dim_per_offer,

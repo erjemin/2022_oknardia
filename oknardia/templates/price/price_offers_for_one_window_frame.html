@@ -6,8 +6,8 @@
     {% if forloop.first %}
       <th rowspan="{% if CurOffer.DIM|length == 1 %}2{% else %}{{ CurOffer.DIM|length }}{% endif %}" title="Добавить коммерческое предложение окна к сравнению">{# красивые чекбоксы BEGIN #}<div class="checkbox"><label><input id="CHK{{ CurOffer.SETS_ID }}" type="checkbox" name="ForCompare" value="{{ CurOffer.SETS_ID }}" onChange="ChangeCountCheckedBox({{ CurOffer.SETS_ID }});" /><span class="cr"><i class="cr-icon glyphicon glyphicon-ok"></i></span></label></div>{# красивые чекбоксы END #}</th>
 			<td rowspan="{% if CurOffer.DIM|length == 1 %}2{% else %}{{ CurOffer.DIM|length }}{% endif %}"{% if CurOffer.IS_COMMERCIAL %} style="background-image: url(/media/{{ CurOffer.MERCHANT_LOGO }})"{% endif %} title="Краткая спецификация коммерческого предложения">
-        <span itemprop="description">
-          <h3 class="set-name shake-trigger" id="btn{{ CurOffer.SETS_ID }}"><a href="javascript://" onclick="show_dtl({{ CurOffer.SETS_ID }})">{{ CurOffer.MERCHANT }} – {{ CurOffer.SETS_NAME }}<i class="glyphicon glyphicon-chevron-down shake-vertical"></i></a></h3>
+        <span>
+          <h3 class="set-name shake-trigger" id="btn{{ CurOffer.SETS_ID }}"><a href="javascript://" onclick="show_dtl({{ CurOffer.SETS_ID }})">{{ CurOffer.MERCHANT }} – {{ CurOffer.SETS_NAME }}<i class="glyphicon glyphicon-chevron-down shake-vertical"></i></a></h3>
 
           <DiV id="dtl{{ CurOffer.SETS_ID }}" class="collapse">■ Профиль: <a href="/catalog/profile/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_MANUFACTURER_T }}/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_NAME_T }}">{{ CurOffer.PVC_NAME|safe }}</a> (<a href="/catalog/profile/{{ CurOffer.PVC_ID }}-{{ CurOffer.PVC_MANUFACTURER_T }}">{{ CurOffer.PVC_MANUFACTURER }}</a>)
             ■&nbsp;{{ CurOffer.GLAZING_NAME_B|safe }} <nobr>({{ CurOffer.GLAZING_MARK }})</nobr>
@@ -29,17 +29,15 @@
           </DiV>
           <!-- Дата обновления  -->
           <nobr class="badge badge4price" title="Дата обновления коммерческого предложения окон — {{ CurOffer.SETS_DATA_MODIFY|date:"d.M.Y" }}"><b class="glyphicon glyphicon-calendar"></b> {{ CurOffer.SETS_DATA_MODIFY|date:"d.M.Y" }}</nobr>
-          <!-- Звездочки рейтинга -->
-          <nobr class="badge badge4price" title="Рейтинг «Окнардии»{% if CurOffer.SETS_RATING > -0.1 %} — {{ CurOffer.SETS_RATING|stringformat:".2f" }} баллов{% endif %}"><a
+          <!-- Звездочки рейтинга с микроразметкой Rating -->
+          <nobr class="badge badge4price" title="Рейтинг «Окнардии»{% if CurOffer.SETS_RATING > -0.1 %} — {{ CurOffer.SETS_RATING|stringformat:".2f" }} баллов{% endif %}">
+            <a
                 href="javascript://"
                 id-set="{{ CurOffer.SETS_ID }}"
                 data-trigger="focus" tabindex="0"
                 title="{% if CurOffer.SETS_RATING > 0.01 %}<b> Рейтинг {{ CurOffer.SETS_RATING|stringformat:".2f" }}</b> для оконого набора «{{ CurOffer.SETS_NAME }}» компании «{{ CurOffer.MERCHANT }}» состоит&nbsp;из:{% else %}Рейтинг не присвоен{% endif %}"
-                data-toggle="popover">рейтинг</a>:&nbsp;{% for Star in CurOffer.SETS_RATING_STARTS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if CurOffer.SETS_RATING > -0.1 %} {{ CurOffer.SETS_RATING|stringformat:".2f" }}{% endif %}</nobr>
+                data-toggle="popover">рейтинг</a>:&nbsp;{% for Star in CurOffer.SETS_RATING_STARTS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if CurOffer.SETS_RATING > -0.1 %}{{ CurOffer.SETS_RATING|stringformat:".2f" }}{% endif %}</nobr>
         </span>
-        <span itemprop="brand" itemscope itemtype="http://schema.org/Brand">
-				  <meta itemprop="name" content="{{ CurOffer.MERCHANT }}" />
-				  <meta itemprop="logo" content="{{ request.scheme }}://{{ request.get_host }}/media/{{ CurOffer.MERCHANT_LOGO }}" />
         </span></td>
       <!--- Конец большой ячейки со спецификацией оконного предложения --->
     {% endif %}
@@ -50,10 +48,8 @@
 
 			<td class="rnw" title="Стоимость {{ CurOffer.TOTAL|stringformat:".2f" }} рублей за все окна квартиры {{ APART|safe }}.">{{ CurOffer.TOTAL|stringformat:".2f"|price_format }}</td>
 			<th{% if CurOffer.DISCOUNT_COLOR2 != "" %} style="background-color:{{ CurOffer.DISCOUNT_COLOR2 }};"{% endif %} title="{% if CurOffer.DISCOUNT < 0.1 %}Нет скидки{% else %}Скидка — {{ CurOffer.DISCOUNT|stringformat:".1f" }}%{% endif %}">{% if CurOffer.DISCOUNT < 0.1 %}—{% else %}&minus;{{ CurOffer.DISCOUNT|stringformat:".1f" }}%{% endif %}</th>
-			<th{% if CurOffer.DISCOUNT_COLOR1 != "" %} style="background-color:{{ CurOffer.DISCOUNT_COLOR1 }};"{% endif %} itemprop="offers" itemscope itemtype="http://schema.org/Offer" title="Итого за все окна с учетом скидки: {{ CurOffer.FIN_PRICE|stringformat:".2f" }} рублей">
+			<th{% if CurOffer.DISCOUNT_COLOR1 != "" %} style="background-color:{{ CurOffer.DISCOUNT_COLOR1 }};"{% endif %} title="Итого за все окна с учетом скидки: {{ CurOffer.FIN_PRICE|stringformat:".2f" }} рублей">
         Итого: {{ CurOffer.FIN_PRICE|stringformat:".2f"|price_format }}&thinsp;<small class="glyphicon glyphicon-ruble" aria-label="₽ (руб.)" title="₽ (руб.)"></small>
-        <meta itemprop="price" content="{{ CurOffer.FIN_PRICE }}" />
-        <meta itemprop="priceCurrency" content="RUB" />
       </th>
       {% if CurOffer.DIM|length == 1 %}
 

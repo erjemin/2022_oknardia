@@ -72,7 +72,7 @@ def _as_sitemap_date(value: date | datetime | None) -> str:
 
 
 class SingleWindowSitemap(Sitemap):
-    """Источник URL для страниц цен одного проёма (/tsena-odnogo-okna/...)."""
+    """Источник URL для страниц цен одного проёма (/catalog/standard_opening/price-...)."""
 
     changefreq = "weekly"
     priority = 0.5
@@ -98,7 +98,7 @@ class SingleWindowSitemap(Sitemap):
         # поэтому умножаем на 10 и приводим к int.
         width_mm = int(float(item.iWinWidth) * 10)
         height_mm = int(float(item.iWinHight) * 10)
-        return f"/tsena-odnogo-okna/{width_mm}x{height_mm}mm/tip{item.id}"
+        return f"/catalog/standard_opening/price-{width_mm}x{height_mm}mm-tip{item.id}"
 
     def lastmod(self, item: Win_MountDim) -> datetime:
         return self.lastmod_value

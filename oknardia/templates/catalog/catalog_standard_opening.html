@@ -70,7 +70,7 @@ CollectionPage + ItemList помогают поисковику понять с�
           "@type": "Thing",
           "name": "{{ i.DESCRIPTION|escapejs }}",
           "description": "{{ i.DESCRIPTION_L|escapejs }}",
-          "url": "{{ request.scheme }}://{{ request.get_host }}/tsena-odnogo-okna/{{ i.W|stringformat:'.0f' }}x{{ i.H|stringformat:'.0f' }}mm/tip{{ i.ID }}",
+          "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening/price-{{ i.W|stringformat:'.0f' }}x{{ i.H|stringformat:'.0f' }}mm-tip{{ i.ID }}",
           "image": "{{ request.scheme }}://{{ request.get_host }}{% static i.URL2IMG %}",
           "additionalProperty": [
             {"@type": "PropertyValue", "name": "Ширина", "value": "{{ i.W|stringformat:'.0f' }} мм"},
@@ -133,7 +133,7 @@ CollectionPage + ItemList помогают поисковику понять с�
           <td data-sort="{% if i.IS_DOOR %}1{% else %}0{% endif %}">{% if i.IS_DOOR %}да{% else %}—{% endif %}</td>
           <td>{{ i.DESCRIPTION }}</td>
           <td>{% for j in i.INCLUDING_IN_SERIA  %}<a href="/catalog/seria/{{ j.NAME_T }}/all{{ j.ID }}">{{ j.NAME }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</td>
-          <td><a class="btn btn-default btn-xs" href="/tsena-odnogo-okna/{{ i.W|stringformat:".0f" }}x{{ i.H|stringformat:".0f" }}mm/tip{{ i.ID }}">цены</a></td>
+          <td><a class="btn btn-default btn-xs" href="/catalog/standard_opening/price-{{ i.W|stringformat:".0f" }}x{{ i.H|stringformat:".0f" }}mm-tip{{ i.ID }}">цены</a></td>
         </tr>{% endfor %}
         </tbody>
       </table>
