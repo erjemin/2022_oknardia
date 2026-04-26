@@ -62,9 +62,9 @@ urlpatterns = [
     re_path(r'^catalog/profile[/*]$', catalog_profiles.catalog_profile), # СПИСОК ВСЕХ ПРОФИЛЕЙ И ПРОИЗВОДИТЕЛЕЙ
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
             r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
-            catalog_profiles.catalog_profile_model), # КАРТОЧКА ПРОФИЛЯ (ИЛИ ПРОИЗВОДИТЕЛЯ)
+            catalog_profiles.catalog_profile_model),  # СТРАНИЦА ОПИСАНИЯ МОДЕЛИ ПРОФИЛЯ
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
-            catalog_profiles.catalog_profile_manufacture),
+            catalog_profiles.catalog_profile_manufacture),  # КАРТОЧКА ОПИСАНИЯ ПРОИЗВОДИТЕЛЯ ПРОФИЛЯ
     # --- --- КАТАЛОГ СЕРИЙ ТИПОВОГО СТРОИТЕЛЬСТВА
     re_path(r'^catalog/seria[/*]$', catalog_series.catalog_seria), # СПИСОК ВСЕХ СЕРИЙ ЗДАНИЙ
     re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$',
@@ -75,12 +75,15 @@ urlpatterns = [
     # --- --- КАТАЛОГ ПРОИЗВОДИТЕЛЕЙ ОКОН
     re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company), # СПИСОК ВСЕХ ПРОИЗВОДИТЕЛЕЙ ОКОН
     re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
-            catalog_companies.catalog_company_detail), # КАРТОЧКА ПРОИЗВОДИТЕЛЯ ОКОН
+            catalog_companies.catalog_company_detail),  # КАРТОЧКА ПРОИЗВОДИТЕЛЯ-УСТНОАЩИКА ОКОН
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
-    # --- Одиночное окно
+    # --- ОДИНОЧНОЕ ОКНО
+    re_path(r'^catalog/standard_opening/price-(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm-tip(?P<win_id>\d+)[/*]$',
+            prices.report_one_win_price),  # КАНОНИЧЕСКИЙ SEO-URL СТРАНИЦЫ ЦЕН ДЛЯ ОДНОГО ПРОЕМА
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
-            prices.report_one_win_price),
-    re_path(r'^next_price_one_flap_frame/idW(?P<win_id>\d+)N(?P<frame_begin_n>\d+)\S*$', prices.next_one_win_price),
+            prices.redirect_one_win_price_legacy),  # LEGACY-URL: 301 -> КАНОНИЧЕСКИЙ ПУТЬ
+    re_path(r'^next_price_one_flap_frame/idW(?P<win_id>\d+)N(?P<frame_begin_n>\d+)\S*$',
+            prices.next_one_win_price),  # ПОДГРУЖАЕМЫЙ ФРЕЙМ С ЦЕНОВЫМИ ПРЕДЛОЖЕНИЯМИ ДЛЯ ОДНОГО ПРОЕМА
     # --- Ценовая выдача
     re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price),
     # --- Подгружаемый фрейм ценовая выдачи

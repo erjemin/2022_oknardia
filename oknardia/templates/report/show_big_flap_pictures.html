@@ -6,7 +6,7 @@
      <nobr>{{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0×{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0&thinsp;мм.</nobr><br />{% if not I_WIN_DIM.iQuantity == 0 %}
      <nobr><b>{{ I_WIN_DIM.iQuantity }}&thinsp;шт.</b>{% for I_II in I_WIN_DIM.qStr %}<span class="color-bullet" style="background-image:url('{% static 'img/svg/mark' %}{{ I_II }}.svg');"></span>{% endfor %}</nobr><br />{% endif %}
      {{ I_WIN_DIM.sDescription }}{% if not I_WIN_DIM.iQuantity == 0 %}<br />
-     <a href="/tsena-odnogo-okna/{{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0x{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0mm/tip{{ I_WIN_DIM.id }}">цены только этого типового окна</a>{% endif %}
+     <a href="/catalog/standard_opening/price-{{ I_WIN_DIM.iWinWidth|stringformat:".0f" }}0x{{ I_WIN_DIM.iWinHight|stringformat:".0f" }}0mm-tip{{ I_WIN_DIM.id }}">цены только этого типового окна</a>{% endif %}
     </div>
    </div>{% endfor %}{% comment %}
 <script type="text/javascript">

@@ -5,11 +5,12 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
+{# SEO блоки дат:#}
+{# - Date4Meta: дата публикации (первого появления) — используем дату модификации данных. #}
+{# - Last4Meta: дата последнего обновления — будет по умолчанию now из base.html. #}
 {% block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
-
-{% block Top_JS4 %}
+{% block Top_JS4 %}{# Для построения круговой диаграммы #}
   <script type="text/javascript" src="//www.gstatic.com/charts/loader.js"></script>
   <script type="text/javascript">
     google.charts.load("current", {packages: ["corechart"]});
@@ -33,6 +34,140 @@
       var chart = new google.visualization.PieChart(document.getElementById('donutchart'));
       chart.draw(data, options);
     }
+  </script>{% endblock %}
+
+{% block ADD_TO_HEAD %}{% comment %}
+	JSON-LD микроразметка для поисковых систем (Schema.org):
+	- BreadcrumbList: хлебные крошки для навигации в поиске
+	- Organization: информация о бренде/компании
+	- Product: типовое окно с полной информацией
+	- Рейтинги и цены берутся из таблицы предложений (price_offers_for_one_window_frame.html)
+  {% endcomment %}<script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org/",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Главная",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Каталог",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/catalog"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Оконные проёмы и балконные блоки",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/standard_opening/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}×{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }}{% endfor %} мм",
+          "item": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"
+        }
+      ]
+    },
+    {
+      "@context": "https://schema.org/",
+      "@type": "Organization",
+      "name": "ОКНАРДИЯ — агрегатор цен на окна",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/",
+      "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}",
+      "description": "Сравнение цен на установку оконных конструкций в типовых жилых домах России",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service"
+      }
+    },
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "Типовое пластиковое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}×{{ I_WIN_DIM.iWinHight|floatformat:0 }} см{% endfor %}",
+      "size": "{% for I_WIN_DIM in FLAP_DIM %}{% if not forloop.first %}, {% endif %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}×{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }} мм{% endfor %}",
+      "description": "Цены на пластиковое окно стандартного размера для типовых жилых домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}. Сравните предложения различных производителей и установщиков, узнайте актуальные цены, технические характеристики стеклопакетов, профилей, фурнитуры и условия доставки/монтажа.",
+      "image": {
+        "@type": "ImageObject",
+        "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}"
+      },
+      "brand": {
+        "@type": "Brand",
+        "name": "ОКНАРДИЯ"
+      },
+      "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "RUB",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/InStock",
+        "offerCount": "{{ NUM_TOTAL_OFFER_N_WORD|safe }}"
+      },
+      "datePublished": "{{ META_DATA_PUBLISH|date:'Y-m-d' }}",
+      "dateModified": "{{ META_DATA_PUBLISH|date:'Y-m-d' }}"
+    },
+    {
+      "@context": "https://schema.org/",
+      "@type": "ItemList",
+      "name": "Коммерческие предложения для типового окна",
+      "numberOfItems": "{{ PRICE_FRAME|length }}",
+      "itemListElement": [
+        {% for CurOffer in PRICE_FRAME %}
+        {
+          "@type": "ListItem",
+          "position": {{ forloop.counter }},
+          "item": {
+            "@type": "Offer",
+            "name": "{{ CurOffer.SETS_NAME|striptags|escapejs }}",
+            "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}#btn{{ CurOffer.SETS_ID }}",
+            "price": "{{ CurOffer.FIN_PRICE|stringformat:'.2f' }}",
+            "priceCurrency": "RUB",
+            "itemCondition": "https://schema.org/NewCondition",
+            "availability": "https://schema.org/InStock",
+            "seller": {
+              "@type": "Organization",
+              "name": "{{ CurOffer.MERCHANT|striptags|escapejs }}"
+            },
+            "itemOffered": {
+              "@type": "Product",
+              "name": "{{ CurOffer.SETS_NAME|striptags|escapejs }}",
+              "additionalProperty": [
+                {
+                  "@type": "PropertyValue",
+                  "name": "Оконный профиль",
+                  "value": "{{ CurOffer.PVC_NAME|striptags|escapejs }}{% if CurOffer.PVC_MANUFACTURER %} ({{ CurOffer.PVC_MANUFACTURER|striptags|escapejs }}){% endif %}"
+                }{% if CurOffer.PVC_MANUFACTURER %},
+                {
+                  "@type": "PropertyValue",
+                  "name": "Производитель профиля",
+                  "value": "{{ CurOffer.PVC_MANUFACTURER|striptags|escapejs }}"
+                }{% endif %}{% if CurOffer.GLAZING_MARK %},
+                {
+                  "@type": "PropertyValue",
+                  "name": "Стеклопакет",
+                  "value": "{{ CurOffer.GLAZING_MARK|striptags|escapejs }}"
+                }{% endif %}
+              ]
+            },
+            "dateModified": "{{ CurOffer.SETS_DATA_MODIFY|date:'Y-m-d' }}"{% if CurOffer.SETS_RATING > -0.1 %},
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": "{{ CurOffer.SETS_RATING|stringformat:'.2f' }}",
+              "bestRating": "5",
+              "worstRating": "0",
+              "ratingCount": "1"
+            }{% endif %}
+          }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }
+  ]
   </script>{% endblock %}
 
 {% block Description %}Цены на типовое окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} см. для домов серий {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}{{ I.sName }}{% endfor %}{% endfor %}.{% endblock %}
@@ -146,12 +281,14 @@ $(function () { // инициализация и обработка попове
   <span itemscope itemtype="http://schema.org/Product">
   <div class="row">
       <div class="col-md-9">
-        <h1>Цены на окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}&times;{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }}{% endfor %}&nbsp;мм. <small>(типовое)</small></h1>
+        <h1 itemprop="name">Цены на окно {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth_mm|floatformat:0 }}&times;{{ I_WIN_DIM.iWinHight_mm|floatformat:0 }}{% endfor %}&nbsp;мм. <small>(типовое)</small></h1>
       </div>
       <div class="col-md-9">
-        <p>Типовой проём {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:1 }}&times;{{ I_WIN_DIM.iWinHight|floatformat:1 }}{% endfor %}&nbsp;cм. представлен в домах серий: {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}<a href="/catalog/seria/{{ I.sNameLat }}/all{{ I.id }}">{{ I.sName }}</a>{% endfor %}. База «Окнардии» размещено {{ NUM_TOTAL_OFFER_N_WORD }} цен для окон в такой проем (из них в архиве {{ NUM_ARCHIVE_OFFER }}). Предложено {{ NUM_FLAP_VARIATION_IN_WORD }} открывания от {{ NUM_TOTAL_FIRM_N_WORD }}.</p>
+        <p itemprop="description">Типовой проём {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:1 }}&times;{{ I_WIN_DIM.iWinHight|floatformat:1 }}{% endfor %}&nbsp;cм. представлен в домах серий: {% for I in SERIA_FOR_WIN %}{% if forloop.last %} и {% elif forloop.first %}{% else %}, {% endif %}<a href="/catalog/seria/{{ I.sNameLat }}/all{{ I.id }}">{{ I.sName }}</a>{% endfor %}. База «Окнардии» размещено {{ NUM_TOTAL_OFFER_N_WORD }} цен для окон в такой проем (из них в архиве {{ NUM_ARCHIVE_OFFER }}). Предложено {{ NUM_FLAP_VARIATION_IN_WORD }} открывания от {{ NUM_TOTAL_FIRM_N_WORD }}.</p>
       </div>
-    {# Микроразмектка: названеи продукта #}<meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})" />
+    {# Микроразметка: название продукта и марка #}
+    <meta itemprop="brand" content="ОКНАРДИЯ — агрегатор цен на окна" />
+    <meta itemprop="productionDate" content="{{ META_DATA_PUBLISH|date:'Y-m-d' }}" />
   </div>
 
   <div class="row ShowBigFlapPictures">
@@ -176,8 +313,6 @@ $(function () { // инициализация и обработка попове
     <div class="col-md-12">
       <p id="tab-note">В таблице представлены только цены поставщиков из базы «Окнардия». Клик на&nbsp;названии набора отобразит детальную спецификацию каждого предложения: профиль рамы и&nbsp;створки, схему стеклопакета, фурнитуру, элементы отлива, подоконника, откоса, системы <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся блоками. Очередной блок выводится кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Детальные технические характеристики стеклопакетов, профилей и&nbsp;описание сопутствующих услуг можно посмотреть и сравнить с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
     </div>
-    {# Микроразмектка: названеи продукта #}
-    <meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})"/>
   </div>
 
 
