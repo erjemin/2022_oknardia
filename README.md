@@ -1,40 +1,29 @@
 # Оконный агрегатор «Окнардия»
+
 ### Переделка под Python 3.12 и Django 5.2
-
-### Актуальная памятка дорожная карта
-
-#### Готово:
-
-* Изменена база данных используемая в проекте (SQLite вместо MariaDB).
-* Окружение проекта теперь настраивается через `poetry` вместо `pip` и `requirements.txt`.
-* Проект получает настройки и секреты через переменные окружения (`.env`) вместо `my_secret*.py`.
-* Рефакторинг создания `sitemap.xml`: raw ⟶ ORM, создание через Django-команду `generate_sitemaps` в медиа-файлы.
-* Рефакторинг URL `/catalog/profil/`: raw SQL ⟶ ORM, убран `last_update`, измененs SEO `description` и `keywords`.
-* Распилен `oknardia/web/catalog.py` на тематические модули (`catalog_companies.py`, `catalog_profiles.py`, `catalog_series.py`, `catalog_openings.py`) с вынесением общей логики в `catalog_utils.py`; маршруты обновлены без изменения внешних URL. Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Рефакторинг `catalog_profile_model` (`/catalog/profile/...`): raw SQL ⟶ ORM, упрощена логика, вынесены helper-функции, сокращено дублирование расчёта цветов рейтинга, нормализована подготовка `LIST_OTHER`/`MERCHANTS`/`PROFILES`/`PROFILE_DETAIL`, сохранена совместимость шаблонов. Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Рефакторинг `catalog_profile_manufacture` (`/catalog/profile/<id>-<manufacturer>`): упрощена валидация URL, убран дублирующий код маппинга для `PROFILES` и `MERCHANTS` через общие хелперы, стандартизирован хвост контекста (`LAST_VISIT`, `LOG_VISIT`, `ticks`) через `_append_visit_context`. Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Рефакторинг `catalog_seria` (`/catalog/seria/`): raw SQL ⟶ ORM для списка корневых серий, подготовка данных упрощена, хвост контекста с визитами и `ticks` вынесен в общий helper внутри `catalog_series.py`. Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Рефакторинг `catalog_seria_info` и связанных функций в `catalog_series.py`: raw SQL ⟶ ORM (`catalog_seria_info`, `seria_nav`, `seria_info_year`, `seria_info_geo_code`), снижена нагрузка на БД за счёт предвыборки и переиспользования агрегатов (`quantities_by_pair`, `offers_by_window`), добавлены безопасные fallback-значения для пустых выборок, включена потоковая обработка `iterator(chunk_size=500)` для гео-данных, обновлены комментарии и docstring под фактическую логику (таблица окон, pre-render light/heavy шаблонов, гео+статистика серии). Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Добавлена management-команда `regenerate_seria_prerender` для оффлайн-пересборки pre-render шаблонов `catalog_seria_info` (все или выбранные root-серии), с режимами `--dry-run` и `--force`; серверный reload (Gunicon? uWSGI или что там еще будет) должен быть вынесен из кода приложения в оркестрацию (cron/systemd/deploy step).
-* Рефакторинг `standard_opening`: raw SQL -> ORM, упрощена дедублекация, убраны лишние запросы и переменные контекста, добавлены комментарии, SEO-описание и keywords, стандартизирован хвост контекста с визитами и `ticks` через общий helper внутри `catalog_openings.py`. Улучшены SEO-атрибуты и добавлена разметка shema.org.
-* Рефакторинг `catalog_company` и `catalog_company_detail` (`/catalog/company`): raw SQL → ORM для получения списка компаний и их наборов, вынесены вспомогательные функции (`_get_company_statistics`, `_get_company_sets_detail`, `_format_company_for_template`, `_format_set_for_template`, `_clean_text_field`, `_lowercase_first_char`), упрощена логика форматирования данных, добавлены подробные комментарии и docstring для каждой функции, использованы `select_related` и `annotate` для оптимизации запросов, добавлена защита от `Http404` при неправильных slugs. Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* Рефакторирнг главной стртаницы каталога (`/catalog/`): Улучшены SEO-атрибуты, и добавлена разметка shema.org.
-* 
 
 #### Планы, задачи, маркеры и идеи на будущее:
 
-* Переделать все raw SQL-запросы на ORM (для перехода на SQLite и для лучшей поддержки разных СУБД в будущем).
-* Для легаси-страниц (шаблоны и вьюхи) поэтапно проверять (если нужно убирать) старые SEO-хвосты вроде `last_update` / `PUB_DAT` / `Date4Meta` / `Last4Meta`: если дата не несёт смысловой нагрузки, лучше оставлять базовые `{% now %}` из `base.html`, а не тащить лишний контекст во вьюху.
-* Шаблоны `report/report_last_user_visit.html` и `report/report_log_user_visit.html` сделать с конентом
-  подгружаемым через AJAX (использовать HTMX, напрмемер) и убрать вызовы `get_last_user_visit_list` и `get_last_all_user_visit_list` их соответствующих вьюх. Это должно разгрузить бекенд и, возможно, сделать кеширование.
-* Упаковать всё в контейнеры (Django + Gunicorn + WhiteNoise... 
+* Перехода на SQLite (возможно, после нагрузочного тестирования переход обратно на mariaDB или PostgreSQL).
+* Переделать все raw SQL-запросы на ORM для лучшей поддержки разных СУБД в будущем.
+* Актуальная SEO- и LLM-оптимизация: добавить разметку schema.org, улучшить мета-теги, оптимизировать URL-структуру и канонические ссылки.
+* Длялегаси-страниц (шаблоны и вьюхи) поэтапно проверять (если нужно убирать) старые SEO-хвосты вроде `last_update` / `PUB_DAT` / `Date4Meta` / `Last4Meta`: если дата не несёт смысловой нагрузки, лучше оставлять базовые `{% now %}` из `base.html`, а не тащить лишний контекст во вьюху.
+* Шаблоны `report/report_last_user_visit.html` и `report/report_log_user_visit.html` сделать с контентом
+  подгружаемым через AJAX (использовать HTMX, напрмемер) и убрать вызовы `get_last_user_visit_list` (переделать  чтобьы формировалось на стороне клиента из куки.
+* Все действия из сервисной `/service/` вынести в management-команды.
+* Перейти на `poetry` для управления зависимостями и виртуальным окружением.
+* Перейти на Django 6.* 
+* Улучшение в блогах (добавить SEO-поля, Codemirror 6, Типограф etpgrfо).
+* Упаковать всё в контейнеры: бакенд Django + Gunicorn + WhiteNoise...
+* CI/CD через gitea + Watchtower для автоматического деплоя при пуше тега `v*.*.*` в репозиторий.
+* Фронтенд: перейти на новый Bootstrap 5, добавить интерактивные элементы через HTMX + Alpine, сделать адаптивность для мобильных устройств.
 
+# См. также:
 
-См. также:
-
+* [`MANAGEMENT_RUNBOOK.md`](MANAGEMENT_RUNBOOK.md) – единый runbook по management-командам и batch-операциям, сниппеты.
+* [`ROADMAP.md`](ROADMAP.md) – дорожная карта переделки (весна 2026) с описанием выполненных шагов (ключевые коммиты).
 * [`AGENTS.md`](AGENTS.md) – контекст проекта для AI-ассистентов (архитектура, конвенции, рабочие сценарии).
 * [`SETUP.md`](SETUP.md) – пошаговая настройка окружения, запуск проекта и базовые команды разработки.
-* [`MANAGEMENT_RUNBOOK.md`](MANAGEMENT_RUNBOOK.md) – единый runbook по management-командам и batch-операциям.
 
 
 ---
