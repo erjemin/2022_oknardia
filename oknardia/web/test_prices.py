@@ -20,7 +20,7 @@ from oknardia.models import (
     Seria_Info,
     SetKit,
 )
-from web.prices import redirect_one_win_price_legacy, report_one_win_price
+from web.prices import redirect_one_win_price_legacy, report_one_win_price, report_price_frame
 
 
 class ReportOneWinPriceTests(TestCase):
@@ -247,4 +247,27 @@ class ReportOneWinPriceTests(TestCase):
             response["Location"],
             f"/catalog/standard_opening/price-670x2160mm-tip{self.window_id}/",
         )
+
+    def test_report_price_frame_for_apartment_keeps_template_contract(self):
+        """ORM-ветка для квартир должна сохранять ключи контекста для price_list*."""
+        frame = report_price_frame(
+            apartment_id=self.apartment.id,
+            mount_dim_per_offer=1,
+            address_longitude=0,
+            address_latitude=0,
+            frame_begin_n=0,
+            brand_id=0,
+            win_id=0,
+        )
+
+        self.assertIn("META_DATA_PUBLISH", frame)
+        self.assertIn("PRICE_FRAME", frame)
+        self.assertIn("N", frame)
+        self.assertEqual(len(frame["PRICE_FRAME"]), 1)
+        offer = frame["PRICE_FRAME"][0]
+        self.assertEqual(offer["SETS_ID"], self.set_kit.id)
+        self.assertEqual(offer["MERCHANT"], self.brand.sMerchantName)
+        self.assertEqual(offer["FIN_PRICE"], self.active_offer.fOfferPrice)
+        self.assertEqual(len(offer["DIM"]), 1)
+        self.assertEqual(offer["DIM"][0]["QUANTITY"], 1)
 

@@ -4,7 +4,15 @@ from django.db.models import Count
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
-from oknardia.models import Win_MountDim, PriceOffer, Apartment_Type, Seria_Info, LogVisitPriceReport, MountDim2Apartment
+from oknardia.models import (
+    Win_MountDim,
+    PriceOffer,
+    Apartment_Type,
+    Seria_Info,
+    Building_Info,
+    LogVisitPriceReport,
+    MountDim2Apartment,
+)
 from oknardia.settings import *
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures, \
@@ -16,6 +24,11 @@ import re
 import json
 from types import SimpleNamespace
 import pytils
+
+
+def _slugify_lower(value: str | None) -> str:
+    """Транслитерирует строку в slug и всегда приводит к нижнему регистру."""
+    return pytils.translit.slugify((value or "").strip()).lower()
 
 
 def _one_win_price_canonical_path(win_width_mm: int | str, win_height_mm: int | str, win_id: int | str) -> str:
@@ -32,6 +45,26 @@ def redirect_one_win_price_legacy(request: HttpRequest,
         _one_win_price_canonical_path(win_width_mm=win_width_mm, win_height_mm=win_height_mm, win_id=win_id),
         permanent=True,
     )
+
+
+def _append_visit_context(
+    to_template: dict,
+    request: HttpRequest,
+    time_start: float,
+    log_visit: list | None = None,
+    last_visit_cookie: list | None = None,
+) -> None:
+    """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
+    if log_visit is None:
+        log_visit = get_last_all_user_visit_list()
+    if last_visit_cookie is None:
+        last_visit_cookie = get_last_user_visit_cookies(request)
+
+    to_template.update({
+        'LAST_VISIT': get_last_user_visit_list(last_visit_cookie[:3]),
+        'LOG_VISIT': log_visit,
+        'ticks': float(time.perf_counter() - time_start),
+    })
 
 
 def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_longitude: float, address_latitude: float,
@@ -241,9 +274,9 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 'GLAZING_TONING': offer.sGlazingToning,
                 'PVC_ID': offer.pwc_id,
                 'PVC_NAME': offer.sProfileName,
-                'PVC_NAME_T': pytils.translit.slugify(offer.sProfileName).lower(),
+                'PVC_NAME_T': _slugify_lower(offer.sProfileName),
                 'PVC_MANUFACTURER': offer.sProfileManufacturer,
-                'PVC_MANUFACTURER_T': pytils.translit.slugify(offer.sProfileManufacturer).lower(),
+                'PVC_MANUFACTURER_T': _slugify_lower(offer.sProfileManufacturer),
                 'PVC_SEAL': offer.sProfileSealDescription,
                 'SETS_CLIMATE_CONTROL': offer.sSetClimateControl,
                 'SETS_SILL': offer.sSetSill,
@@ -283,50 +316,110 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
         return {'META_DATA_PUBLISH': time_for_meta, 'PRICE_FRAME': price_frame, 'N': n_begin}
     else:
         # если выводим цены для типовой квартиры
-        # print("Нужно несколько окон для квартиры")
-        q_price_offer = PriceOffer.objects.raw(
-            f"SELECT"
-            f"  oknardia_priceoffer.*,"
-            f"  oknardia_win_mountdim.*,"
-            f"  oknardia_setkit.*,"
-            f"  oknardia_merchantoffice.*,"
-            f"  oknardia_glazing.*,"
-            f"  oknardia_pvcprofiles.*,"
-            f"  oknardia_merchantbrand.*,"
-            f"  oknardia_mountdim2apartment.iQuantity,"
-            f"  oknardia_win_mountdim.id  AS mID, "
-            f"  oknardia_setkit.id        AS setID,"
-            f"  (oknardia_setkit.dSetCommercialUntil > CURRENT_TIMESTAMP) AS bCommercial,"
-            f"  oknardia_pvcprofiles.id   AS pwc_id,"
-            f"  oknardia_merchantbrand.id AS brand_id "
-            f"FROM oknardia_priceoffer"
-            f"  INNER JOIN oknardia_win_mountdim"
-            f"    ON oknardia_priceoffer.kOffer2MountDim_id = oknardia_win_mountdim.id"
-            f"  INNER JOIN oknardia_setkit"
-            f"    ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id"
-            f"  INNER JOIN oknardia_ouruser"
-            f"    ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id"
-            f"  INNER JOIN oknardia_merchantoffice"
-            f"    ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id"
-            f"  INNER JOIN oknardia_glazing"
-            f"    ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id"
-            f"  INNER JOIN oknardia_pvcprofiles"
-            f"    ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id"
-            f"  INNER JOIN oknardia_mountdim2apartment"
-            f"    ON oknardia_mountdim2apartment.kMountDim_id = oknardia_win_mountdim.id"
-            f"  INNER JOIN oknardia_merchantbrand"
-            f"    ON oknardia_merchantoffice.kMerchantName_id = oknardia_merchantbrand.id "
-            f"WHERE oknardia_priceoffer.sOfferActive IS TRUE"
-            f"  AND oknardia_mountdim2apartment.kApartment_id = {int(apartment_id)}"
-            f"  AND oknardia_setkit.sSetActive IS TRUE {add_to_sql_for_widget} "
-            f"ORDER BY"
-            f"  oknardia_setkit.dSetCreate DESC, "  # Сейчас окна в наборе собираются через это
-            f"  oknardia_win_mountdim.bIsNearDoor DESC,"
-            f"  oknardia_win_mountdim.bIsDoor DESC,"
-            f"  oknardia_win_mountdim.iWinWidth,"
-            f"  oknardia_win_mountdim.iWinHight DESC "
-            f"LIMIT {int(frame_begin_n)} , 10000;")
-        # print list(qPO)
+        # ORM-ветка сохраняет контракт полей для шаблонов price_list.html и price_list_frame.html.
+        quantities_by_mount_dim = {
+            row['kMountDim_id']: row['iQuantity']
+            for row in MountDim2Apartment.objects.filter(kApartment_id=apartment_id).values('kMountDim_id', 'iQuantity')
+        }
+        if not quantities_by_mount_dim:
+            return {'META_DATA_PUBLISH': 0, 'PRICE_FRAME': [], 'N': '-1'}
+
+        q_price_offer = (
+            PriceOffer.objects.filter(
+                sOfferActive=True,
+                kOffer2MountDim_id__in=quantities_by_mount_dim.keys(),
+                kOffer2SetKit__sSetActive=True,
+                kOffer2SetKit__kSet2User__kMerchantOffice__isnull=False,
+                kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__isnull=False,
+                kOffer2SetKit__kSet2Glazing__isnull=False,
+                kOffer2SetKit__kSet2PVCprofiles__isnull=False,
+            )
+            .select_related(
+                'kOffer2MountDim',
+                'kOffer2SetKit',
+                'kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName',
+                'kOffer2SetKit__kSet2Glazing',
+                'kOffer2SetKit__kSet2PVCprofiles',
+            )
+            .order_by(
+                '-kOffer2SetKit__dSetCreate',
+                '-kOffer2MountDim__bIsNearDoor',
+                '-kOffer2MountDim__bIsDoor',
+                'kOffer2MountDim__iWinWidth',
+                '-kOffer2MountDim__iWinHight',
+                'id',
+            )
+        )
+        if brand_id != 0:
+            q_price_offer = q_price_offer.filter(
+                kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName_id=brand_id,
+            )
+
+        q_price_offer = [
+            SimpleNamespace(
+                id=offer.id,
+                fOfferPrice=offer.fOfferPrice,
+                dOfferModify=offer.dOfferModify,
+                sOfferFlapConfig=offer.sOfferFlapConfig,
+                sDescripion=offer.kOffer2MountDim.sDescripion,
+                iWinWidth=offer.kOffer2MountDim.iWinWidth,
+                iWinHight=offer.kOffer2MountDim.iWinHight,
+                iQuantity=quantities_by_mount_dim.get(offer.kOffer2MountDim_id, 0),
+                setID=offer.kOffer2SetKit.id,
+                dSetModify=offer.kOffer2SetKit.dSetModify,
+                dSetCommercialUntil=offer.kOffer2SetKit.dSetCommercialUntil,
+                bCommercial=bool(
+                    offer.kOffer2SetKit.dSetCommercialUntil
+                    and offer.kOffer2SetKit.dSetCommercialUntil > timezone.now()
+                ),
+                sSetName=offer.kOffer2SetKit.sSetName,
+                sSetClimateControl=offer.kOffer2SetKit.sSetClimateControl,
+                sSetSill=offer.kOffer2SetKit.sSetSill,
+                sSetImplementAll=offer.kOffer2SetKit.sSetImplementAll,
+                sSetImplementHandles=offer.kOffer2SetKit.sSetImplementHandles,
+                sSetImplementHinges=offer.kOffer2SetKit.sSetImplementHinges,
+                sSetImplementLatch=offer.kOffer2SetKit.sSetImplementLatch,
+                sSetImplementLimiter=offer.kOffer2SetKit.sSetImplementLimiter,
+                sSetImplementCatch=offer.kOffer2SetKit.sSetImplementCatch,
+                sSetPanes=offer.kOffer2SetKit.sSetPanes,
+                sSetSlope=offer.kOffer2SetKit.sSetSlope,
+                sSetOtherConditions=offer.kOffer2SetKit.sSetOtherConditions,
+                sSetDelivery=offer.kOffer2SetKit.sSetDelivery,
+                bSetDelivery=offer.kOffer2SetKit.bSetDelivery,
+                sSetUninstallInstall=offer.kOffer2SetKit.sSetUninstallInstall,
+                bSetUninstallInstall=offer.kOffer2SetKit.bSetUninstallInstall,
+                fSetRating=offer.kOffer2SetKit.fSetRating,
+                sOfficePhones=offer.kOffer2SetKit.kSet2User.kMerchantOffice.sOfficePhones,
+                sOfficeDiscountMetaFormula=(
+                    offer.kOffer2SetKit.kSet2User.kMerchantOffice.sOfficeDiscountMetaFormula or ""
+                ),
+                sOfficeName=offer.kOffer2SetKit.kSet2User.kMerchantOffice.sOfficeName,
+                sOfficeAddress=offer.kOffer2SetKit.kSet2User.kMerchantOffice.sOfficeAddress,
+                fOfficeGeoCode_Longitude=(
+                    offer.kOffer2SetKit.kSet2User.kMerchantOffice.fOfficeGeoCode_Longitude or 0
+                ),
+                fOfficeGeoCode_Latitude=(
+                    offer.kOffer2SetKit.kSet2User.kMerchantOffice.fOfficeGeoCode_Latitude or 0
+                ),
+                sGlazingBriefDescription=offer.kOffer2SetKit.kSet2Glazing.sGlazingBriefDescription,
+                sGlazingMark=offer.kOffer2SetKit.kSet2Glazing.sGlazingMark,
+                sGlazingToning=offer.kOffer2SetKit.kSet2Glazing.sGlazingToning,
+                pwc_id=offer.kOffer2SetKit.kSet2PVCprofiles.id,
+                sProfileName=offer.kOffer2SetKit.kSet2PVCprofiles.sProfileName,
+                sProfileManufacturer=offer.kOffer2SetKit.kSet2PVCprofiles.sProfileManufacturer or "",
+                sProfileSealDescription=offer.kOffer2SetKit.kSet2PVCprofiles.sProfileSealDescription,
+                sMerchantName=offer.kOffer2SetKit.kSet2User.kMerchantOffice.kMerchantName.sMerchantName,
+                pMerchantLogo=(
+                    str(offer.kOffer2SetKit.kSet2User.kMerchantOffice.kMerchantName.pMerchantLogo)
+                    if offer.kOffer2SetKit.kSet2User.kMerchantOffice.kMerchantName.pMerchantLogo
+                    else ""
+                ),
+                sMerchantMainURL=(
+                    offer.kOffer2SetKit.kSet2User.kMerchantOffice.kMerchantName.sMerchantMainURL or ""
+                ),
+            )
+            for offer in q_price_offer[frame_begin_n:frame_begin_n + 10000]
+        ]
     price_frame = []
     count_mount_dim_in_offer = 0
     dim_in_offer = []
@@ -440,9 +533,9 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 'GLAZING_TONING': i2.sGlazingToning,
                 'PVC_ID': i2.pwc_id,
                 'PVC_NAME': i2.sProfileName,
-                'PVC_NAME_T': pytils.translit.slugify(i2.sProfileName).lower(),
+                'PVC_NAME_T': _slugify_lower(i2.sProfileName),
                 'PVC_MANUFACTURER': i2.sProfileManufacturer,
-                'PVC_MANUFACTURER_T': pytils.translit.slugify(i2.sProfileManufacturer).lower(),
+                'PVC_MANUFACTURER_T': _slugify_lower(i2.sProfileManufacturer),
                 'PVC_SEAL': i2.sProfileSealDescription,
                 'SETS_CLIMATE_CONTROL': i2.sSetClimateControl,
                 'SETS_SILL': i2.sSetSill,
@@ -620,7 +713,7 @@ def report_one_win_price(request: HttpRequest,
         list_seria_for_win.append(SimpleNamespace(
             id=seria_item['kApartment__kSeria__id'],
             sName=seria_name,
-            sNameLat=pytils.translit.slugify(seria_name),
+            sNameLat=_slugify_lower(seria_name),
             num_variation_of_apartment=pytils.numeral.sum_string(
                 seria_item['num_variation_of_apartment'],
                 pytils.numeral.MALE,
@@ -642,13 +735,8 @@ def report_one_win_price(request: HttpRequest,
         'SERIA_FOR_WIN': list_seria_for_win,
         'WIN_ID': int(win_id),
         'MOUNT_DIM_PER_OFFER': 1,
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
-        # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
-        'LOG_VISIT': get_last_all_user_visit_list(),
-        'ticks': float(time.perf_counter() - time_start)
     })
+    _append_visit_context(to_template=to_template, request=request, time_start=time_start)
     return render(request, "price/price_offers_for_one_window.html", to_template)
 
 
@@ -696,102 +784,81 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     except ValueError:
         return redirect("/")
     try:
-        # получаем все типы квартир для данного адреса (а заодно и попутную информацию о площади дома и пр.)
-        q_apart = Apartment_Type.objects.raw(
-            f'SELECT'
-            f'  oknardia_apartment_type.sNameApartment, oknardia_apartment_type.id,'
-            f'  oknardia_apartment_type.iSort, oknardia_seria_info.kRoot_id,'
-            f'  oknardia_building_info.kSeria_Link_id, oknardia_building_info.sAddress,'
-            f'  oknardia_building_info.fGeoCode_Latitude, oknardia_building_info.fGeoCode_Longitude,'
-            f'  oknardia_building_info.fTotal_Area, oknardia_building_info.sCadastre_Num_Area,'
-            f'  oknardia_building_info.fLand_Area, oknardia_building_info.sInventory_Num,'
-            f'  oknardia_building_info.iNum_Apartments, oknardia_building_info.sType,'
-            f'  oknardia_building_info.iStoreys, oknardia_building_info.fCommon_Area,'
-            f'  oknardia_building_info.sEnergy_Efficiency, oknardia_building_info.iEntrances_Porchs,'
-            f'  oknardia_building_info.fUninhabited_Area, oknardia_building_info.sManagement_Co,'
-            f'  oknardia_building_info.iElevators, oknardia_building_info.fResidential_Area,'
-            f'  oknardia_building_info.iNum_Residents, oknardia_building_info.fPrivate_Area,'
-            f'  oknardia_building_info.iNum_Accounts, oknardia_building_info.iCommissioning_year,'
-            f'  oknardia_building_info.fGovernment_Area, oknardia_building_info.fCondition_House,'
-            f'  oknardia_building_info.fCondition_Foundation, oknardia_building_info.fCondition_Walls,'
-            f'  oknardia_building_info.fCondition_Overlap, oknardia_building_info.fMunicipal_Area,'
-            f'  oknardia_building_info.sSerias_Project '
-            f'FROM oknardia_seria_info '
-            f'INNER JOIN oknardia_apartment_type'
-            f'  ON oknardia_seria_info.kRoot_id = oknardia_apartment_type.kSeria_id '
-            f'  INNER JOIN oknardia_building_info'
-            f'    ON oknardia_building_info.kSeria_Link_id = oknardia_seria_info.id '
-            f'WHERE oknardia_building_info.id = {build_id} '
-            f'ORDER BY oknardia_apartment_type.iSort;')
-        list_apart = list(q_apart)
+        building = Building_Info.objects.select_related('kSeria_Link__kRoot').get(id=build_id)
+        if not building.kSeria_Link_id or not getattr(building.kSeria_Link, 'kRoot_id', None):
+            return redirect("/")
+
+        list_apart = list(
+            Apartment_Type.objects.filter(kSeria_id=building.kSeria_Link.kRoot_id).order_by('iSort')
+        )
+        if not list_apart:
+            return redirect("/")
+
         # если кто-то нахимичит ID квартиры не для этого дома, то сделаем так, что он будет от этого дома!
-        apart_inside = False
-        for i in q_apart:
-            if i.id == apart_id:
-                apart_inside = True
-                break
-        if not apart_inside or slug != pytils.translit.slugify(list_apart[0].sAddress):
+        apart_inside = any(ap.id == apart_id for ap in list_apart)
+        address_slug = _slugify_lower(building.sAddress)
+        if not apart_inside or slug != address_slug:
             # Переадресация 302, если с apart_id (ID-квартиры нахимичили) или slug-ом.
             # Нужно для склейки парных URL в поисковиках
             # При переходе с карты apart_id выставляем в 0. Из-за этого тоже нужно 302-переадресация.
-            return redirect(f"/{build_id}/{list_apart[0].id}/{pytils.translit.slugify(list_apart[0].sAddress)}")
-        address_latitude = list_apart[0].fGeoCode_Latitude
-        address_longitude = list_apart[0].fGeoCode_Longitude
+            return redirect(f"/{build_id}/{list_apart[0].id}/{address_slug}")
+        address_latitude = building.fGeoCode_Latitude
+        address_longitude = building.fGeoCode_Longitude
         to_template.update({'BUILD_ID': build_id})
         to_template.update({'APPARTMENT_ID': apart_id})
         to_template.update({'ADDRESS_LAT': address_latitude})
         to_template.update({'ADDRESS_LON': address_longitude})
-        to_template.update({'ADDRESS': list_apart[0].sAddress})
-        to_template.update({'ADDRESS_T': pytils.translit.slugify(list_apart[0].sAddress)})
-        to_template.update({'SERIA': list_apart[0].sSerias_Project})
+        to_template.update({'ADDRESS': building.sAddress})
+        to_template.update({'ADDRESS_T': address_slug})
+        to_template.update({'SERIA': building.sSerias_Project})
         # данные нужные для отображения информации о доме (метраж, число подъездов и пр.)
-        to_template.update({'CADASTRE_NUM': list_apart[0].sCadastre_Num_Area})
-        to_template.update({'INVENTORY_NUM': list_apart[0].sInventory_Num})
-        to_template.update({'TYPE_BUILDING': list_apart[0].sType})
-        to_template.update({'ENERGY_EFFICIENCY': list_apart[0].sEnergy_Efficiency})
-        if list_apart[0].fTotal_Area != -1.0:
-            to_template.update({'TOTAL_AREA': f"{list_apart[0].fTotal_Area:.1f}"})
-        if list_apart[0].fLand_Area != -1.0:
-            to_template.update({'LAND': f"{list_apart[0].fLand_Area:.1f}"})
-        if list_apart[0].iNum_Apartments != -1:
-            to_template.update({'NUM_APARTMENTS': list_apart[0].iNum_Apartments})
-        if list_apart[0].iStoreys != -1:
-            to_template.update({'STOREYS': list_apart[0].iStoreys})
-        if list_apart[0].fCommon_Area != -1.0:
-            to_template.update({'COMMON_AREA': f"{list_apart[0].fCommon_Area:.1f}"})
-        if list_apart[0].iEntrances_Porchs != -1:
-            to_template.update({'NUM_ENTERANCES': list_apart[0].iEntrances_Porchs})
-        if list_apart[0].fUninhabited_Area != -1.0:
-            to_template.update({'UNINHABITED_AREA': f"{list_apart[0].fUninhabited_Area:.1f}"})
-        if list_apart[0].sManagement_Co != u"N/A":
-            to_template.update({'MANAGEMENT_CO': list_apart[0].sManagement_Co})
-        if list_apart[0].iElevators != -1:
-            to_template.update({'NUM_ELEVATORS': list_apart[0].iElevators})
-        if list_apart[0].fResidential_Area != -1.0:
-            to_template.update({'RESIDENTIAL_AREA': f"{list_apart[0].fResidential_Area:.1f}"})
-        if list_apart[0].iNum_Residents != -1:
-            to_template.update({'NUM_RESIDENTS': list_apart[0].iNum_Residents})
-        if list_apart[0].fPrivate_Area != -1.0:
-            to_template.update({'PRIVATE_AREA': f"{list_apart[0].fPrivate_Area:.1f}"})
-        if list_apart[0].iNum_Accounts != -1:
-            to_template.update({'NUM_ACCOUNTS': list_apart[0].iNum_Accounts})
-        if list_apart[0].iCommissioning_year != "N/A":
-            to_template.update({'COMMISSIONING_YEAR': list_apart[0].iCommissioning_year})
-        if list_apart[0].fGovernment_Area != -1.0:
-            to_template.update({'GOVERNMENT_AREA': f"{list_apart[0].fGovernment_Area:.1f}"})
-        if list_apart[0].fCondition_House != -1.0:
-            to_template.update({'CONDITION_HOUSE': f"{list_apart[0].fCondition_House:.0f}%"})
-        if list_apart[0].fCondition_Foundation != -1.0:
-            to_template.update({'CONDITION_FOUNDATION': f"{list_apart[0].fCondition_Foundation:.0f}%"})
-        if list_apart[0].fCondition_Walls != -1.0:
-            to_template.update({'CONDITION_WALL': f"{list_apart[0].fCondition_Walls:.0f}%"})
-        if list_apart[0].fCondition_Overlap != -1.0:
-            to_template.update({'CONDITION_OVERLAP': f"{list_apart[0].fCondition_Overlap:.0f}%"})
-        if list_apart[0].fMunicipal_Area != -1.0:
-            to_template.update({'MUNICIPAL_AREA': f"{list_apart[0].fMunicipal_Area:.1f}"})
+        to_template.update({'CADASTRE_NUM': building.sCadastre_Num_Area})
+        to_template.update({'INVENTORY_NUM': building.sInventory_Num})
+        to_template.update({'TYPE_BUILDING': building.sType})
+        to_template.update({'ENERGY_EFFICIENCY': building.sEnergy_Efficiency})
+        if building.fTotal_Area != -1.0:
+            to_template.update({'TOTAL_AREA': f"{building.fTotal_Area:.1f}"})
+        if building.fLand_Area != -1.0:
+            to_template.update({'LAND': f"{building.fLand_Area:.1f}"})
+        if building.iNum_Apartments != -1:
+            to_template.update({'NUM_APARTMENTS': building.iNum_Apartments})
+        if building.iStoreys != -1:
+            to_template.update({'STOREYS': building.iStoreys})
+        if building.fCommon_Area != -1.0:
+            to_template.update({'COMMON_AREA': f"{building.fCommon_Area:.1f}"})
+        if building.iEntrances_Porchs != -1:
+            to_template.update({'NUM_ENTERANCES': building.iEntrances_Porchs})
+        if building.fUninhabited_Area != -1.0:
+            to_template.update({'UNINHABITED_AREA': f"{building.fUninhabited_Area:.1f}"})
+        if building.sManagement_Co != u"N/A":
+            to_template.update({'MANAGEMENT_CO': building.sManagement_Co})
+        if building.iElevators != -1:
+            to_template.update({'NUM_ELEVATORS': building.iElevators})
+        if building.fResidential_Area != -1.0:
+            to_template.update({'RESIDENTIAL_AREA': f"{building.fResidential_Area:.1f}"})
+        if building.iNum_Residents != -1:
+            to_template.update({'NUM_RESIDENTS': building.iNum_Residents})
+        if building.fPrivate_Area != -1.0:
+            to_template.update({'PRIVATE_AREA': f"{building.fPrivate_Area:.1f}"})
+        if building.iNum_Accounts != -1:
+            to_template.update({'NUM_ACCOUNTS': building.iNum_Accounts})
+        if building.iCommissioning_year != "N/A":
+            to_template.update({'COMMISSIONING_YEAR': building.iCommissioning_year})
+        if building.fGovernment_Area != -1.0:
+            to_template.update({'GOVERNMENT_AREA': f"{building.fGovernment_Area:.1f}"})
+        if building.fCondition_House != -1.0:
+            to_template.update({'CONDITION_HOUSE': f"{building.fCondition_House:.0f}%"})
+        if building.fCondition_Foundation != -1.0:
+            to_template.update({'CONDITION_FOUNDATION': f"{building.fCondition_Foundation:.0f}%"})
+        if building.fCondition_Walls != -1.0:
+            to_template.update({'CONDITION_WALL': f"{building.fCondition_Walls:.0f}%"})
+        if building.fCondition_Overlap != -1.0:
+            to_template.update({'CONDITION_OVERLAP': f"{building.fCondition_Overlap:.0f}%"})
+        if building.fMunicipal_Area != -1.0:
+            to_template.update({'MUNICIPAL_AREA': f"{building.fMunicipal_Area:.1f}"})
         # заполняем массив квартир для отправки в шаблон
         apart_in_building = []
-        for apartment_count in q_apart:
+        for apartment_count in list_apart:
             apartment_in = {}
             if apartment_count.id != apart_id:
                 apartment_in.update({'APT_ID': apartment_count.id})
@@ -802,8 +869,8 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         to_template.update({'APARTMENT_IN_BUILDING': apart_in_building})
 
         # узнаем базовую серию дома
-        q_base_seria = Seria_Info.objects.get(id=list_apart[0].kRoot_id)
-        base_seria_slug = pytils.translit.slugify(q_base_seria.sName)
+        q_base_seria = building.kSeria_Link.kRoot
+        base_seria_slug = _slugify_lower(q_base_seria.sName)
         to_template.update({'BASE_SERIA': q_base_seria.sName,
                             'BASE_SERIA_LAT': base_seria_slug,
                             'BASE_SERIA_ID': q_base_seria.id})
@@ -813,38 +880,36 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     ###############################################
     # получаем массив окон для данной квартиры...
     try:
-        q_md = Win_MountDim.objects.raw(
-            f'SELECT'
-            f'  oknardia_apartment_type.sNameApartment, oknardia_win_mountdim.iWinWidth,'
-            f'  oknardia_win_mountdim.iWinHight, oknardia_win_mountdim.iWinDepth,'
-            f'  oknardia_win_mountdim.sFlapConfig, oknardia_win_mountdim.bIsNearDoor,'
-            f'  oknardia_win_mountdim.bIsDoor, oknardia_win_mountdim.sDescripion,'
-            f'  oknardia_win_mountdim.id,  oknardia_mountdim2apartment.iQuantity '
-            f'FROM oknardia_mountdim2apartment '
-            f'INNER JOIN oknardia_apartment_type'
-            f'    ON oknardia_mountdim2apartment.kApartment_id = oknardia_apartment_type.id'
-            f'  INNER JOIN oknardia_win_mountdim'
-            f'    ON oknardia_mountdim2apartment.kMountDim_id = oknardia_win_mountdim.id '
-            f'WHERE oknardia_mountdim2apartment.kApartment_id = {apart_id} '
-            f'GROUP BY'
-            f'  oknardia_apartment_type.sNameApartment, oknardia_win_mountdim.iWinWidth,'
-            f'  oknardia_win_mountdim.iWinHight, oknardia_win_mountdim.iWinDepth,'
-            f'  oknardia_win_mountdim.sFlapConfig, oknardia_win_mountdim.bIsNearDoor,'
-            f'  oknardia_win_mountdim.bIsDoor, oknardia_win_mountdim.sDescripion,'
-            f'  oknardia_apartment_type.bApartmentCheck, oknardia_win_mountdim.dMountXYZModify,'
-            f'  oknardia_apartment_type.dApartmentModify, oknardia_win_mountdim.iWinLimit,'
-            f'  oknardia_win_mountdim.id, oknardia_mountdim2apartment.iQuantity '
-            f'ORDER BY'
-            f'  oknardia_win_mountdim.bIsNearDoor DESC,'
-            f'  oknardia_win_mountdim.bIsDoor DESC,'
-            f'  oknardia_win_mountdim.iWinWidth,'
-            f'  oknardia_win_mountdim.iWinHight DESC;')
-        list_mount_dim_per_offer = list(q_md)
+        list_mount_dim_per_offer = [
+            SimpleNamespace(
+                sNameApartment=row.kApartment.sNameApartment,
+                iWinWidth=row.kMountDim.iWinWidth,
+                iWinHight=row.kMountDim.iWinHight,
+                iWinDepth=row.kMountDim.iWinDepth,
+                sFlapConfig=row.kMountDim.sFlapConfig,
+                bIsNearDoor=row.kMountDim.bIsNearDoor,
+                bIsDoor=row.kMountDim.bIsDoor,
+                sDescripion=row.kMountDim.sDescripion,
+                id=row.kMountDim.id,
+                iQuantity=row.iQuantity,
+            )
+            for row in MountDim2Apartment.objects.filter(kApartment_id=apart_id)
+            .select_related('kApartment', 'kMountDim')
+            .order_by(
+                '-kMountDim__bIsNearDoor',
+                '-kMountDim__bIsDoor',
+                'kMountDim__iWinWidth',
+                '-kMountDim__iWinHight',
+            )
+        ]
+        if not list_mount_dim_per_offer:
+            return redirect("/")
+
         mount_dim_per_offer = len(list_mount_dim_per_offer)
         to_template.update({'APART': list_mount_dim_per_offer[0].sNameApartment})
 
         # получаем данные для отрисовки больших картинок с проемами.
-        to_template.update(get_flaps_for_big_pictures(q_md))
+        to_template.update(get_flaps_for_big_pictures(list_mount_dim_per_offer))
         # <---
     except (ValueError, IndexError, TypeError, ObjectDoesNotExist):
         return redirect("/")
@@ -865,12 +930,11 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
 
     # получаем последние визиты всех посетителей из базы
     log_visit = get_last_all_user_visit_list()
-    if log_visit[0]['id'] is not None:
+    if log_visit and log_visit[0].get('id') is not None:
         id_last_visit_log = log_visit[0]['id'] + 1
     else:
         id_last_visit_log = 1
     # print("id_last_visit_log:", id_last_visit_log)
-    to_template.update({'LOG_VISIT': log_visit})
     if id_last_visit_log > MAX_LEN_RING_LOG_BUFFER:  # максимальный размер циклического буфера
         id_last_visit_log = 1  # ставим в начало буфера
     try:
@@ -891,7 +955,8 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
 
     # получаем последние визиты клиента через куки
     last_visit = get_last_user_visit_cookies(request)
-    to_template.update({'LAST_VISIT': get_last_user_visit_list(last_visit)})
+    # Для блока LAST_VISIT показываем историю до текущего захода.
+    last_visit_for_context = list(last_visit)
     # подготавливаем данные о текущем посещении для помещения в cookie
     Item = {
         "LastURL": f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}",
@@ -901,7 +966,13 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     last_visit.insert(0, Item)  # Добавляем текущий Item в начало
     last_visit = json.dumps(last_visit[:3])  # упаковываем json без пробелов (три записи)
     # print u"сейчас запишем вот эту куку:", LastVisit
-    to_template.update({'ticks': float(time.perf_counter() - time_start)})
+    _append_visit_context(
+        to_template=to_template,
+        request=request,
+        time_start=time_start,
+        log_visit=log_visit,
+        last_visit_cookie=last_visit_for_context,
+    )
     response = render(request, "price/price_list.html", to_template)
     response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
     return response
