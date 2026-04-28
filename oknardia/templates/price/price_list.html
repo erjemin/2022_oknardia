@@ -13,18 +13,38 @@
 {% block Keywords %}цены на окна, пластиковые окна, серия {{ BASE_SERIA }}, стоимость окон, окна для {{ BASE_SERIA }}, размеры окон, проемы серии {{ BASE_SERIA }}, окна в {{ APART|safe }}, скидки на окна, {{ ADDRESS }}, оконный профиль, монтаж окон, установка окон, сравнение цен, лучшие предложения, акции, рассрочка, {{ KEYWORDS_EXTRA }}{% endblock %}
 
 {% block ADD_TO_HEAD %}{# --- Микроразметка schema.org, Open Graph, Twitter Card, meta-даты --- #}
-    {# --- JSON-LD микроразметка schema.org --- #}<script type="application/ld+json">
+    {# --- JSON-LD микроразметка schema.org: хлебные крошки по новой структуре + остальные объекты --- #}
+    <script type="application/ld+json">
     [
-      {
-        "@context": "https://schema.org/",
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
-          {"@type": "ListItem", "position": 2, "name": "Каталог", "item": "{{ request.scheme }}://{{ request.get_host }}/catalog"},
-          {"@type": "ListItem", "position": 3, "name": "Цены на окна", "item": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}"}
-        ]
-      },
-      {
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Главная",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Серия {{ BASE_SERIA }}",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "{{ APART }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Цены замены окон по адресу: {{ ADDRESS }}"
+        }
+      ]
+    },
+    {
         "@context": "https://schema.org/",
         "@type": "Organization",
         "name": "ОКНАРДИЯ — агрегатор цен на окна",
@@ -179,6 +199,16 @@ $(function () { // инициализация и обработка попове
 {% block Top_CSS1 %}<link rel="stylesheet" type="text/css" href="{% static "css/csshake-vertical.min.css" %}">{%  endblock %}
 
 {% block Main_Content %}<div class="container-fluid">
+  {# --- Хлебные крошки: НАЧАЛО --- #}<div class="row">
+    <div class="col-md-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">Серия {{ BASE_SERIA }}</a></li>
+        <li>{{ APART }}</li>
+        <li>Цены замены окон по адресу: {{ ADDRESS }}</li>
+      </ol>
+    </div>
+  </div>{# --- Хлебные крошки: КОНЕЦ --- #}
   <div class="row">
     <div class="col-md-9">
       <h1>Цены на окна для серии {{ APART|safe }} <small><nobr>({{ ADDRESS }})</nobr></small></h1>
@@ -202,7 +232,7 @@ $(function () { // инициализация и обработка попове
 
 <div class="row col-md-12">
   <div class="col-md-12">
-    <p id="tab-note">Таблица содержит цены поставщиков. Клик на&nbsp;название отобразит детальные спецификации каждого предложения: марку профиля рамы и&nbsp;створки, схему стеклопакета, тип фурнитуры, элементы отделки (отлив, подоконник, откос, клапан <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся покадрово, получите следующий кадр кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Просмотреть и&nbsp;сравнить технические характеристик стеклопакетов, профилей и&nbsp;детальное описание сопутствующих услуг возможно с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
+    <p id="tab-note">Таблица содержит цены поставщиков. Клик на&nbsp;название отобразит детальные спецификации каждого предложения: марку профиля рамы и&nbsp;створки, схему стеклопакета, тип фурнитуры, элементы отделки (отлив, подоконник, откос, клапан <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся покадрово, получите следующий кадр кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Просмотреть и&nbsp;сравнить технические характеристики стеклопакетов, профилей и&nbsp;детальное описание сопутствующих услуг возможно с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
   </div>
 </div>
 
