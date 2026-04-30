@@ -937,18 +937,21 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     # print("id_last_visit_log:", id_last_visit_log)
     if id_last_visit_log > MAX_LEN_RING_LOG_BUFFER:  # максимальный размер циклического буфера
         id_last_visit_log = 1  # ставим в начало буфера
+    
+    new_url = f"/price/seriaID{to_template['BASE_SERIA_ID']}--{to_template['BASE_SERIA_LAT']}/appartID{apart_id}/addressID{build_id}--null"
+    
     try:
         log_entry = LogVisitPriceReport.objects.get(id=id_last_visit_log)
         log_entry.sLogAddress = to_template["ADDRESS"]
         log_entry.sLogNameApartment = to_template["APART"]
-        log_entry.sLogURL = f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}"
+        log_entry.sLogURL = new_url
         log_entry.dLogVisitTime = time.perf_counter()
         log_entry.save()  # UPDATE
     except ObjectDoesNotExist:
         log_entry = LogVisitPriceReport(
             sLogAddress=to_template["ADDRESS"],
             sLogNameApartment=to_template["APART"],
-            sLogURL=f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}",
+            sLogURL=new_url,
             dLogVisitTime=time.perf_counter()
         )
         log_entry.save()  # INSERT
@@ -959,7 +962,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
     last_visit_for_context = list(last_visit)
     # подготавливаем данные о текущем посещении для помещения в cookie
     Item = {
-        "LastURL": f"/{build_id}/{apart_id}/{to_template['ADDRESS_T']}",
+        "LastURL": new_url,
         "LastAddress": to_template["ADDRESS"],
         "LastApart": to_template["APART"],
         "Time": time.perf_counter()}
