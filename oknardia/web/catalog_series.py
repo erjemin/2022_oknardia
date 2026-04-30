@@ -101,7 +101,7 @@ def catalog_seria_info(
         is_hard_template = True
     else:
         # В PROD используем существующий pre-render include при наличии на диске.
-        light_template = f"{PATH_FOR_SERIA_INFO_HTML_INCLUDE}{seria_id}_id.html"
+        light_template = f"seria_info/prepared/{seria_id}_id.html"
         light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
         is_hard_template = not os.path.isfile(light_template_w_path)
 
@@ -124,10 +124,6 @@ def catalog_seria_info(
         .order_by("-bIsNearDoor", "-bIsDoor", "iWinWidth", "-iWinHight", "id")
         .distinct()
     )
-
-    if is_hard_template:
-        # Для "тяжелого" шаблона нужны большие картинки схем окон.
-        to_template.update(get_flaps_for_big_pictures(list_win_in_seria))
 
     window_ids = [win.id for win in list_win_in_seria]
     apartments_in_seria = list(
@@ -209,16 +205,26 @@ def catalog_seria_info(
 
     # Для "тяжелого" шаблона получаем навигацию, карту и график, затем кэшируем pre-render.
     if is_hard_template:
+        to_template.update(get_flaps_for_big_pictures(list_win_in_seria))
         seria_id, for_seria_nav = seria_nav(seria_id)
         to_template.update(for_seria_nav)
         to_template.update(seria_info_year(seria_id))
         to_template.update(seria_info_geo_code(seria_id))
         if not DEBUG:
-            string_prerender = render_to_string("seria_info/all_seria_info_pre_light.html", to_template)
+            # Пре-рендер происходит только для "включаемого" шаблона,
+            # чтобы избежать дублирования базовой разметки.
+            string_prerender = render_to_string("seria_info/all_seria_info_pre_light_include.html", to_template)
             with open(light_template_w_path, "w", encoding="utf-8") as file:
                 file.write(string_prerender)
+            # Основной шаблон будет просто включать в себя уже готовый HTML
+            light_template = "seria_info/all_seria_info_pre_light.html"
     else:
         to_template.update({"THIS_SERIA_NAME": q_seria.sName})
+        # Указываем путь к кешированному файлу для include
+        to_template.update({"PRE_RENDERED_INCLUDE_PATH": light_template})
+        # Основной шаблон должен быть один и тот же
+        light_template = "seria_info/all_seria_info_pre_light.html"
+
 
     _append_visit_context(to_template, request, time_start)
     return render(request, light_template, to_template)

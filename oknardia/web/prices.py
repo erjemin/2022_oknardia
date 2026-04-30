@@ -1009,3 +1009,54 @@ def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_o
                         'ADDRESS_LON': address_longitude,
                         'ticks': float(time.perf_counter() - time_start)})
     return render(request, "price/price_list_frame.html", to_template)
+
+
+def report_price_new(request, seria_id, seria_slug, apart_id, address_id, address_slug):
+    """
+    Новый view для ценовой выдачи по новому роутингу.
+    :param seria_id: ID серии (Seria_Info)
+    :param seria_slug: slug серии (транслит)
+    :param apart_id: ID типа квартиры (Apartment_Type)
+    :param address_id: ID адреса (Building_Info)
+    :param address_slug: slug адреса (транслит)
+    """
+    from oknardia.models import Building_Info, Apartment_Type, Seria_Info
+    from django.shortcuts import redirect
+    # Проверяем, что все объекты существуют
+    try:
+        print(f"seria_id: {seria_id}, seria_slug: {seria_slug}, apart_id: {apart_id}, address_id: {address_id}, address_slug: {address_slug}")
+        seria = Seria_Info.objects.get(id=seria_id)
+        building = Building_Info.objects.get(id=address_id)
+        # apartment = Apartment_Type.objects.get(id=apart_id)
+    except Exception:
+        return redirect("/")
+    # Проверяем slug'и, если не совпадает — делаем 301 на канонический URL (новый формат)
+    seria_slug_real = pytils.translit.slugify((seria.sName or "").strip()).lower()
+    address_slug_real = pytils.translit.slugify((building.sAddress or "").strip()).lower()
+    if seria_slug != seria_slug_real or address_slug != address_slug_real:
+        # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartAD<apart_id>/addressID<address_id>--<address_slug>/
+        return redirect(f"/price/seriaID{seria_id}--{seria_slug_real}/appartID{apart_id}/addressID{address_id}--{address_slug_real}/", permanent=True)
+    # Вызываем старую логику выдачи (используем report_price)
+    # В старом view: build_id = address_id, apart_id = apart_id, slug = address_slug
+    return report_price(request, build_id=address_id, apart_id=apart_id, slug=address_slug)
+
+
+def report_price_legacy_redirect(request, build_id, apart_id, slug):
+    try:
+        building = Building_Info.objects.select_related('kSeria_Link__kRoot').get(id=build_id)
+        seria = building.kSeria_Link.kRoot
+        # Если apart_id == 0, ищем минимальный валидный ID квартиры для этой серии
+        if int(apart_id) == 0:
+            min_apart = Apartment_Type.objects.filter(kSeria_id=seria.id).order_by('id').first()
+            if min_apart:
+                apart_id = min_apart.id
+    except Exception:
+        return redirect("/")
+    import pytils
+    seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
+    address_slug = pytils.translit.slugify((building.sAddress or "").strip()).lower()
+    # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartID<apart_id>/addressID<build_id>--<address_slug>/
+    return redirect(f"/price/seriaID{seria.id}--{seria_slug}/appartID{apart_id}/addressID{build_id}--{address_slug}/", permanent=True)
+    seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
+    address_slug = pytils.translit.slugify((building.sAddress or "").strip()).lower()
+    return redirect(f"/price/seriaID{seria.id}--{seria_slug}/appartID{apart_id}/addressID{build_id}--{address_slug}/", permanent=True)

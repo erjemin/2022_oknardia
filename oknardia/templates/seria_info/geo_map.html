@@ -2,8 +2,7 @@
        {% block Top_JS5 %}<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
 {% if MAP_JS %}<script src="{% static '' %}{{ MAP_JS }}"  charset="utf-8" type="text/javascript"></script>{% else %}<script type="text/javascript">
 let points = [{% for count in DATA4GEO %}{% if forloop.last %}[{{ count.LONGITUDE|stringformat:"f" }},{{ count.LATITUDE|stringformat:"f" }}]{% else %}[{{ count.LONGITUDE|stringformat:"f" }},{{ count.LATITUDE|stringformat:"f" }}],{% endif %}{% endfor %}];
-let forURL = [{% for count in DATA4GEO %}{{ count.ADDR_ID }}{# ,rus: '{{ count.ADDR_RUS }}',lat: '{{ count.ADDR_LAT }}' #}{% if not forloop.last %},{% endif %}{% endfor %}];
-
+let forURL = [{% for count in DATA4GEO %}{ id: {{ count.ADDR_ID }} }{% if not forloop.last %},{% endif %}{% endfor %}];
 
 ymaps.ready(function () {
     let myMap = new ymaps.Map('SeriaMap', {
@@ -23,15 +22,23 @@ ymaps.ready(function () {
         gridSize: 80
         });
     geoObjects = [];
-    add_str1 = '<a href="/';
-    add_str2 = '/0/">Смотреть коммерческие предложения</a>';
-    add_str3 = '<b>Здание серии {{ THIS_SERIA_NAME }}</b>';
+
+    const linkText = 'Смотреть коммерческие предложения</a>';
+    const hintText = '<b>Здание серии {{ THIS_SERIA_NAME }}</b>';
+    const apartmentId = {{ first_apart_id|default:0 }};
+    const seriaId = {{ THIS_SERIA_ID }};
+    const seriaSlug = '{{ THIS_SERIA_NAME_T }}';
+
     // Данные передаются в конструктор метки.
     for(var i = 0, len = points.length; i < len; i++) {
+        const buildingId = forURL[i].id;
+        // Формируем SEO-URL для каждой метки
+        const balloonLink = `<a href="/price/seriaID${seriaId}--${seriaSlug}/appartID${apartmentId}/addressID${buildingId}--null">`;
+
         geoObjects[i] = new ymaps.Placemark( points[i],
 		        { // Содержимое иконки, балуна и хинта.
-               balloonContent: add_str1 + forURL[i] + add_str2,
-               hintContent: add_str3
+               balloonContent: balloonLink + linkText,
+               hintContent: hintText
             },
 		        { preset:'islands#circleIcon',iconColor: 'silver'} );
 	      geoObjects[i].events
