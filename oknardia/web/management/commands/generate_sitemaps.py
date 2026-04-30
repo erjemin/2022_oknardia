@@ -141,8 +141,18 @@ class BuildingOffersSitemap(Sitemap):
                 yield (building.id, apart_id, pytils.translit.slugify(building.sAddress))
 
     def location(self, item: tuple[int, int, str]) -> str:
-        build_id, apart_id, slug = item
-        return f"/{build_id}/{apart_id}/{slug}"
+        build_id, apart_id, address_slug = item
+        # Получаем объект здания и серию для формирования нового роутинга
+        try:
+            building = Building_Info.objects.select_related('kSeria_Link__kRoot').get(id=build_id)
+            seria = building.kSeria_Link.kRoot
+            seria_id = seria.id
+            seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
+        except Exception:
+            # fallback на старый роутинг, если что-то пошло не так
+            return f"/{build_id}/{apart_id}/{address_slug}"
+        # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartID<apart_id>/addressID<address_id>--<address_slug>/
+        return f"/price/seriaID{seria_id}--{seria_slug}/appartID{apart_id}/addressID{build_id}--{address_slug}/"
 
     def lastmod(self, item: tuple[int, int, str]) -> datetime:
         return self.lastmod_value

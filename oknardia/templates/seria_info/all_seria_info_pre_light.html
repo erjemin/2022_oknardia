@@ -149,19 +149,15 @@ TechArticle: описывает страницу как технический �
       <h3 class="header">Оконные проёмы в&nbsp;типовых квартирах <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
     </div>
     <div class="col-lg-8 col-xs-12 col-md-offset-1">
-      <!--- прешаблон начало ---><table style="padding:2px;">{% templatetag openblock %} for row in TABLE_OF_WINDOWS {% templatetag closeblock %}
-        <tr class="tr2">
-          <td>{% templatetag openvariable %} row.APART_NAME|safe {% templatetag closevariable %}</td>{% templatetag openblock %} for col in row.WIN_IN_APART {% templatetag closeblock %}
-          <td class="cntr">{% templatetag openblock %} if col.WIN_ID {% templatetag closeblock %}<nobr	title="{% templatetag openvariable %} col.WIN_Q {% templatetag closevariable %} × {% templatetag openvariable %} col.WIN_DESCRIPTION {% templatetag closevariable %}: {% templatetag openvariable %} col.WIN_WIDTH {% templatetag closevariable %}шт.: {% templatetag openvariable %} col.WIN_HEIGHT {% templatetag closevariable %} (Ш×В, см.). Схема открывания: {% templatetag openvariable %} col.WIN_FLAPCFG {% templatetag closevariable %}">{% templatetag openblock %} for I_II in col.WIN_NUM {% templatetag closeblock %}<span	style="background-image:url('{% static 'img/svg/mark' %}{% templatetag openvariable %} I_II {% templatetag closevariable %}.svg');">&nbsp;</span>{% templatetag openblock %} endfor {% templatetag closeblock %}</nobr>{% templatetag openblock %} else {% templatetag closeblock %}—{% templatetag openblock %} endif {% templatetag closeblock %}</td>{% templatetag openblock %} endfor {% templatetag closeblock %}
-          <td style="background:#f9f9f9;"><a href="#{% templatetag openvariable %} row.APART_ID {% templatetag closevariable %}" class="badge" title="Оконных предложений для квартиры: {% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}</a></td>
-        </tr>{% templatetag openblock %} endfor {% templatetag closeblock %}
-        <tr class="trZ">
-          <td style="font-size: xx-small;vertical-align:text-top">© 2015-{% now "Y" %}, данные: oknardia.ru</td>{% templatetag openblock %} for i in WIN_OFFER_AND_MERCHANT {% templatetag closeblock %}
-          <td class="cntr" style="background:#f9f9f9;"><a href="/catalog/standard_opening/price-{% templatetag openvariable %} i.WIN_W|floatformat:0 {% templatetag closevariable %}0x{% templatetag openvariable %} i.WIN_H|floatformat:0 {% templatetag closevariable %}0mm-tip{% templatetag openvariable %} i.WIN_ID {% templatetag closevariable %}" class="badge" title="Ценовых предложений для окна: {% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}</a></td>{% templatetag openblock %} endfor {% templatetag closeblock %}
-          <td></td>
-        </tr>
-      </table>
-    <!--- прешаблон конец  ---></div>
+      {# --- ОСНОВНОЙ БЛОК С ТАБЛИЦЕЙ --- #}
+      {# Если есть кешированный файл, включаем его. Иначе - рендерим блок на лету. #}
+      {% if PRE_RENDERED_INCLUDE_PATH %}
+        {% include PRE_RENDERED_INCLUDE_PATH %}
+      {% else %}
+        {% include "seria_info/all_seria_info_pre_light_include.html" %}
+      {% endif %}
+      {# --- КОНЕЦ ОСНОВНОГО БЛОКА --- #}
+    </div>
   </div>
 
 	<div class="row">
@@ -182,7 +178,9 @@ TechArticle: описывает страницу как технический �
     </div>
 		<div class="col-md-7 col-lg-offset-1">
       <p><small>Чтобы посмотреть цены на&nbsp;установку и&nbsp;замену окон от&nbsp;партнёров &laquo;Окнардия&raquo; в&nbsp;своей квартире: найдите дом на&nbsp;карте; кликните на&nbsp;него; перейдите по&nbsp;ссылке &laquo;Смотреть коммерческие предложения&raquo;. При необходимости смените типовую планировку квартиры (на&nbsp;странице ценовой выдачи, справа от&nbsp;изображения типовых проёмов и&nbsp;схем открывания).</small></p>
-			<div style="height:350px;">{% include 'seria_info/geo_map.html' %}</div>
+			<div style="height:350px;">
+        {% include 'seria_info/geo_map.html' with first_apart_id=TABLE_OF_WINDOWS.0.APART_ID %}
+      </div>
 			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
 		</div>
 
@@ -208,8 +206,8 @@ TechArticle: описывает страницу как технический �
 		</div>
 	</div>
   <div class="row">
-    {% templatetag openblock %}include "report/report_last_user_visit.html" {% templatetag closeblock %}
-    {% templatetag openblock %} include "report/report_log_user_visit.html" {% templatetag closeblock %}
+    {% include "report/report_last_user_visit.html" %}
+    {% include "report/report_log_user_visit.html" %}
   </div>
 </div>
 {% endblock %}

@@ -224,7 +224,10 @@ $(function () { // инициализация и обработка попове
   <div class="col-sm-3 visible-md visible-lg ap_list">
     <h6>Другие типовые квартиры в&nbsp;этом доме:</h6>
     <ul>{% for I_APART in APARTMENT_IN_BUILDING %}
-      {% if I_APART.APT_ID == '!' %}<li>{{ I_APART.APT_NAME|safe }}</li>{% else %}<li><a href="/{{ BUILD_ID }}/{{ I_APART.APT_ID }}/{{ ADDRESS_T }}">{{ I_APART.APT_NAME|safe }}</a></li>{% endif %}{% endfor %}
+      {% if I_APART.APT_ID == '!' %}<li>{{ I_APART.APT_NAME|safe }}</li>{% else %}
+      {# Новый формат роутинга для перехода между квартирами #}
+      <li><a href="/price/seriaID{{ BASE_SERIA_ID }}--{{ BASE_SERIA_LAT }}/appartID{{ I_APART.APT_ID }}/addressID{{ BUILD_ID }}--{{ ADDRESS_T }}/">{{ I_APART.APT_NAME|safe }}</a></li>
+      {% endif %}{% endfor %}
     </ul>
     <a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">Информация по серии {{ BASE_SERIA }}</a>
   </div>

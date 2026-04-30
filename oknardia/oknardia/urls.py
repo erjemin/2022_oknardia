@@ -84,11 +84,14 @@ urlpatterns = [
             prices.redirect_one_win_price_legacy),  # LEGACY-URL: 301 -> КАНОНИЧЕСКИЙ ПУТЬ
     re_path(r'^next_price_one_flap_frame/idW(?P<win_id>\d+)N(?P<frame_begin_n>\d+)\S*$',
             prices.next_one_win_price),  # ПОДГРУЖАЕМЫЙ ФРЕЙМ С ЦЕНОВЫМИ ПРЕДЛОЖЕНИЯМИ ДЛЯ ОДНОГО ПРОЕМА
-    # --- Ценовая выдача
-    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price),
-    # --- Подгружаемый фрейм ценовая выдачи
+    # --- Ценовая выдача (НОВЫЙ РОУТИНГ)
+    # Новый красивый URL с префиксами seriaID, appartAD, addressID
+    re_path(r'^price/seriaID(?P<seria_id>\d+)--(?P<seria_slug>[^/]+)/appartID(?P<apart_id>\d+)/addressID(?P<address_id>\d+)--(?P<address_slug>[^/]+)/?$', prices.report_price_new),
+    # --- Подгружаемый фрейм ценовой выдачи (оставляем старый)
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
+    # --- Старый URL ценовой выдачи (добавим редирект)
+    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price_legacy_redirect),
     # СРАВНЕНИЕ ОКОННЫХ НАБОРОВ
     re_path(r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
     re_path(r'^compare_offers/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),
@@ -116,4 +119,3 @@ if DEBUG:
     urlpatterns = [path('__debug__/', include('debug_toolbar.urls')), *urlpatterns]
     # Медиа-файлы
     urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
-
