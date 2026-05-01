@@ -1027,7 +1027,6 @@ def report_price_new(request, seria_id, seria_slug, apart_id, address_id, addres
     from django.shortcuts import redirect
     # Проверяем, что все объекты существуют
     try:
-        print(f"seria_id: {seria_id}, seria_slug: {seria_slug}, apart_id: {apart_id}, address_id: {address_id}, address_slug: {address_slug}")
         seria = Seria_Info.objects.get(id=seria_id)
         building = Building_Info.objects.get(id=address_id)
         # apartment = Apartment_Type.objects.get(id=apart_id)
