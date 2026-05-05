@@ -201,7 +201,7 @@ TechArticle: описывает страницу как технический �
 	<div class="row">
 		<div class="col-md-4 col-lg-offset-8" style="margin-top: 1em;">
 			<h5>Информация о&nbsp;других, отличных от&nbsp;{{ THIS_SERIA_NAME }}, типовых сериях в&nbsp;базе &laquo;Окнардия&raquo;, типовых планировках квартир и&nbsp;оконных проёмах в&nbsp;них, а&nbsp;также рекомендации по&nbsp;замене&nbsp;окон:</h5>
-			<div class="href_d">{% include 'seria_info/seria_nav.html' %}</div>
+			<div class="href_d">{% include 'seria_info/seria_nav.html' with current_seria_id=THIS_SERIA_ID %}</div>
       <p style="text-align:left;padding: 1em 50% 2em 0;"><small>Смотри так же <a href="/stat_all/">агрегированную информацию</a> по&nbsp;типовым сериям типового строительства в&nbsp;базе &laquo;Окнардия&raquo;.</small></p>
 		</div>
 	</div>
