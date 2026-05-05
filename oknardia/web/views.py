@@ -123,7 +123,7 @@ def get_address(request: HttpRequest) -> HttpResponse:
     try:
         q = Building_Info.objects.get(sAddress=addr)
         # Если QuerySet не содержит GeoCode (такое бывает, что в Яндекс-Картах не было каких-то данных),
-        # то пробуем получить GeoCode повторно (вдруг, у Яндекс-Карт расширилась база адресов)
+        # то пробуем получить GeoCode повторно (вдруг у Яндекс-Карт расширилась база адресов)
         if int(q.fGeoCode_Longitude) != 0 and int(q.fGeoCode_Latitude != 0):
             # print("координаты не ноль")
             to_template.update({'LATITUDE':  str(q.fGeoCode_Latitude).replace(",", "."),
