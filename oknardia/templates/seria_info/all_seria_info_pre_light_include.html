@@ -1,0 +1,38 @@
+<div class="col-md-9 col-xs-12" style="padding:0;">
+  <!--- прешаблон начало --->
+  <table style="padding:2px;">
+    {% for row in TABLE_OF_WINDOWS %}
+    <tr class="tr2">
+      <td>{{ row.APART_NAME|safe }}</td>
+      {% for col in row.WIN_IN_APART %}
+      <td class="cntr">
+        {% if col.WIN_ID %}
+        <nobr title="{{ col.WIN_Q }} × {{ col.WIN_DESCRIPTION }}: {{ col.WIN_WIDTH }}шт.: {{ col.WIN_HEIGHT }} (Ш×В, см.). Схема открывания: {{ col.WIN_FLAPCFG }}">
+          {% for I_II in col.WIN_NUM %}
+          <span style="background-image:url('/static/img/svg/mark{{ I_II }}.svg');">&nbsp;</span>
+          {% endfor %}
+        </nobr>
+        {% else %}—{% endif %}
+      </td>
+      {% endfor %}
+      <td style="background:#f9f9f9;">
+        <a href="#{{ row.APART_ID }}" class="badge" title="Оконных предложений для квартиры: {{ row.NUM_OFFERS }}">
+          <small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{{ row.NUM_OFFERS }}
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+    <tr class="trZ">
+      <td style="font-size: xx-small;vertical-align:text-top">© 2015-2026, данные: oknardia.ru</td>
+      {% for i in WIN_OFFER_AND_MERCHANT %}
+      <td class="cntr" style="background:#f9f9f9;">
+        <a href="/catalog/standard_opening/price-{{ i.WIN_W|floatformat:0 }}0x{{ i.WIN_H|floatformat:0 }}0mm-tip{{ i.WIN_ID }}" class="badge" title="Ценовых предложений для окна: {{ i.WIN_OFFER }}">
+          <small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{{ i.WIN_OFFER }}
+        </a>
+      </td>
+      {% endfor %}
+      <td></td>
+    </tr>
+  </table>
+  <!--- прешаблон конец  --->
+</div>
