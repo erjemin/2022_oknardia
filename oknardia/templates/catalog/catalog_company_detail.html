@@ -30,16 +30,17 @@
   <meta property="og:type" content="article" />
   <meta property="og:title" content="Окна «{{ COMPANY }}» | oknardia.ru" />
   <meta property="og:description" content="«{{ COMPANY }}» — оконные наборы, состав и характеристики, независимый рейтинг качества, средние цены на установку. Агрегатор Окнардия." />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
+  {# Нельзя вкладывать {{ }} внутрь аргумента фильтра |default — используем {% if %}{% else %} #}
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
   <!-- Разметка для соц-сетей Twitter Card -->
   <meta name="twitter:title" content="Производитель окон «{{ COMPANY }}» | oknardia.ru" />
   <meta name="twitter:description" content="«{{ COMPANY }}» в каталоге Окнардии: наборы, характеристики, рейтинг и цены на установку окон в типовых домах." />
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@oknardia" />
   {# Удалить: <meta name="twitter:domain"> — устарело с 2015, Twitter его не использует #}
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:'{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg' }}">
+  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}">
 {# <!-- END Дополнительные Metatags -->  #}{% endblock %}
 
 {% block Top_JS5 %}
