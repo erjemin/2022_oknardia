@@ -75,7 +75,7 @@ urlpatterns = [
     # --- --- КАТАЛОГ ПРОИЗВОДИТЕЛЕЙ ОКОН
     re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company), # СПИСОК ВСЕХ ПРОИЗВОДИТЕЛЕЙ ОКОН
     re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
-            catalog_companies.catalog_company_detail),  # КАРТОЧКА ПРОИЗВОДИТЕЛЯ-УСТНОАЩИКА ОКОН
+            catalog_companies.catalog_company_detail),  # КАРТОЧКА ПРОИЗВОДИТЕЛЯ-УСТАНОВЩИКА ОКОН
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
     # --- ОДИНОЧНОЕ ОКНО
     re_path(r'^catalog/standard_opening/price-(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm-tip(?P<win_id>\d+)[/*]$',
