@@ -359,6 +359,7 @@ def _format_set_for_template(set_data: dict, empty_values: list) -> dict:
 
     formatted = {
         # Ключи ниже оставлены в legacy-формате, т.к. шаблон использует именно их имена.
+        'idSetKit': set_kit.id,
         'sSetName': set_kit.sSetName,
         'sMerchantName': merchant_brand.sMerchantName,
         'sMerchantDescription': merchant_brand.sMerchantDescription,
