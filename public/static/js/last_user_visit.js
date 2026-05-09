@@ -1,0 +1,55 @@
+/**
+ * Отслеживание последних визитов пользователя из браузерных кук.
+ * Читает куку 'LastVisit', парсит JSON и выводит список ссылок на уже просмотренные ценовые отчёты.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+  // Функция для получения значения куки по имени
+  function getCookieValue(name) {
+    try {
+      if (document.cookie) {
+        const cookies = document.cookie.split('; ');
+        for (let cookie of cookies) {
+          const [cookieName, cookieValue] = cookie.split('=');
+          if (cookieName === name) {
+            return decodeURIComponent(cookieValue);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Ошибка при чтении куки LastVisit:', e);
+    }
+    return null;
+  }
+
+  // Получаем куку с визитами
+  const cookieValue = getCookieValue('LastVisit');
+  if (cookieValue) {
+    try {
+      const visits = JSON.parse(cookieValue);
+      // Проверяем, есть ли визиты
+      if (visits && visits.length > 0) {
+        const listContainer = document.getElementById('last_visits_list');
+        const lastUserVisitContainer = document.getElementById('last_user_visit_container');
+        // Очищаем список перед заполнением
+        listContainer.innerHTML = '';
+        // При перезагрузке страницы текущий визит уже записан, поэтому пропускаем первый
+        const visitsToShow = visits.slice(1);
+        // Выводим предыдущие визиты (не текущий)
+        for (let i = 0; i < visitsToShow.length; i++) {
+          const item = visitsToShow[i];
+          const li = document.createElement('li');
+          // Форматируем текст ссылки: адрес (тип квартиры)
+          const linkText = `Цены на окна для серии ${item.LastApart} <small>(${item.LastAddress})</small>`;
+          li.innerHTML = `<a href="${item.LastURL}">${linkText}</a>`;
+          listContainer.appendChild(li);
+        }
+        // Если есть данные для отображения, показываем блок
+        if (visitsToShow.length > 0) {
+          lastUserVisitContainer.style.display = 'block';
+        }
+      }
+    } catch (e) {
+      console.warn('Ошибка при разборе JSON из кук LastVisit:', e);
+    }
+  }
+});
