@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 
 from oknardia.models import Seria_Info, SetKit
 from web.add_func import get_rating_set_for_stars
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 
 
 def catalog_root(request: HttpRequest) -> HttpResponse:
@@ -21,7 +21,6 @@ def catalog_root(request: HttpRequest) -> HttpResponse:
     time_start = time.perf_counter()
     # получаем из cookies последние визиты клиента
     to_template: dict[str, object] = {
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start)}
     response = render(request, "catalog/catalog_root.html", to_template)
@@ -83,7 +82,6 @@ def catalog_sets(request: HttpRequest) -> HttpResponse:
 
     to_template: dict[str, object] = {
         'SET_LIST': kits,
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start),
     }

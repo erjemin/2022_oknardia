@@ -13,7 +13,7 @@ from oknardia.models import (
     Win_MountDim,
     Building_Info,
 )
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 from web.add_func import get_flaps_for_big_pictures
 import time
 import os
@@ -29,7 +29,6 @@ def _make_slug(value: str) -> str:
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
     """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
     to_template.update({
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start),
     })

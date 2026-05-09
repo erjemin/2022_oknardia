@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.settings import *
 from oknardia.models import Catalog2Profile, PVCprofiles, PriceOffer
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars
 import time
 import json
@@ -49,7 +49,6 @@ def _profile_row_to_dict(profile: dict) -> dict:
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
     """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
     to_template.update({
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start),
     })

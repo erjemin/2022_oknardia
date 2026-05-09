@@ -14,7 +14,7 @@ from oknardia.models import (
     MountDim2Apartment,
 )
 from oknardia.settings import *
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures, \
     get_geo_distance
 import django.utils.dateformat
@@ -57,11 +57,8 @@ def _append_visit_context(
     """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
     if log_visit is None:
         log_visit = get_last_all_user_visit_list()
-    if last_visit_cookie is None:
-        last_visit_cookie = get_last_user_visit_cookies(request)
 
     to_template.update({
-        'LAST_VISIT': get_last_user_visit_list(last_visit_cookie[:3]),
         'LOG_VISIT': log_visit,
         'ticks': float(time.perf_counter() - time_start),
     })
@@ -956,29 +953,14 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
         )
         log_entry.save()  # INSERT
 
-    # получаем последние визиты клиента через куки
-    last_visit = get_last_user_visit_cookies(request)
-    # Для блока LAST_VISIT показываем историю до текущего захода.
-    last_visit_for_context = list(last_visit)
-    # подготавливаем данные о текущем посещении для помещения в cookie
-    Item = {
-        "LastURL": new_url,
-        "LastAddress": to_template["ADDRESS"],
-        "LastApart": to_template["APART"],
-        "Time": time.perf_counter()}
-    last_visit.insert(0, Item)  # Добавляем текущий Item в начало
-    last_visit = json.dumps(last_visit[:3])  # упаковываем json без пробелов (три записи)
-    # print u"сейчас запишем вот эту куку:", LastVisit
+    # Вызываем контекст без параметра last_visit_cookie (получит из кук автоматически)
     _append_visit_context(
         to_template=to_template,
         request=request,
         time_start=time_start,
         log_visit=log_visit,
-        last_visit_cookie=last_visit_for_context,
     )
-    response = render(request, "price/price_list.html", to_template)
-    response.set_cookie("LastVisit", last_visit, max_age=7862400)   # ставим или перезаписываем куки (91 день)
-    return response
+    return render(request, "price/price_list.html", to_template)
 
 
 def next_price_frame(request:  HttpRequest, apart_id: str = "1", mount_dim_per_offer: str = "1",

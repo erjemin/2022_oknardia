@@ -107,7 +107,8 @@
     <meta property="article:modified_time" content="{{ META_DATA_PUBLISH|date:'Y-m-d' }}" />
 {% endblock %}
 
-{% block Top_JS3%}<script type="text/javascript">
+{% block Top_JS3%}<script type="text/javascript" src="{% static 'js/track_user_visit.js' %}"></script>
+<script type="text/javascript">
 function show_phone_num( id ){ // колапсатор для отображения контатной информации постафшика окон
   $('#tel'+id).collapse('show');
   $('#hid'+id).collapse('hide');
@@ -272,11 +273,18 @@ $(function () { // инициализация и обработка попове
   {# --- Баннер: НАЧАЛО --- #}
   <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
   {# --- Баннер: конец --- #}
-  <div class="row">
-  {% include "report/report_last_user_visit.html" %}
-  {% include "report/report_log_user_visit.html" %}
-  <p id="shadow_buffer"></p>
-  </div>
+   <div class="row">
+   {% include "report/report_last_user_visit.html" %}
+   {% include "report/report_log_user_visit.html" %}
+   <p id="shadow_buffer"></p>
+   </div>
+
+   {# Скрытый элемент для отслеживания визитов пользователя (передача данных в JS track_user_visit.js) #}
+   <div id="tracking-data"
+        data-current-url="{{ request.path }}"
+        data-address="{{ ADDRESS }}"
+        data-apart="{{ APART }}"
+        style="display: none;"></div>
 
   {# модальное окно #}
   <div class="modal fade bs-example-modal-sm" id="modal-exclamation" tabindex="-1" role="dialog">

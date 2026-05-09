@@ -17,11 +17,7 @@ from oknardia.models import (
     SetKit,
     PriceOffer,
 )
-from web.report1 import (
-    get_last_all_user_visit_list,
-    get_last_user_visit_cookies,
-    get_last_user_visit_list
-)
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 from web.add_func import get_rating_set_for_stars
 import django.utils.dateformat
 import time
@@ -179,7 +175,6 @@ def catalog_company(request: HttpRequest) -> HttpResponse:
 
     Контекст шаблона:
         - COMPANIES (list): Список компаний с статистикой
-        - LAST_VISIT (list): Последние визиты текущего пользователя
         - LOG_VISIT (list): Последние визиты всех пользователей
 
     Args:
@@ -200,9 +195,6 @@ def catalog_company(request: HttpRequest) -> HttpResponse:
     # Получаем информацию о посещениях для персонализации
     to_template: dict[str, object] = {
         'COMPANIES': formatted_companies,
-        'LAST_VISIT': get_last_user_visit_list(
-            get_last_user_visit_cookies(request)[:3]
-        ),
         'LOG_VISIT': get_last_all_user_visit_list(),
     }
 
@@ -469,7 +461,6 @@ def catalog_company_detail(
         - SETS (list): Список оконных наборов с их полной информацией
         - IMG_FOR_BLOG (str): Логотип компании
         - LIST_NOT (list): Стандартные маркеры "пусто"
-        - LAST_VISIT (list): Последние визиты текущего пользователя
         - LOG_VISIT (list): Последние визиты всех пользователей
         - ticks (float): Время выполнения представления (в секундах)
 
@@ -518,9 +509,6 @@ def catalog_company_detail(
         'META_KEYWORDS': company.sMerchantName,
         'IMG_FOR_BLOG': company.pMerchantLogo,
         'LIST_NOT': empty_values,
-        'LAST_VISIT': get_last_user_visit_list(
-            get_last_user_visit_cookies(request)[:3]
-        ),
         'LOG_VISIT': get_last_all_user_visit_list(),
     }
 
