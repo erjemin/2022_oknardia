@@ -95,21 +95,6 @@ def _bounds(items: list, field: str, threshold=None) -> tuple[float, float]:
     return min(vals), max(vals)
 
 
-def get_last_user_visit_cookies(request: HttpRequest) -> list:
-    """ Служебная функция: проверяет есть ли куки о последних посещениях пользователя, и если есть возвращает их
-
-    :param request: HttpRequest -- входящий http-запрос
-    :return LastVisit: json -- загруженный json-объект из куки LastVisit
-    """
-    if "LastVisit" in request.COOKIES:
-        try:
-            return json.loads(request.COOKIES["LastVisit"])
-        except (json.decoder.JSONDecodeError, TypeError, ValueError, KeyError, AttributeError):
-            return []
-    else:
-        return []
-
-
 def get_last_user_visit_list(list_visit: list) -> list:
     """ Служебная функция: получает список с посещенных страниц с ценовой выдачей (ListVisit), меняет в нем даты
     на описание типа "три недели назад" и возвращает обратно.
@@ -417,10 +402,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
         except SetKit.DoesNotExist:
             pass
     to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         # получаем последние визиты всех посетителей из базы
-        # id2log, log_visit = get_last_all_user_visit_list()
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start)
     })

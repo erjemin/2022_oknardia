@@ -156,14 +156,8 @@ class CatalogProfileViewTests(TestCase):
 
 		return profile, sibling, brand, blog
 
-	@patch("web.catalog.get_last_all_user_visit_list", return_value=["all-visits"])
-	@patch("web.catalog.get_last_user_visit_list", return_value=["last-visits"])
-	@patch("web.catalog.get_last_user_visit_cookies", return_value=["cookie-1", "cookie-2", "cookie-3"])
 	def test_catalog_profile_handles_empty_catalog(
 		self,
-		mocked_cookies,
-		mocked_last_visits,
-		mocked_all_visits,
 	):
 		"""Пустой каталог не должен падать и должен отдавать ожидаемый контекст."""
 		with self.assertNumQueries(1):
@@ -174,20 +168,10 @@ class CatalogProfileViewTests(TestCase):
 		self.assertEqual(context["CATALOG_PROFILE_NUM"], "0 профилей")
 		self.assertEqual(context["CATALOG_MANUFACT_NUM"], 0)
 		self.assertEqual(context["CATALOG_PROFILE_MAN1_NAME2"], [])
-		self.assertEqual(context["LAST_VISIT"], ["last-visits"])
-		self.assertEqual(context["LOG_VISIT"], ["all-visits"])
-		self.assertTrue(mocked_cookies.called)
-		self.assertTrue(mocked_last_visits.called)
-		self.assertTrue(mocked_all_visits.called)
 
-	@patch("web.catalog.get_last_all_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_cookies", return_value=[])
+
 	def test_catalog_profile_groups_and_sorts_profiles(
 		self,
-		mocked_cookies,
-		mocked_last_visits,
-		mocked_all_visits,
 	):
 		"""Каталог должен группировать профили по производителю и сохранять сортировку."""
 		self._create_profile(name="Alpha Basic", brief="Альфа База", manufacturer="Альфа", days_ago=5)
@@ -224,20 +208,9 @@ class CatalogProfileViewTests(TestCase):
 		# Проверяем итоговые счетчики и структуру контекста.
 		self.assertEqual(context["CATALOG_MANUFACT_NUM"], 2)
 		self.assertEqual(context["CATALOG_PROFILE_NUM"], "4 профиля")
-		self.assertEqual(context["LAST_VISIT"], [])
-		self.assertEqual(context["LOG_VISIT"], [])
-		self.assertTrue(mocked_cookies.called)
-		self.assertTrue(mocked_last_visits.called)
-		self.assertTrue(mocked_all_visits.called)
 
-	@patch("web.catalog.get_last_all_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_cookies", return_value=[])
 	def test_catalog_profile_model_redirects_to_canonical_url(
 		self,
-		mocked_cookies,
-		mocked_last_visits,
-		mocked_all_visits,
 	):
 		"""При неверных slug страница должна отправлять на канонический URL."""
 		profile = self._create_profile(name="Alpha Basic", brief="Альфа База", manufacturer="Альфа", days_ago=5)
@@ -248,14 +221,8 @@ class CatalogProfileViewTests(TestCase):
 		self.assertEqual(response.status_code, 302)
 		self.assertEqual(response["Location"], f"/catalog/profile/{profile.id}-alfa/{profile.id}-alpha-basic")
 
-	@patch("web.catalog.get_last_all_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_list", return_value=[])
-	@patch("web.catalog.get_last_user_visit_cookies", return_value=[])
 	def test_catalog_profile_model_renders_related_data(
 		self,
-		mocked_cookies,
-		mocked_last_visits,
-		mocked_all_visits,
 	):
 		"""Карточка профиля должна собираться через ORM и отдавать все ключевые блоки."""
 		profile, sibling, brand, blog = self._create_catalog_profile_model_fixture()
@@ -287,7 +254,4 @@ class CatalogProfileViewTests(TestCase):
 		self.assertEqual(context["IMG_FOR_BLOG"], blog.sImgForBlogSocial)
 		self.assertEqual(context["PUB_DAT"].date(), blog.dPostDataModify.date())
 		self.assertEqual(context["LIST_OTHER"], ["<b>Контур:</b>2", "<b>Цвет:</b>Белый"])
-		self.assertTrue(mocked_cookies.called)
-		self.assertTrue(mocked_last_visits.called)
-		self.assertTrue(mocked_all_visits.called)
 

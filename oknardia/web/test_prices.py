@@ -158,9 +158,6 @@ class ReportOneWinPriceTests(TestCase):
             sOfferActive=False,
         )
 
-    @patch("web.prices.get_last_all_user_visit_list", return_value=[])
-    @patch("web.prices.get_last_user_visit_list", return_value=[])
-    @patch("web.prices.get_last_user_visit_cookies", return_value=[])
     @patch("web.prices.get_flaps_for_mini_pictures", return_value="img/test-mini.png")
     @patch(
         "web.prices.get_flaps_for_big_pictures",
@@ -178,9 +175,6 @@ class ReportOneWinPriceTests(TestCase):
         self,
         mocked_big_pictures,
         mocked_mini_pictures,
-        mocked_cookies,
-        mocked_last_visits,
-        mocked_all_visits,
     ):
         """Вьюха должна собирать тот же ключевой контекст, но уже без raw SQL."""
         request = self.factory.get(
@@ -216,9 +210,6 @@ class ReportOneWinPriceTests(TestCase):
         self.assertIn("META_DATA_PUBLISH", context)
         self.assertTrue(mocked_big_pictures.called)
         self.assertTrue(mocked_mini_pictures.called)
-        self.assertTrue(mocked_cookies.called)
-        self.assertTrue(mocked_last_visits.called)
-        self.assertTrue(mocked_all_visits.called)
 
     def test_report_one_win_price_redirects_to_canonical_dimensions(self):
         """Если SEO-размеры в URL неверные, вьюха должна редиректить на канонический URL."""

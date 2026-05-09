@@ -3,7 +3,7 @@ from django.db.models import F
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from oknardia.models import MountDim2Apartment
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_cookies, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 from web.add_func import get_flaps_for_mini_pictures
 import time
 import pytils
@@ -20,8 +20,6 @@ def _make_slug(value: str) -> str:
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
     """Дописывает в контекст стандартный хвост: визиты и время выполнения."""
     to_template.update({
-        # получаем последние визиты клиента через куки
-        'LAST_VISIT': get_last_user_visit_list(get_last_user_visit_cookies(request)[:3]),
         # получаем последние визиты всех посетителей из базы
         'LOG_VISIT': get_last_all_user_visit_list(),
         'ticks': float(time.perf_counter() - time_start),
