@@ -138,7 +138,14 @@
     {# ПРАВАЯ КОЛОНКА: НАЧАЛО #}<div class="col-md-6 col-xs-12">
       <table class="head3">
         <tr>
-          <td><h3>Оконный набор: &laquo;{{ i.sSetName|safe }}&raquo;</h3></td>
+          <td>
+            <h3>
+              Оконный набор: &laquo;{{ i.sSetName|safe }}&raquo;
+              <small style="font-size:xx-small;font-weight:normal;">
+                <a href="/catalog/sets/#kit-card-{{ i.idSetKit }}" title="Открыть карточку этого набора в каталоге оконных наборов">в каталоге наборов</a>
+              </small>
+            </h3>
+          </td>
           <td align="right"><nobr class="badge badge4price" title="Рейтинг «Окнардии» для оконного набора «{{ i.sSetName }}»{% if i.fSetRating.RATING > -0.01 %} — {{ i.fSetRating.RATING|stringformat:".2f" }} баллов{% endif %}">{% for Star in i.fSetRating.STARS %}{% if Star == 0 %}<b class="glyphicon glyphicon-star-empty"></b>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %} {% if i.fSetRating.RATING > -0.01 %} {{ i.fSetRating.RATING|stringformat:".2f" }}{% endif %}</nobr></td>
         </tr>
       </table>
