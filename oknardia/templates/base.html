@@ -88,7 +88,7 @@
           <li><a href="#" rel="nofollow">Обратная связь</a></li -->
         </ul>
       </li>
-      <li class="dropdown" id="login-logout"><a href="#" onclick="return openLoginLogout(event);" rel="nofollow"><span class="glyphicon glyphicon-user"></span> Вход</a><small><br />Авторизации.<noscript style="color:red;">Для авторизации необходимо включить JavaScript.</noscript></small></li>
+      <li class="dropdown" id="login-logout"><a href="#" onclick="return openLoginLogout(event);" rel="nofollow"><span class="glyphicon glyphicon-user"></span> {% if LOGGED_USER != "" %}{{ user.username|truncatechars:12 }}{% else %}Вход{% endif %}</a><small>{# <br />Авторизации. #}<noscript style="color:red;">Для авторизации необходимо включить JavaScript.</noscript></small></li>
 			</ul>
   </div>
 </nav>{% endblock %}
