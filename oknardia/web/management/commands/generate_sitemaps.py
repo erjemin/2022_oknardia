@@ -36,8 +36,7 @@ from oknardia.models import (
     SetKit,
     Win_MountDim,
 )
-import pytils
-
+from web.add_func import sanitize_slug
 
 # Namespace схемы sitemap.xml по стандарту sitemaps.org.
 SITEMAP_XMLNS = "http://www.sitemaps.org/schemas/sitemap/0.9"
@@ -138,7 +137,7 @@ class BuildingOffersSitemap(Sitemap):
             if not root_id:
                 continue
             for apart_id in apartments_by_root.get(root_id, []):
-                yield (building.id, apart_id, pytils.translit.slugify(building.sAddress))
+                yield (building.id, apart_id, sanitize_slug(building.sAddress))
 
     def location(self, item: tuple[int, int, str]) -> str:
         build_id, apart_id, address_slug = item
@@ -147,7 +146,7 @@ class BuildingOffersSitemap(Sitemap):
             building = Building_Info.objects.select_related('kSeria_Link__kRoot').get(id=build_id)
             seria = building.kSeria_Link.kRoot
             seria_id = seria.id
-            seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
+            seria_slug = sanitize_slug((seria.sName or ""))
         except Exception:
             # fallback на старый роутинг, если что-то пошло не так
             return f"/{build_id}/{apart_id}/{address_slug}"
@@ -250,7 +249,7 @@ class BlogPostSitemap(Sitemap):
         ).only("id", "sPostHeader", "dPostDataModify")
 
     def location(self, item: BlogPosts) -> str:
-        return f"/blogpost/{item.id}/{pytils.translit.slugify(item.sPostHeader).lower()}"
+        return f"/blogpost/{item.id}/{sanitize_slug(item.sPostHeader)}"
 
     def lastmod(self, item: BlogPosts) -> date | datetime | None:
         return item.dPostDataModify
@@ -270,7 +269,7 @@ class ProfileManufactureSitemap(Sitemap):
         )
 
     def location(self, item: dict) -> str:
-        manufacturer_slug = pytils.translit.slugify(item["sProfileManufacturer"]).lower()
+        manufacturer_slug = sanitize_slug(item["sProfileManufacturer"])
         return f"/catalog/profile/{item['first_id']}-{manufacturer_slug}"
 
     def lastmod(self, item: dict) -> date | datetime | None:
@@ -287,8 +286,8 @@ class ProfileModelSitemap(Sitemap):
         return PVCprofiles.objects.only("id", "sProfileManufacturer", "sProfileName", "dProfileModify")
 
     def location(self, item: PVCprofiles) -> str:
-        manufacturer_slug = pytils.translit.slugify(item.sProfileManufacturer).lower()
-        model_slug = pytils.translit.slugify(item.sProfileName).lower()
+        manufacturer_slug = sanitize_slug(item.sProfileManufacturer)
+        model_slug = sanitize_slug(item.sProfileName)
         # Исторически канонический URL использует id модели и в сегменте manufacturer_id, и в segment model_id.
         return f"/catalog/profile/{item.id}-{manufacturer_slug}/{item.id}-{model_slug}"
 
@@ -308,7 +307,7 @@ class SeriaDetailSitemap(Sitemap):
         )
 
     def location(self, item: Seria_Info) -> str:
-        return f"/catalog/seria/{pytils.translit.slugify(item.sName).lower()}/all{item.id}"
+        return f"/catalog/seria/{sanitize_slug(item.sName)}/all{item.id}"
 
     def lastmod(self, item: Seria_Info) -> date | datetime | None:
         return item.dSeriaInfoModify
@@ -329,7 +328,7 @@ class CompanyDetailSitemap(Sitemap):
         )
 
     def location(self, item: MerchantBrand) -> str:
-        return f"/catalog/company/{item.id}-{pytils.translit.slugify(item.sMerchantName).lower()}"
+        return f"/catalog/company/{item.id}-{sanitize_slug(item.sMerchantName)}"
 
     def lastmod(self, item: MerchantBrand) -> date | datetime | None:
         return getattr(item, "last_offer_modify", None) or getattr(item, "last_office_modify", None)

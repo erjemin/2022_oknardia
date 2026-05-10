@@ -7,8 +7,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.settings import *
 from oknardia.models import Catalog2Profile, PVCprofiles, PriceOffer
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
-from web.add_func import normalize, get_rating_set_for_stars
+from web.report1 import get_last_all_user_visit_list
+from web.add_func import normalize, get_rating_set_for_stars, sanitize_slug
 import time
 import json
 import re
@@ -17,19 +17,13 @@ import pytils
 # ---------------------------------------------------------------------------
 # Модульные хелперы, общие для всех вьюх этого файла
 # ---------------------------------------------------------------------------
-
-def make_slug(value: str) -> str:
-    """Транслитерирует строку в slug (pytils)."""
-    return pytils.translit.slugify(value).lower()
-
-
 def _merchant_row_to_dict(row: dict) -> dict:
     """Преобразует ORM-строку с данными партнёра в словарь для шаблона."""
     merchant_name = row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__sMerchantName"]
     return {
         "MERCHANT_ID": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__id"],
         "MERCHANT_NAME": merchant_name,
-        "MERCHANT_NAME_T": make_slug(merchant_name),
+        "MERCHANT_NAME_T": sanitize_slug(merchant_name),
         "MERCHANT_LOGO_URL": row["kOffer2SetKit__kSet2User__kMerchantOffice__kMerchantName__pMerchantLogo"],
         "MERCHANT_OFFERS": row["offers_by_merchant"],
     }
@@ -40,7 +34,7 @@ def _profile_row_to_dict(profile: dict) -> dict:
     return {
         "PROFILE_NAME": profile["sProfileBriefDescription"],
         "PROFILE_ID": profile["id"],
-        "PROFILE_URL": make_slug(profile["sProfileName"]),
+        "PROFILE_URL": sanitize_slug(profile["sProfileName"]),
         "PROFILE_RATING": profile["fProfileRating"],
         "PROFILE_RATING_STARS": get_rating_set_for_stars(profile["fProfileRating"]),
     }
@@ -94,11 +88,11 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
             list_profile_manufactures.append({
                 "PROF_MAN_ID": profile["id"],
                 "PROF_MAN": profile["sProfileManufacturer"],
-                "PROF_MAN_T": make_slug(profile["sProfileManufacturer"]),
+                "PROF_MAN_T": sanitize_slug(profile["sProfileManufacturer"]),
                 "PROF_MAN_LIST": [{
                     "PROF_NAME_ID": profile["id"],
                     "PROF_NAME": profile["sProfileBriefDescription"],
-                    "PROF_NAME_T": make_slug(profile["sProfileName"]),
+                    "PROF_NAME_T": sanitize_slug(profile["sProfileName"]),
                 }]
             })
         else:
@@ -106,7 +100,7 @@ def catalog_profile(request: HttpRequest) -> HttpResponse:
             list_profile_manufactures[-1]["PROF_MAN_LIST"].append({
                 "PROF_NAME_ID": profile["id"],
                 "PROF_NAME": profile["sProfileBriefDescription"],
-                "PROF_NAME_T": make_slug(profile["sProfileName"]),
+                "PROF_NAME_T": sanitize_slug(profile["sProfileName"]),
             })
 
     to_template.update({
@@ -128,17 +122,17 @@ def catalog_profile_model(request: HttpRequest, manufacture_id: int, manufacture
 
     :param request: HttpRequest -- входящий http-запрос
     :param manufacture_id: id профиля. Предполагается, что это первый id при сортировке по sProfileBriefDescription
-    :param manufacture_name: название производителя (транслитерированное pytils.translit.slugify())
+    :param manufacture_name: название производителя (транслитерированное sanitize_slug())
     :param model_id: id модели (марки) профиля
-    :param model_name: модель (марка) профиля (транслитерированное pytils.translit.slugify(sProfileName))
+    :param model_name: модель (марка) профиля (транслитерированное sanitize_slug(sProfileName))
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.perf_counter()
     manufacture_id = int(manufacture_id)
     model_id = int(model_id)
     q_pvc_by_id = PVCprofiles.objects.get(id=model_id)
-    manufacturer_slug = pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)
-    model_slug = pytils.translit.slugify(q_pvc_by_id.sProfileName)
+    manufacturer_slug = sanitize_slug(q_pvc_by_id.sProfileManufacturer)
+    model_slug = sanitize_slug(q_pvc_by_id.sProfileName)
     if manufacturer_slug != manufacture_name \
             or model_slug != model_name \
             or manufacture_id != model_id:
@@ -268,21 +262,21 @@ def catalog_profile_manufacture(request: HttpRequest, manufacture_id: int, manuf
 
     :param request: HttpRequest -- входящий http-запрос
     :param manufacture_id: id профиля. Предполагается, что это первый id при сортировке по sProfileBriefDescription
-    :param manufacture_name: название производителя (транслитерированное pytils.translit.slugify())
+    :param manufacture_name: название производителя (транслитерированное sanitize_slug())
     :return response: HttpResponse -- исходящий http-ответ
     """
     time_start = time.perf_counter()
     manufacture_id = int(manufacture_id)
     q_pvc_by_id = PVCprofiles.objects.get(id=manufacture_id)
-    if pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer) != manufacture_name:
+    if sanitize_slug(q_pvc_by_id.sProfileManufacturer) != manufacture_name:
         return redirect(f'/catalog/profile/{manufacture_id}-'
-                        f'{pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)}')
+                        f'{sanitize_slug(q_pvc_by_id.sProfileManufacturer)}')
     else:
         q_pvc_by_id = PVCprofiles.objects.order_by('id') \
             .filter(sProfileManufacturer=q_pvc_by_id.sProfileManufacturer).first()
         if q_pvc_by_id.id != manufacture_id:
             return redirect(f'/catalog/profile/{q_pvc_by_id.id}-'
-                            f'{pytils.translit.slugify(q_pvc_by_id.sProfileManufacturer)}')
+                            f'{sanitize_slug(q_pvc_by_id.sProfileManufacturer)}')
     to_template: dict[str, object] = {'CATALOG_MANUFACT': q_pvc_by_id.sProfileManufacturer,
                                       'CATALOG_MAN2URL': manufacture_name,
                                       'CATALOG_URL': f"{manufacture_id}-{manufacture_name}"}

@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.models import PVCprofiles
 from oknardia.settings import *
-from web.add_func import normalize, get_rating_set_for_stars
+from web.add_func import normalize, get_rating_set_for_stars, sanitize_slug
 from time import time
 import json
 import pytils
@@ -73,9 +73,9 @@ def profiles_rating(request: HttpRequest) -> HttpResponse:
             "ID": profile.id,
             "R_REAL": rating_real,
             "BRAND": profile.sProfileManufacturer,
-            "BRAND_URL": pytils.translit.slugify(profile.sProfileManufacturer),
+            "BRAND_URL": sanitize_slug(profile.sProfileManufacturer),
             "NAME": profile.sProfileName,
-            "NAME_URL": pytils.translit.slugify(profile.sProfileName),
+            "NAME_URL": sanitize_slug(profile.sProfileName),
             "K_ARR": k_arr,
             "RATING_STAR": get_rating_set_for_stars(profile.fProfileRating),
             "RATING_N": profile.fProfileRating,

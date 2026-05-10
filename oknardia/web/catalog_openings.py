@@ -3,18 +3,12 @@ from django.db.models import F
 from django.shortcuts import render
 from django.http import HttpRequest, HttpResponse
 from oknardia.models import MountDim2Apartment
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
-from web.add_func import get_flaps_for_mini_pictures
+from web.report1 import get_last_all_user_visit_list
+from web.add_func import get_flaps_for_mini_pictures, sanitize_slug
 import time
-import pytils
 from typing import Any
 from itertools import groupby
 from operator import itemgetter
-
-
-def _make_slug(value: str) -> str:
-    """Транслитерирует строку в slug (pytils)."""
-    return pytils.translit.slugify(value)
 
 
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
@@ -73,7 +67,7 @@ def standard_opening(request: HttpRequest) -> HttpResponse:
         serias_for_opening = [
             {
                 'ID': row['kApartment__kSeria_id'],
-                'NAME_T': _make_slug(row['kApartment__kSeria__sName']),
+                'NAME_T': sanitize_slug(row['kApartment__kSeria__sName']),
                 'NAME': row['kApartment__kSeria__sName'],
             }
             for row in rows_for_opening

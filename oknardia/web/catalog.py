@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 import time
 
-import pytils.translit
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 
 from oknardia.models import Seria_Info, SetKit
-from web.add_func import get_rating_set_for_stars
+from web.add_func import get_rating_set_for_stars, sanitize_slug
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
 
 
@@ -32,7 +31,7 @@ def catalog_sets(request: HttpRequest) -> HttpResponse:
 
     Для каждого набора собирается dict с полями набора, профиля, стеклопакета и компании-установщика.
     Цепочка FK: SetKit.kSet2User → OurUser.kMerchantOffice → MerchantOffice.kMerchantName (MerchantBrand).
-    Слаги URL формируются через pytils.translit.slugify.
+    Слаги URL формируются через sanitize_slug.
 
     :param request: HttpRequest -- входящий http-запрос
     :return response: HttpResponse -- исходящий http-ответ
@@ -69,15 +68,13 @@ def catalog_sets(request: HttpRequest) -> HttpResponse:
             'glazing': glazing,
             # компания-установщик
             'merchant_id':   brand.id if brand else None,
-            'merchant_slug': pytils.translit.slugify(brand.sMerchantName) if brand else "",
+            'merchant_slug': sanitize_slug(brand.sMerchantName) if brand else "",
             'merchant_name': brand.sMerchantName if brand else "",
             'merchant_logo': str(brand.pMerchantLogo) if brand and brand.pMerchantLogo else "",
             'merchant_url':  brand.sMerchantMainURL if brand else "",
             # слаги для ссылок на профиль в каталоге профилей
-            'profile_manufacturer_slug': pytils.translit.slugify(
-                profile.sProfileManufacturer) if profile else "",
-            'profile_slug': pytils.translit.slugify(
-                profile.sProfileName) if profile else "",
+            'profile_manufacturer_slug': sanitize_slug(profile.sProfileManufacturer) if profile else "",
+            'profile_slug': sanitize_slug(profile.sProfileName) if profile else "",
         })
 
     to_template: dict[str, object] = {
@@ -99,7 +96,7 @@ def report_all_info_seria_redirect(request: HttpRequest, seria_id: str = "12") -
         seria_id = int(seria_id)
         q_seria = Seria_Info.objects.get(id=seria_id)
         if q_seria.id == q_seria.kRoot_id:
-            return redirect("f/catalog/seria/{pytils.translit.slugify(q_seria.sName)}/all{seria_id}")
+            return redirect(f"/catalog/seria/{sanitize_slug(q_seria.sName)}/all{seria_id}")
     except (Seria_Info.DoesNotExist, ValueError):
         return redirect("/catalog/seria")
     return redirect("/catalog/seria")

@@ -6,12 +6,8 @@ from django.db.models import ExpressionWrapper, FloatField, F, Count
 from django.db.models.functions import Abs
 from smtplib import SMTPException
 from oknardia.models import Seria_Info, Building_Info, Apartment_Type
-from web.add_func import get_yandex_geocode_by_address, get_geo_distance
-import json
-import datetime
+from web.add_func import get_yandex_geocode_by_address, get_geo_distance, sanitize_slug
 import time
-import pytils
-
 # from django.core.context_processors import csrf
 
 
@@ -240,9 +236,9 @@ def get_address(request: HttpRequest) -> HttpResponse:
     to_template.update({
         'SERIA_BASE': q1.sName if q1 else "",
         'BASE_SERIA_ID': seria_root.id if seria_root else "",
-        'BASE_SERIA_LAT': pytils.translit.slugify((seria_root.sName or "").strip()).lower() if seria_root else "",
+        'BASE_SERIA_LAT': sanitize_slug((seria_root.sName or "").strip()) if seria_root else "",
         'addr': addr,
-        'addr_T': pytils.translit.slugify(addr),
+        'addr_T': sanitize_slug(addr),
         'ticks': float(time.perf_counter() - time_start),
     })
     return render(request, "popup/popup_show_apartment_variants.html", to_template)

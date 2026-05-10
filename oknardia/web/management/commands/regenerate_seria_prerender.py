@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytils
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import F
@@ -11,6 +10,7 @@ from django.test import RequestFactory
 
 from oknardia.models import Seria_Info
 from web import catalog_series
+from web.add_func import sanitize_slug
 
 
 class Command(BaseCommand):
@@ -76,7 +76,7 @@ class Command(BaseCommand):
             if target_file.exists():
                 target_file.unlink()
 
-            slug = pytils.translit.slugify(seria.sName)
+            slug = sanitize_slug(seria.sName)
             request = request_factory.get(f"/catalog/seria/{slug}/all{seria.id}")
 
             # В команде принудительно включаем «production-mode» для вьюхи,

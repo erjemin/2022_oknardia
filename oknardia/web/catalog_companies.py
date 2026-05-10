@@ -17,8 +17,8 @@ from oknardia.models import (
     SetKit,
     PriceOffer,
 )
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
-from web.add_func import get_rating_set_for_stars
+from web.report1 import get_last_all_user_visit_list
+from web.add_func import get_rating_set_for_stars, sanitize_slug
 import django.utils.dateformat
 import time
 import random
@@ -131,12 +131,10 @@ def _format_company_for_template(company_data: dict) -> dict:
         dict: Отформатированные данные компании
     """
     formatted = company_data.copy()
-
     # Вычисляем звёзды на основе рейтинга
     formatted['STARS'] = get_rating_set_for_stars(
         formatted['RatingAVG']
     )
-
     # Применяем правильные формы множественного числа
     formatted['NumSets'] = pytils.numeral.get_plural(
         formatted['NumSets'],
@@ -146,7 +144,6 @@ def _format_company_for_template(company_data: dict) -> dict:
         formatted['NumOffers'],
         "вариант, варианта, вариантов"
     )
-
     # Конвертируем время последнего обновления в читаемый формат
     if formatted['lastUpdate']:
         timestamp = int(
@@ -158,12 +155,8 @@ def _format_company_for_template(company_data: dict) -> dict:
         formatted['lastUpdate'] = pytils.dt.distance_of_time_in_words(
             timestamp
         )
-
     # Генерируем slug из имени компании для URL
-    formatted['sMerchantMainURL'] = pytils.translit.slugify(
-        formatted['sMerchantName']
-    )
-
+    formatted['sMerchantMainURL'] = sanitize_slug(formatted['sMerchantName'])
     return formatted
 
 
@@ -387,11 +380,11 @@ def _format_set_for_template(set_data: dict, empty_values: list) -> dict:
         'iProfileCameras': profile.iProfileCameras,
         'sProfileName': {
             'NAME': profile.sProfileName,
-            'NAME_T': pytils.translit.slugify(profile.sProfileName)
+            'NAME_T': sanitize_slug(profile.sProfileName)
         },
         'sProfileManufacturer': {
             'NAME': profile.sProfileManufacturer,
-            'NAME_T': pytils.translit.slugify(profile.sProfileManufacturer)
+            'NAME_T': sanitize_slug(profile.sProfileManufacturer)
         },
         'sProfileColor': profile.sProfileColor,
         'sProfileSealDescription': profile.sProfileSealDescription,
@@ -482,7 +475,7 @@ def catalog_company_detail(
         raise Http404("Компания не найдена")
 
     # Проверяем что slug совпадает (для SEO и красивых URL)
-    actual_slug = pytils.translit.slugify(company.sMerchantName)
+    actual_slug = sanitize_slug(company.sMerchantName)
     if actual_slug != company_name_slug:
         return redirect(
             f'/catalog/company/{company_id_int}-{actual_slug}'
