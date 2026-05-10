@@ -1033,6 +1033,28 @@ class BlogPosts(models.Model):
         db_index=False,
         verbose_name=u"Создано"
     )
+    sMetaDescription = models.CharField(
+        max_length=160,
+        blank=True,
+        default=u"",
+        verbose_name=u"Meta описание",
+        help_text=u"SEO: описание для мета-тега (до 160 символов). Если пусто, будет использоваться текст тизера из контента."
+    )
+    sMetaKeywords = models.CharField(
+        max_length=256,
+        blank=True,
+        default=u"",
+        verbose_name=u"Meta ключевые слова",
+        help_text=u"SEO: ключевые слова для мета-тега (до 256 символов). Если пусто, будет использоваться заголовок."
+    )
+    sSlug = models.SlugField(
+        max_length=200,
+        db_index=True,
+        blank=True,
+        verbose_name=u"Slug",
+        help_text=u"SEO: URL-friendly версия заголовка (автоматически генерируется, если оставить пусто)"
+    )
+
 
     def __unicode__(self):
         # return u'%s (%s)' % (self.sPostHeader, datetime.strftime(
@@ -1323,6 +1345,8 @@ class Win_MountDim(models.Model):
     )
     sFlapConfig = models.CharField(
         max_length=32,
+        blank=True,
+        default=u"",
         verbose_name=u"Открывание",
         help_text=u"Рекомендуемая гор.архитектурой конфигурации открывания (МЕТАЯЗЫК)")
     sDescripion = models.CharField(
