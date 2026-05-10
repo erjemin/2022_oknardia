@@ -14,16 +14,11 @@ from oknardia.models import (
     Building_Info,
 )
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
-from web.add_func import get_flaps_for_big_pictures
+from web.add_func import get_flaps_for_big_pictures, sanitize_slug
 import time
 import os
 import math
 import pytils
-
-
-def _make_slug(value: str) -> str:
-    """Транслитерирует строку в slug (pytils)."""
-    return pytils.translit.slugify(value)
 
 
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
@@ -54,7 +49,7 @@ def catalog_seria(request: HttpRequest) -> HttpResponse:
                 'ID': row['id'],
                 'URL': row['sURL2IMG'],
                 'NAME': row['sName'],
-                'NAME_T': _make_slug(row['sName']),
+                'NAME_T': sanitize_slug(row['sName']),
             }
             for row in q_seria
         ]
@@ -87,8 +82,8 @@ def catalog_seria_info(
     try:
         seria_id = int(seria_id)
         q_seria = Seria_Info.objects.only("id", "kRoot_id", "sName").get(id=seria_id)
-        if q_seria.id != q_seria.kRoot_id or seria_name_translit != pytils.translit.slugify(q_seria.sName):
-            return redirect(f"/catalog/seria/{pytils.translit.slugify(q_seria.sName)}/all{seria_id}")
+        if q_seria.id != q_seria.kRoot_id or seria_name_translit != sanitize_slug(q_seria.sName):
+            return redirect(f"/catalog/seria/{sanitize_slug(q_seria.sName)}/all{seria_id}")
     except (ObjectDoesNotExist, ValueError):
         return redirect("/catalog/")
 
@@ -295,7 +290,7 @@ def all_seria_nav(seria_id: int, q_seria) -> tuple[int, dict]:
         one_seria = {
             "SERIA_R": seria_name,
             "ID2URL": seria_id_value,
-            "SERIA_L": pytils.translit.slugify(seria_name),
+            "SERIA_L": sanitize_slug(seria_name),
         }
         if seria_id_value == seria_id:
             # Изображение серии: используется в OG-image в шаблоне seria_info
@@ -309,7 +304,7 @@ def all_seria_nav(seria_id: int, q_seria) -> tuple[int, dict]:
                 "THIS_SERIA_DESCRIPTION": seria_description,
                 # ID и slug серии нужны для canonical URL и JSON-LD в шаблоне
                 "THIS_SERIA_ID": seria_id_value,
-                "THIS_SERIA_NAME_T": pytils.translit.slugify(seria_name),
+                "THIS_SERIA_NAME_T": sanitize_slug(seria_name),
                 # URL изображения серии для OG-тегов (путь относительно /media/)
                 "THIS_SERIA_IMAGE_URL": str(seria_image) if seria_image else "",
             })
@@ -417,7 +412,7 @@ def seria_info_geo_code(seria_id: int | str = DEFAULT_SERIA_ID_FOR_CATALOG) -> d
             seria_to_geo.append({"LATITUDE": latitude,
                                  "LONGITUDE": longitude,
                                  "ADDR_ID": count["id"],
-                                 "ADDR_LAT": pytils.translit.slugify(count["sAddress"]),
+                                 "ADDR_LAT": sanitize_slug(count["sAddress"]),
                                  "ADDR_RUS": count["sAddress"],
                                  "SER_ID": count["kSeria_Link__kRoot_id"]
                                  })

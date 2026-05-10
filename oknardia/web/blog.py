@@ -6,10 +6,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from oknardia.models import BlogPosts
 from oknardia.settings import *
 from django.utils import timezone
-from web.add_func import safe_html_spec_symbols
+from web.add_func import safe_html_spec_symbols, sanitize_slug
 from time import time
 import re
-import pytils
 from oknardia.settings import *
 
 
@@ -88,7 +87,7 @@ def blog_list_posts(request: HttpRequest, page: str = "0") -> HttpResponse:
                                  'PUB_DAT': post.dPostDataBegin,
                                  'HEADER': post.sPostHeader,
                                  'HEADER_D': safe_html_spec_symbols(post.sPostHeader),
-                                 'HEADER_T': pytils.translit.slugify(safe_html_spec_symbols(post.sPostHeader)).lower(),
+                                 'HEADER_T': sanitize_slug(post.sPostHeader).lower(),
                                  'POST_ID': post.id,
                                  'USER_STATUS': post.kBlogAuthorUser.get_sUserStatus_display(),
                                  'USER_AVATAR': post.kBlogAuthorUser.sUserAvatarImg,
@@ -160,20 +159,19 @@ def blog_post(request: HttpRequest, post_id: str = "0", page_back: str = None) -
     to_template.update({'PUB_DAT': q.dPostDataBegin,
                         'PUB_MODIFY': q.dPostDataModify,
                         'HEADER': q.sPostHeader,
-                        'HEADER_T': pytils.translit.slugify(safe_html_spec_symbols(q.sPostHeader)).lower(),
+                        'HEADER_T': sanitize_slug(q.sPostHeader).lower(),
                         'USER_STATUS': q.kBlogAuthorUser.get_sUserStatus_display(),
                         'USER_AVATAR': q.kBlogAuthorUser.sUserAvatarImg,
                         'USER_TITLE': q.kBlogAuthorUser.sUserJobTitle,
                         'USER_FROM_ID_OFFICE': q.kBlogAuthorUser.kMerchantOffice,
                         'CONTENT': re.sub(r'<cut[\s\S]*?>', '', q.sPostContent, 0, re.IGNORECASE)})
-    to_template.update({'TIZER': safe_html_spec_symbols(
-        re.sub('<script[\s\S]*?</script>|<style[\s\S]*?</style>|<iframe[\s\S]*?</iframe>',
-               '', to_template["CONTENT"], 0, re.IGNORECASE))})
+    content = to_template.get('CONTENT', '')
+    to_template.update({'TIZER': sanitize_slug(str(content))})
     # получаем следующую по дате запись
     try:
         q1 = BlogPosts.objects.filter(dPostDataBegin__gt=q.dPostDataBegin, dPostDataBegin__lt=timezone.now(),
                                       bPublished=True, bArchive=False).order_by('dPostDataBegin')[0]
-        to_template.update({'FORW_HEADER_T': pytils.translit.slugify(safe_html_spec_symbols(q1.sPostHeader)).lower(),
+        to_template.update({'FORW_HEADER_T': sanitize_slug(q1.sPostHeader).lower(),
                             'FORW_ID': q1.id})
     except(IndexError, ObjectDoesNotExist, BlogPosts.DoesNotExist):
         to_template.update({'FORW_DISABLE': True})
@@ -181,7 +179,7 @@ def blog_post(request: HttpRequest, post_id: str = "0", page_back: str = None) -
     try:
         q1 = BlogPosts.objects.filter(dPostDataBegin__lt=q.dPostDataBegin, bPublished=True,
                                       bArchive=False).order_by('-dPostDataBegin')[0]
-        to_template.update({'BACK_HEADER_T': pytils.translit.slugify(safe_html_spec_symbols(q1.sPostHeader)).lower(),
+        to_template.update({'BACK_HEADER_T': sanitize_slug(q1.sPostHeader).lower(),
                             'BACK_ID': q1.id})
     except(IndexError, ObjectDoesNotExist, BlogPosts.DoesNotExist):
         to_template.update({'BACK_DISABLE': True})

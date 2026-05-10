@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.db.models import F, Q, ExpressionWrapper, BooleanField, Max, Count, Avg
 from oknardia.models import LogVisitPriceReport, SetKit
 from oknardia.settings import *
-from web.add_func import normalize, get_rating_set_for_stars, sum_through
+from web.add_func import normalize, get_rating_set_for_stars, sum_through, sanitize_slug
 # from time import time
 import django.utils.dateformat
 import time
@@ -290,7 +290,7 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
             "MERCHANT":                    i.sMerchantName,
             "MERCHANT_ID":                 i.MERCHANT_ID,
             "IS_COMMERCIAL":               i.bCommercial,
-            "MERCHANT_T":                  pytils.translit.slugify(i.sMerchantName),
+            "MERCHANT_T":                  sanitize_slug(i.sMerchantName),
             "MERCHANT_URL":                i.sMerchantMainURL,
             "MERCHANT_URL_SHOT":           re.sub(r"(?:^https?://|/$|www\.)", "", i.sMerchantMainURL),
             "SET_NAME":                    i.sSetName,
@@ -300,9 +300,9 @@ def compare_offers(request: HttpRequest, to_compare: str = "1,2") -> HttpRespons
             "RATING_SET_COLOR":            rating_set_color,
             "PROFILE_ID":                  i.PROFILE_ID,
             "PROFILE_NAME":                i.sProfileName,
-            "PROFILE_NAME_T":              pytils.translit.slugify(i.sProfileName),
+            "PROFILE_NAME_T":              sanitize_slug(i.sProfileName),
             "PROFILE_MANUFACTURER":        i.sProfileManufacturer,
-            "PROFILE_MANUFACTURER_T":      pytils.translit.slugify(i.sProfileManufacturer),
+            "PROFILE_MANUFACTURER_T":      sanitize_slug(i.sProfileManufacturer),
             "PROFILE_NUM_COLOR":           i.sProfileColor,
             "PROFILE_NUM_CAMERAS":         i.iProfileCameras,       # Число камер рамы/створки
             "PROFILE_NUM_CAMERAS_COLOR":   _color_hi(profile_num_cameras, min_cameras, max_cameras, threshold=1),

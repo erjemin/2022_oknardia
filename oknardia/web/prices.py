@@ -15,8 +15,8 @@ from oknardia.models import (
 )
 from oknardia.settings import *
 from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
-from web.add_func import normalize, get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures, \
-    get_geo_distance
+from web.add_func import get_rating_set_for_stars, get_flaps_for_big_pictures, get_flaps_for_mini_pictures, \
+    get_geo_distance, sanitize_slug
 import django.utils.dateformat
 import time
 import os
@@ -24,11 +24,6 @@ import re
 import json
 from types import SimpleNamespace
 import pytils
-
-
-def _slugify_lower(value: str | None) -> str:
-    """Транслитерирует строку в slug и всегда приводит к нижнему регистру."""
-    return pytils.translit.slugify((value or "").strip()).lower()
 
 
 def _one_win_price_canonical_path(win_width_mm: int | str, win_height_mm: int | str, win_id: int | str) -> str:
@@ -271,9 +266,9 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 'GLAZING_TONING': offer.sGlazingToning,
                 'PVC_ID': offer.pwc_id,
                 'PVC_NAME': offer.sProfileName,
-                'PVC_NAME_T': _slugify_lower(offer.sProfileName),
+                'PVC_NAME_T': sanitize_slug(offer.sProfileName),
                 'PVC_MANUFACTURER': offer.sProfileManufacturer,
-                'PVC_MANUFACTURER_T': _slugify_lower(offer.sProfileManufacturer),
+                'PVC_MANUFACTURER_T': sanitize_slug(offer.sProfileManufacturer),
                 'PVC_SEAL': offer.sProfileSealDescription,
                 'SETS_CLIMATE_CONTROL': offer.sSetClimateControl,
                 'SETS_SILL': offer.sSetSill,
@@ -530,9 +525,9 @@ def report_price_frame(apartment_id: int, mount_dim_per_offer: int, address_long
                 'GLAZING_TONING': i2.sGlazingToning,
                 'PVC_ID': i2.pwc_id,
                 'PVC_NAME': i2.sProfileName,
-                'PVC_NAME_T': _slugify_lower(i2.sProfileName),
+                'PVC_NAME_T': sanitize_slug(i2.sProfileName),
                 'PVC_MANUFACTURER': i2.sProfileManufacturer,
-                'PVC_MANUFACTURER_T': _slugify_lower(i2.sProfileManufacturer),
+                'PVC_MANUFACTURER_T': sanitize_slug(i2.sProfileManufacturer),
                 'PVC_SEAL': i2.sProfileSealDescription,
                 'SETS_CLIMATE_CONTROL': i2.sSetClimateControl,
                 'SETS_SILL': i2.sSetSill,
@@ -710,7 +705,7 @@ def report_one_win_price(request: HttpRequest,
         list_seria_for_win.append(SimpleNamespace(
             id=seria_item['kApartment__kSeria__id'],
             sName=seria_name,
-            sNameLat=_slugify_lower(seria_name),
+            sNameLat=sanitize_slug(seria_name),
             num_variation_of_apartment=pytils.numeral.sum_string(
                 seria_item['num_variation_of_apartment'],
                 pytils.numeral.MALE,
@@ -793,7 +788,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
 
         # если кто-то нахимичит ID квартиры не для этого дома, то сделаем так, что он будет от этого дома!
         apart_inside = any(ap.id == apart_id for ap in list_apart)
-        address_slug = _slugify_lower(building.sAddress)
+        address_slug = sanitize_slug(building.sAddress)
         if not apart_inside or slug != address_slug:
             # Переадресация 302, если с apart_id (ID-квартиры нахимичили) или slug-ом.
             # Нужно для склейки парных URL в поисковиках
@@ -867,7 +862,7 @@ def report_price(request: HttpRequest, build_id: str = "22427", apart_id: str = 
 
         # узнаем базовую серию дома
         q_base_seria = building.kSeria_Link.kRoot
-        base_seria_slug = _slugify_lower(q_base_seria.sName)
+        base_seria_slug = sanitize_slug(q_base_seria.sName)
         to_template.update({'BASE_SERIA': q_base_seria.sName,
                             'BASE_SERIA_LAT': base_seria_slug,
                             'BASE_SERIA_ID': q_base_seria.id})
@@ -1015,8 +1010,8 @@ def report_price_new(request, seria_id, seria_slug, apart_id, address_id, addres
     except Exception:
         return redirect("/")
     # Проверяем slug'и, если не совпадает — делаем 301 на канонический URL (новый формат)
-    seria_slug_real = pytils.translit.slugify((seria.sName or "").strip()).lower()
-    address_slug_real = pytils.translit.slugify((building.sAddress or "").strip()).lower()
+    seria_slug_real = sanitize_slug((seria.sName or "").strip()).lower()
+    address_slug_real = sanitize_slug((building.sAddress or "").strip()).lower()
     if seria_slug != seria_slug_real or address_slug != address_slug_real:
         # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartAD<apart_id>/addressID<address_id>--<address_slug>/
         return redirect(f"/price/seriaID{seria_id}--{seria_slug_real}/appartID{apart_id}/addressID{address_id}--{address_slug_real}/", permanent=True)
@@ -1037,10 +1032,7 @@ def report_price_legacy_redirect(request, build_id, apart_id, slug):
     except Exception:
         return redirect("/")
     import pytils
-    seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
-    address_slug = pytils.translit.slugify((building.sAddress or "").strip()).lower()
+    seria_slug = sanitize_slug((seria.sName or "").strip()).lower()
+    address_slug = sanitize_slug((building.sAddress or "").strip()).lower()
     # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartID<apart_id>/addressID<build_id>--<address_slug>/
-    return redirect(f"/price/seriaID{seria.id}--{seria_slug}/appartID{apart_id}/addressID{build_id}--{address_slug}/", permanent=True)
-    seria_slug = pytils.translit.slugify((seria.sName or "").strip()).lower()
-    address_slug = pytils.translit.slugify((building.sAddress or "").strip()).lower()
     return redirect(f"/price/seriaID{seria.id}--{seria_slug}/appartID{apart_id}/addressID{build_id}--{address_slug}/", permanent=True)

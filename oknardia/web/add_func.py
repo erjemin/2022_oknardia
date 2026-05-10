@@ -3,40 +3,115 @@ __author__ = 'Sergei Erjemin'
 
 from PIL import Image, ImageDraw
 from oknardia.settings import *
+from pytils.translit import slugify
 import os
 import math
 import re
+import html
 import urllib3
 import xml.dom.minidom
 
 
 def safe_html_spec_symbols(s: str) -> str:
-    """ Очистка строки от HTML-разметки типографа
+    """ Очистка строки от HTML-разметки и получение чистого текста.
 
-    :param s: str --  строка которую надо очистить
-    :return: str: str -- очищенная строка
+    Функция удаляет HTML-теги, содержимое исключённых тегов (script, style, object, embed, applet,
+    iframe, svg, canvas, code, kbd, pre, var, samp, output, noscript, link, meta, form, input,
+    button, textarea, select, base, title, head, body, track, source, picture), заменяет HTML-мнемоники
+    на Unicode-символы и убирает лишние пробелы.
+
+    :param s: str -- строка которую надо очистить
+    :return: str -- очищенная строка с чистым текстом
     """
-    # очистка строки от некоторых спец-символов HTML
-    result = s.replace('&shy;', '­')
-    result = result.replace('<span class="laquo">', '')
-    result = result.replace('<span style="margin-right:0.44em;">', '')
-    result = result.replace('<span style="margin-left:-0.44em;">', '')
-    result = result.replace('<span class="raquo">', '')
-    result = result.replace('<span class="point">', '')
-    result = result.replace('<span class="thinsp">', ' ')
-    result = result.replace('<span class="ensp">', '')
-    result = result.replace('</span>', '')
-    result = result.replace('&nbsp;', ' ')
-    result = result.replace('&laquo;', '«')
-    result = result.replace('&raquo;', '»')
-    result = result.replace('&hellip;', '…')
-    result = result.replace('<nobr>', '')
-    result = result.replace('</nobr>', '')
-    result = result.replace('&mdash;', '—')
-    result = result.replace('&#8470;', '№')
-    result = result.replace('<br />', ' ')
-    result = result.replace('<br>', ' ')
+    # Шаг 1: Удаляем содержимое "опасных" и невидимых тегов
+    # Опасные: script, object, embed, applet, iframe, svg, canvas
+    # Техническое содержимое: style, code, kbd, pre, var, samp, output, noscript
+    # Формы: form, input, button, textarea, select
+    # Служебные: meta, link, base, title, head, body, track, source, picture
+    # Используем флаг IGNORECASE и DOTALL для работы с многострочным контентом
+    result = re.sub(
+        r'<(script|style|code|kbd|pre|var|samp|output|noscript|link|meta|iframe|object|embed|applet|form|input|button|textarea|select|svg|canvas|base|title|head|body|track|source|picture)(?:\s[^>]*)?>.*?</\1>',
+        '',
+        s,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Удаляем самозакрывающиеся теги (что-то типа <input/>, <embed/>, и т.д.)
+    result = re.sub(
+        r'<(input|embed|meta|link|base|track|source|img)(?:\s[^>]*)?/>',
+        '',
+        result,
+        flags=re.IGNORECASE
+    )
+
+    # Шаг 2: Удаляем все остальные HTML-теги (в т.ч. самозакрывающиеся)
+    result = re.sub(r'<[^>]+>', '', result)
+
+    # Шаг 3: Заменяем HTML-мнемоники на Unicode-символы (включая числовые и именованные)
+    # html.unescape() обрабатывает: &nbsp;, &lt;, &#8470;, &#x20AC; и т.д.
+    result = html.unescape(result)
+
+    # Шаг 4: Очищаем множественные пробелы (в т.ч. табуляцию и переводы строк)
+    result = re.sub(r'\s+', ' ', result)
+
+    # Шаг 5: Убираем пробелы в начале и конце строки
+    result = result.strip()
+
     return result
+
+
+def sanitize_slug(text: str, separator: str = '-', max_length: int = 200) -> str:
+    """ Преобразует текст в URL-безопасный слаг (slug).
+
+    Функция очищает текст от HTML-разметки, выполняет транслитерацию русского текста в
+    латиницу, заменяет пробелы и недопустимые символы на разделитель (по умолчанию дефис),
+    и возвращает готовый к использованию в URL слаг.
+
+    Этапы обработки:
+    1. Очистка от HTML-разметки через safe_html_spec_symbols()
+    2. Транслитерация русского текста в латиницу через pytils.translit.slugify()
+    3. Замена множественных разделителей на один
+    4. Удаление разделителя в начале и конце
+    5. Прерывание на max_length символов
+
+    :param text: str -- исходный текст, может содержать HTML и русский текст
+    :param separator: str -- разделитель для слага (по умолчанию дефис '-')
+                             pytils.slugify() всегда использует дефис, этот параметр
+                             конвертирует результат в нужный разделитель
+    :param max_length: int -- максимальная длина слага в символах (по умолчанию 200)
+    :return: str -- очищенный и готовый к использованию слаг
+
+    Примеры:
+    >>> sanitize_slug('   Тест &mdash; HTML <b>текст</b>   ')
+    'test-html-tekst'
+    >>> sanitize_slug('Привет мир!!!   @#$')
+    'privet-mir'
+    >>> sanitize_slug('<p>Русский текст в слаге</p>')
+    'russkii-tekst-v-slage'
+    >>> sanitize_slug('Проверка_слага', separator='_')
+    'proverka_slaga'
+    """
+    # Шаг 1: Очищаем от HTML и мнемоник, убираем лишние пробелы
+    cleaned = safe_html_spec_symbols(text)
+
+    # Шаг 2: Транслитерируем русский текст в латиницу (pytils.slugify использует дефис)
+    slug = slugify(cleaned)
+
+    # Шаг 3: Конвертируем разделитель если нужен другой (не дефис)
+    if separator != '-':
+        slug = slug.replace('-', separator)
+
+    # Шаг 4: Убираем множественные разделители (например, '---' -> '-')
+    slug = re.sub(f'{re.escape(separator)}+', separator, slug)
+
+    # Шаг 5: Убираем разделитель в начале и конце если он есть
+    slug = slug.strip(separator)
+
+    # Шаг 6: Обрезаем по max_length если нужно (и убираем разделитель в конце)
+    if max_length and len(slug) > max_length:
+        slug = slug[:max_length].rstrip(separator)
+
+    return slug.lower()
 
 
 # def Rus2Lat(RusString):
