@@ -10,7 +10,8 @@
 ## Каталог команд
 
 1. `generate_sitemaps` — оффлайн генерация sitemap-файлов.
-2ю `regenerate_seria_prerender` — оффлайн пересборка pre-render шаблонов для `catalog_seria_info`.
+2. `regenerate_seria_prerender` — оффлайн пересборка pre-render шаблонов для `catalog_seria_info`.
+3. `populate_seo_fields` — автозаполнение SEO-полей блога из существующих данных.
 
 ## Общие правила запуска
 
@@ -111,6 +112,118 @@ poetry run python oknardia/manage.py regenerate_seria_prerender --seria-id 843 -
 - после обновления логики `catalog_seria_info`;
 - после массового обновления данных серий/окон/квартир;
 - после очистки `seria_info/prepared/`.
+
+## 3) Команда `populate_seo_fields`
+
+Назначение:
+- автозаполнить SEO-поля (`sSlug`, `sMetaDescription`, `sMetaKeywords`) для всех существующих записей блога.
+
+Используется:
+- при первом развертывании новой версии с автогенерацией SEO-полей;
+- при восстановлении из бэкапа где SEO-поля пусты;
+- при изменении логики автогенерации (с флагом `--force`).
+
+### Базовый запуск
+
+Заполнить только пустые SEO-поля (стандартный вариант):
+
+```bash
+cd /Users/e-serg/PRJ/2022-oknardia
+poetry run python oknardia/manage.py populate_seo_fields
+```
+
+### Параметры запуска
+
+**`--dry-run`** — только показать что будет сделано (без сохранения в БД):
+
+```bash
+poetry run python oknardia/manage.py populate_seo_fields --dry-run
+```
+
+**`--force`** — переполнить ВСЕ SEO-поля, даже уже заполненные:
+
+```bash
+poetry run python oknardia/manage.py populate_seo_fields --force
+```
+
+**`--clean`** — очистить все SEO-поля перед заполнением (для переделки):
+
+```bash
+poetry run python oknardia/manage.py populate_seo_fields --clean
+```
+
+**Комбинация флагов** — сухой прогон переполнения всех полей:
+
+```bash
+poetry run python oknardia/manage.py populate_seo_fields --dry-run --force
+```
+
+### Что заполняется
+
+| Поле | Источник | Результат |
+|------|----------|-----------|
+| `sSlug` | `sPostHeader` | URL-безопасный слаг (max 200 символов) |
+| `sMetaDescription` | `sPostContent` | Первые 160 символов (исключая теги `<cut>`) |
+| `sMetaKeywords` | `sPostHeader` | Заголовок + префикс "oknardia, окнардия, блог, публикация" (max 256 символов) |
+
+Пример результата:
+
+```python
+sPostHeader = "Профиль Brusbox Super Aero"
+↓
+sSlug = "profil-brusbox-super-aero"
+sMetaDescription = "brusbox-super-aero-pyatikamernaya-profil-sistema..."
+sMetaKeywords = "oknardia, окнардия, блог, публикация, Профиль Brusbox Super Aero"
+```
+
+### Когда запускать
+
+- **После первого развертывания** — заполнить SEO-поля всех 29 существующих постов одной командой.
+- **Один раз** — команда идемпотентна (при повторном запуске не будет ничего менять, т.к. пустые поля остатся).
+- **При изменении логики** — использовать `--clean --force` для полной переделки всех SEO-полей.
+
+### Пример полного сценария
+
+```bash
+cd /Users/e-serg/PRJ/2022-oknardia
+
+# Шаг 1: Проверить что будет заполнено
+poetry run python oknardia/manage.py populate_seo_fields --dry-run
+
+# Шаг 2: Если результат устраивает — запустить реально
+poetry run python oknardia/manage.py populate_seo_fields
+
+# Шаг 3: Проверить что заполнилось
+poetry run python oknardia/manage.py shell -c "
+from oknardia.models import BlogPosts
+posts = BlogPosts.objects.all()
+print(f'Пусто sSlug: {posts.filter(sSlug=\"\").count()}')
+print(f'Пусто sMetaDescription: {posts.filter(sMetaDescription=\"\").count()}')
+print(f'Пусто sMetaKeywords: {posts.filter(sMetaKeywords=\"\").count()}')
+"
+```
+
+### Возвращаемая информация
+
+```
+======================================================================
+ИТОГОВЫЙ ОТЧЕТ
+======================================================================
+
+✓ sSlug заполнено:              28 раз
+✓ sMetaDescription заполнено:  28 раз
+✓ sMetaKeywords заполнено:     28 раз
+✓ Записей обновлено в БД:      28
+✗ Ошибок при обработке:        0
+
+✅ Обновлено 28 записей успешно!
+```
+
+### Откат и безопасность
+
+- ✅ **Безопасна для повторного запуска** — пустые поля не изменяются при повторной работе.
+- ✅ **Откат через SQL** — если нужно очистить, используй: `UPDATE oknardia_blogposts SET sSlug='', sMetaDescription='', sMetaKeywords='';`
+- ✅ **Всегда используй `--dry-run`** перед первым запуском для проверки.
 
 ## Оркестрация и reload веб-сервера
 
