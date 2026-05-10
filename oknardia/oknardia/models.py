@@ -1064,6 +1064,52 @@ class BlogPosts(models.Model):
     def __str__(self):
         return self.__unicode__()
 
+    def save(self, *args, **kwargs):
+        """Переопределённый метод save() для автоматической генерации слага и SEO-полей.
+
+        При сохранении записи блога:
+        - Генерируется sSlug из sPostHeader если тот пуст
+        - Генерируется sMetaDescription из текста контента (тизер)
+        - Генерируется sMetaKeywords из заголовка
+        """
+        # Шаг 1: Автоматически генерируем слаг из заголовка, если он не указан
+        if not self.sSlug and self.sPostHeader:
+            from web.add_func import sanitize_slug
+            self.sSlug = sanitize_slug(self.sPostHeader, max_length=200)
+        
+        # Шаг 2: Автоматически генерируем sMetaDescription из контента (тизер)
+        if not self.sMetaDescription and self.sPostContent:
+            import re
+            from web.add_func import sanitize_slug
+
+            # Удаляем теги <cut> из контента
+            content_clean = re.sub(r'<cut[\s\S]*?>', '', self.sPostContent, flags=re.IGNORECASE)
+
+            # Генерируем тизер (очищенный текст без HTML)
+            tizer = sanitize_slug(content_clean, max_length=200)
+
+            # Обрезаем до 160 символов для мета-description
+            if len(tizer) > 160:
+                # Обрезаем слово целиком (не посередине)
+                tizer = tizer[:160].rsplit(' ', 1)[0] + '...' if ' ' in tizer[:160] else tizer[:160]
+
+            self.sMetaDescription = tizer
+
+        # Шаг 3: Автоматически генерируем sMetaKeywords из заголовка
+        if not self.sMetaKeywords and self.sPostHeader:
+            from web.add_func import sanitize_slug
+            import re
+
+            # Берём заголовок и удаляем HTML-теги
+            header_clean = re.sub(r'<[^>]+>', '', self.sPostHeader)
+            header_clean = header_clean.strip()
+
+            # Генерируем ключевые слова: фиксированные + заголовок
+            fixed_keywords = u"oknardia, окнардия, блог, публикация"
+            self.sMetaKeywords = f"{fixed_keywords}, {header_clean}"[:256]
+
+        super().save(*args, **kwargs)
+
     class Meta:
         # db_table = "jtb_BlogPost"
         verbose_name = u"Запись в блоге каталоге"
