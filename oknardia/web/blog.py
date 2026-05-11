@@ -85,15 +85,19 @@ def blog_list_posts(request: HttpRequest, page: str = "0") -> HttpResponse:
                                  'NAME1': post.kBlogAuthorUser.kDjangoUser.first_name,
                                  'NAME2': post.kBlogAuthorUser.kDjangoUser.last_name,
                                  'PUB_DAT': post.dPostDataBegin,
+                                 'MOD_DAT': post.dPostDataModify,
                                  'HEADER': post.sPostHeader,
                                  'HEADER_D': safe_html_spec_symbols(post.sPostHeader),
-                                 'HEADER_T': sanitize_slug(post.sPostHeader).lower(),
+                                 'HEADER_T': sanitize_slug(post.sPostHeader),
                                  'POST_ID': post.id,
                                  'USER_STATUS': post.kBlogAuthorUser.get_sUserStatus_display(),
                                  'USER_AVATAR': post.kBlogAuthorUser.sUserAvatarImg,
                                  'USER_TITLE': post.kBlogAuthorUser.sUserJobTitle,
                                  'USER_FROM_ID_OFFICE': post.kBlogAuthorUser.kMerchantOffice,
-                                 'CONTENT_CUT': post.sPostContent})
+                                 'CONTENT_CUT': post.sPostContent,
+                                 'META_DESC': post.sMetaDescription,
+                                 'META_KW': post.sMetaKeywords,
+                                 'IMG_BLOG': post.sImgForBlogSocial})
         # ищем CUT в тексте блога
         i_cut1 = post.sPostContent.lower().find(u"<cut")
         if i_cut1 != -1:
@@ -107,14 +111,37 @@ def blog_list_posts(request: HttpRequest, page: str = "0") -> HttpResponse:
                 dim_blogposts[i].update({'CUT_TEXT': u"Читать дальше →"})
         else:
             # Проверка на случай если нет "cut" и текст не длинный... нужна ли кнопка "читать дальше"?
-            if len(post.sPostContent) < 4096:
+            if len(post.sPostContent) < 2048:
                 dim_blogposts[i].update({'CUT_TEXT': u"NONE"})
             else:
                 dim_blogposts[i].update({'CUT_TEXT': u"Читать дальше →"})
         i += 1
+
+    # Формируем SEO-данные для мета-тегов страницы
+    # Ключевые слова для B2B блога (компании-поставщик и их клиенты)
+    combined_keywords = u"oknardia, окнардия, блог, поставщики окон, производители, установщики, компании"
+    first_post_image = ""
+
+    if dim_blogposts:
+        # Объединяем META_KW из нескольких первых постов
+        collected_keywords = []
+        for post_dict in dim_blogposts[:3]:  # из первых 3 постов
+            if post_dict.get('META_KW'):
+                # Берем только часть keywords без фиксированного префикса (чтобы не повторять)
+                kw_parts = post_dict['META_KW'].split(", ")
+                if len(kw_parts) > 4:  # пропускаем первые 4 (фиксированный префикс)
+                    collected_keywords.extend(kw_parts[4:])
+        if collected_keywords:
+            combined_keywords = u"oknardia, окнардия, блог, поставщики окон, производители, установщики, " + ", ".join(collected_keywords[:5])
+        # Берем изображение первого поста для og:image
+        if dim_blogposts[0].get('IMG_BLOG'):
+            first_post_image = f"/media/{dim_blogposts[0]['IMG_BLOG']}"
+
     to_template.update({'DIM_BLOGPOST': dim_blogposts,
                         'META_DATA_PUB': q[0].dPostDataBegin,
                         'META_DATA_MODIFY': q[0].dPostDataModify,
+                        'META_KEYWORDS': combined_keywords,
+                        'META_IMAGE': first_post_image,
                         'PAGE_BACK': page,
                         'ticks': float(time()-time_start)})
     return render(request, template, to_template)
