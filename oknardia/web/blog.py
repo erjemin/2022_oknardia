@@ -183,22 +183,27 @@ def blog_post(request: HttpRequest, post_id: str = "0", page_back: str = None) -
                         'ID': q.id})
     if PATH_FOR_IMG_BLOG in q.sImgForBlogSocial.name:
         to_template.update({'IMG_FOR_BLOG': q.sImgForBlogSocial})
-    to_template.update({'PUB_DAT': q.dPostDataBegin,
-                        'PUB_MODIFY': q.dPostDataModify,
-                        'HEADER': q.sPostHeader,
-                        'HEADER_T': sanitize_slug(q.sPostHeader).lower(),
-                        'USER_STATUS': q.kBlogAuthorUser.get_sUserStatus_display(),
-                        'USER_AVATAR': q.kBlogAuthorUser.sUserAvatarImg,
-                        'USER_TITLE': q.kBlogAuthorUser.sUserJobTitle,
-                        'USER_FROM_ID_OFFICE': q.kBlogAuthorUser.kMerchantOffice,
-                        'CONTENT': re.sub(r'<cut[\s\S]*?>', '', q.sPostContent, 0, re.IGNORECASE)})
+    to_template.update({
+        'PUB_DAT': q.dPostDataBegin,
+        'PUB_MODIFY': q.dPostDataModify,
+        'HEADER': safe_html_spec_symbols(q.sPostHeader),
+        'HEADER_T': sanitize_slug(q.sPostHeader),
+        'USER_STATUS': q.kBlogAuthorUser.get_sUserStatus_display(),
+        'USER_AVATAR': q.kBlogAuthorUser.sUserAvatarImg,
+        'USER_TITLE': q.kBlogAuthorUser.sUserJobTitle,
+        'USER_FROM_ID_OFFICE': q.kBlogAuthorUser.kMerchantOffice,
+        'CONTENT': re.sub(r'<cut[\s\S]*?>', '', q.sPostContent, 0, re.IGNORECASE),
+        'MOD_DAT': q.dPostDataModify,
+        'META_DESC': q.sMetaDescription,
+        'META_KW': q.sMetaKeywords
+    })
     content = to_template.get('CONTENT', '')
-    to_template.update({'TIZER': sanitize_slug(str(content))})
+    to_template.update({'TIZER': safe_html_spec_symbols(str(content))})
     # получаем следующую по дате запись
     try:
         q1 = BlogPosts.objects.filter(dPostDataBegin__gt=q.dPostDataBegin, dPostDataBegin__lt=timezone.now(),
                                       bPublished=True, bArchive=False).order_by('dPostDataBegin')[0]
-        to_template.update({'FORW_HEADER_T': sanitize_slug(q1.sPostHeader).lower(),
+        to_template.update({'FORW_HEADER_T': sanitize_slug(q1.sPostHeader),
                             'FORW_ID': q1.id})
     except(IndexError, ObjectDoesNotExist, BlogPosts.DoesNotExist):
         to_template.update({'FORW_DISABLE': True})
@@ -206,7 +211,7 @@ def blog_post(request: HttpRequest, post_id: str = "0", page_back: str = None) -
     try:
         q1 = BlogPosts.objects.filter(dPostDataBegin__lt=q.dPostDataBegin, bPublished=True,
                                       bArchive=False).order_by('-dPostDataBegin')[0]
-        to_template.update({'BACK_HEADER_T': sanitize_slug(q1.sPostHeader).lower(),
+        to_template.update({'BACK_HEADER_T': sanitize_slug(q1.sPostHeader),
                             'BACK_ID': q1.id})
     except(IndexError, ObjectDoesNotExist, BlogPosts.DoesNotExist):
         to_template.update({'BACK_DISABLE': True})
