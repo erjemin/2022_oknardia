@@ -1,20 +1,121 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %}Блоги: Стр.{{ PAGE_BACK|add:"1" }}{% endblock %}
+{% block Title %}Блог Окнардии для компаний-поставщиков окон и их клиентов — Страница {{ PAGE_BACK|add:"1" }}{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Блоги «Окнардия» :: {% for i1 in DIM_BLOGPOST %}{{ i1.HEADER_D }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endblock %}
+{% block Description %}Блог Окнардии для компаний-поставщиков окон и их клиентов: публикации о пластиковых окнах, продвижении услуг замены окон, ценах и трендах — Страница {{ PAGE_BACK|add:"1" }}{% endblock %}
 
-{% block Keywords %}oknardia, окнардия, blogs, блоги, публикации, цены пластиковых окон, стоимость пластиковых окон, скидки на пластиковые окна, предложения пластиковых окон, {{ META_KEYWORDS|default:"" }} {% endblock %}
+{% block Keywords %}{{ META_KEYWORDS }}{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if META_DATA_PUB %}{{ META_DATA_PUB|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if META_DATA_MODIFY %}{{ META_DATA_MODIFY|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Author4Meta %}: Блоги{% endblock %}
+{% block Author4Meta %}: Блоги Окнардия{% endblock %}
 
-{% block CopyrightAuthor4Meta %}: Блоги{% endblock %}
+{% block CopyrightAuthor4Meta %}: Блоги Окнардия{% endblock %}
+
+{% block Top_Meta1 %}{# <!-- Canonical (текущая страница) и pagination разметка --> #}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}" />
+  {% if PAGE_BACK > 0 %}<link rel="prev" href="{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK|add:'-1' }}" />{% endif %}
+  {% if FORW_BUTTON %}<link rel="next" href="{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK|add:'1' }}" />{% endif %}
+  {# <!-- Meta-теги для улучшения индексирования в социальных сетях (B2B) --> #}
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Блог Окнардии для компаний-поставщиков окон и их клиентов" />
+  <meta property="og:description" content="Публикации о пластиковых окнах, продвижении услуг замены окон, ценах и трендах — Страница {{ PAGE_BACK|add:"1" }}" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  {% if META_IMAGE %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ META_IMAGE }}" />{% else %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg" />{% endif %}
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@oknardia" />
+  <meta name="twitter:title" content="Блог Окнардии — для компаний и их клиентов" />
+  <meta name="twitter:description" content="Статьи о продвижении услуг замены окон, ценах и трендах в оконной индустрии — Страница {{ PAGE_BACK|add:"1" }}" />
+  {% if META_IMAGE %}<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{{ META_IMAGE }}" />{% else %}<meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg" />{% endif %}
+{# <!-- /Meta-теги --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}{# <!-- Schema.org JSON-LD разметка для списка блога (B2B для компаний и их клиентов) --> #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Блог Окнардии — для компаний-поставщиков окон и их клиентов",
+  "description": "Блог Окнардии для компаний-поставщиков окон и их клиентов: публикации о пластиковых окнах, продвижении услуг замены окон, ценах и трендах. Ресурс для расширения продаж и улучшения видимости в выдаче поисковиков.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}",
+  "image": "{% if META_IMAGE %}{{ request.scheme }}://{{ request.get_host }}{{ META_IMAGE }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg{% endif %}",
+  "audience": [
+    {
+      "@type": "AudienceType",
+      "name": "B2B: Компании-поставщики и производители оконных конструкций"
+    },
+    {
+      "@type": "AudienceType",
+      "name": "B2C: Клиенты компаний, ищущие информацию о заменке окон"
+    }
+  ],
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Блог",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/blog/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Страница {{ PAGE_BACK|add:'1' }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}"
+      }
+    ]
+  },
+  "mainEntity": {
+    "@type": "Blog",
+    "name": "Блог Окнардии",
+    "alternateName": "Блог для компаний-поставщиков окон и их клиентов",
+    "description": "Профессиональный блог для компаний, занимающихся производством, поставкой и установкой пластиковых окон, а также их клиентов. Публикации об оконных конструкциях, продвижении услуг замены окон, ценах, трендах и инновациях в оконной индустрии.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/blog/",
+    "image": "{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg",
+    "audience": [
+      {
+        "@type": "AudienceType",
+        "name": "Компании-поставщики, производители, установщики окон"
+      },
+      {
+        "@type": "AudienceType",
+        "name": "Конечные клиенты, ищущие информацию об окнах и услугах"
+      }
+    ],
+    "blogPosts": [
+      {% for POST in DIM_BLOGPOST %}
+      {
+        "@type": "BlogPosting",
+        "headline": "{{ POST.HEADER|escapejs }}",
+        "description": "{% if POST.META_DESC %}{{ POST.META_DESC|escapejs }}{% else %}Публикация в блоге Окнардии{% endif %}",
+        "image": "{% if POST.IMG_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ POST.IMG_BLOG|escapejs }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg{% endif %}",
+        "datePublished": "{{ POST.PUB_DAT|date:'Y-m-d' }}T{{ POST.PUB_DAT|date:'H:i:s' }}Z",
+        "dateModified": "{{ POST.MOD_DAT|date:'Y-m-d' }}T{{ POST.MOD_DAT|date:'H:i:s' }}Z",
+        "author": {
+          "@type": "Person",
+          "name": "{{ POST.NAME1 }}{% if POST.NAME2 %} {{ POST.NAME2 }}{% endif %}"
+        },
+        "url": "{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ POST.POST_ID }}/{{ POST.HEADER_T }}",
+        "keywords": "{% if POST.META_KW %}{{ POST.META_KW|escapejs }}{% else %}блог, публикация, окна, поставщики{% endif %}"
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ]
+  }
+}
+</script>
+{# <!-- /Schema.org JSON-LD --> #}{% endblock %}
 
 {% block Top_JS3%}
 <script>
@@ -24,29 +125,37 @@ $(window).load(function(){var images = $('.half');images.each(function(i){$(this
 
 {% block Main_Content %}
 <div class="container-fluid">
-{# <!--- Хлебные крошки --> #}<div class="row">
+{# Хлебные крошки #}
+<div class="row">
     <div class="col-md-11 col-xs-12">
       <ol class="breadcrumb">
         <li><a href="/">Главная</a></li>
         <li><a href="/blog/">Блог</a></li>
-        <li>Стр.{{ PAGE_BACK|add:"1" }}</li>
+        <li>Страница {{ PAGE_BACK|add:"1" }}</li>
       </ol>
       <h1>Блог</h1>
     </div>
-  </div>{# <!--- /Хлебные крошки ---> #}
+  </div>
+
+  {# Список постов #}
   {% for POST in DIM_BLOGPOST %}<div class="row">
     <div class="col-md-11 col-xs-12 blog-list-header">
       <hr class="dotted-black" />
-      <p>{{ POST.PUB_DAT|date:"d.F.Y (l) H:i" }}</p>
-      <p><img src="/media/{{ POST.USER_AVATAR }}" /> {% if POST.NAME1 != "" or POST.NAME2 != "" %} <i>{{ POST.NAME1 }}{% if POST.NAME2 != "" %}&nbsp;{{ POST.NAME2 }}{% endif %}</i>{% endif %}</p>
+      <p><time datetime="{{ POST.PUB_DAT|date:'Y-m-d\TH:i:s\Z' }}">{{ POST.PUB_DAT|date:"d.F.Y (l) H:i" }}</time></p>
+      <p><img src="/media/{{ POST.USER_AVATAR }}" alt="{{ POST.NAME1 }}{% if POST.NAME2 %} {{ POST.NAME2 }}{% endif %}" />
+         {% if POST.NAME1 != "" or POST.NAME2 != "" %}<i>{{ POST.NAME1 }}{% if POST.NAME2 != "" %}&nbsp;{{ POST.NAME2 }}{% endif %}</i>{% endif %}
+      </p>
       <h2>{{ POST.HEADER|safe }}</h2>
     </div>
     <div class="col-md-11 blog-list-tizer">
-{# <!--- Тизер поста в блоге ---> #}{{ POST.CONTENT_CUT|safe|truncatechars:4096 }}{# <!--- /Тизер поста в блоге ---> #}
+{# Тизер поста в блоге #}{{ POST.CONTENT_CUT|safe|truncatechars:4096 }}{# /Тизер поста в блоге #}
       {% if POST.CUT_TEXT != "NONE" %}<p><a href="/blogpost/{{ POST.POST_ID }}/{{ POST.HEADER_T }}?page-back={{ PAGE_BACK }}" class="btn btn-default">{{ POST.CUT_TEXT|safe }}</a></p>{% endif %}
     </div>
   </div>{% endfor %}
-  {# <!--- Листалка ---> #}<div class="row">
+
+
+  {# Листалка пагинации #}
+  <div class="row">
     <div class="col-md-11 col-xs-12">
       <hr class="dotted-black" />
       <nav aria-label="переходы на страницы">
@@ -66,13 +175,10 @@ $(window).load(function(){var images = $('.half');images.each(function(i){$(this
         </ul>
       </nav>
     </div>
-  </div>{# <!--- /Листалка: ---> #}
-  {# <!--- Баннер ---> #}<div class="row"><div class="col-md-12 col-xs-12">{% include "ad/bannet-wide.html" %}</div></div>{# <!--- Баннер: конец --- #}
+  </div>
+
+  {# Баннер #}
+  <div class="row"><div class="col-md-12 col-xs-12">{% include "ad/bannet-wide.html" %}</div></div>
 </div>{% endblock %}
 
-{% comment %}
-{% block Top_Nav_Bar %}
-    {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
-{% endblock %}
-{% endcomment %}
 
