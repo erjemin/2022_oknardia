@@ -6,7 +6,6 @@ from oknardia.settings import *
 from web.add_func import normalize, get_rating_set_for_stars, sanitize_slug
 from time import time
 import json
-import pytils
 
 
 def ratings(request: HttpRequest) -> HttpResponse:
