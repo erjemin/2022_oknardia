@@ -12,9 +12,9 @@
 
 {% block Last4Meta %}{% if META_DATA_MODIFY %}{{ META_DATA_MODIFY|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Author4Meta %}: Блоги Окнардия{% endblock %}
+{% block Author4Meta %}Окнардия{% endblock %}
 
-{% block CopyrightAuthor4Meta %}: Блоги Окнардия{% endblock %}
+{% block CopyrightAuthor4Meta %}Окнардия{% endblock %}
 
 {% block Top_Meta1 %}{# <!-- Canonical (текущая страница) и pagination разметка --> #}
   <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}" />
