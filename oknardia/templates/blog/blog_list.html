@@ -153,9 +153,7 @@ $(window).load(function(){var images = $('.half');images.each(function(i){$(this
     </div>
   </div>{% endfor %}
 
-
-  {# Листалка пагинации #}
-  <div class="row">
+  {# Листалка пагинации #}<nav class="row">
     <div class="col-md-11 col-xs-12">
       <hr class="dotted-black" />
       <nav aria-label="переходы на страницы">
@@ -175,7 +173,7 @@ $(window).load(function(){var images = $('.half');images.each(function(i){$(this
         </ul>
       </nav>
     </div>
-  </div>
+  </nav>
 
   {# Баннер #}
   <div class="row"><div class="col-md-12 col-xs-12">{% include "ad/bannet-wide.html" %}</div></div>
