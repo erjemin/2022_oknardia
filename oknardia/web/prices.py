@@ -1031,7 +1031,6 @@ def report_price_legacy_redirect(request, build_id, apart_id, slug):
                 apart_id = min_apart.id
     except Exception:
         return redirect("/")
-    import pytils
     seria_slug = sanitize_slug((seria.sName or "").strip()).lower()
     address_slug = sanitize_slug((building.sAddress or "").strip()).lower()
     # Новый формат: /price/seriaID<seria_id>--<seria_slug>/appartID<apart_id>/addressID<build_id>--<address_slug>/
