@@ -1096,7 +1096,7 @@ class BlogPosts(models.Model):
         if not self.sMetaKeywords and self.sPostHeader:
 
             # Берём заголовок и удаляем HTML-теги
-            header_clean = re.sub(r'<[^>]+>', '', self.sPostHeader)
+            header_clean = safe_html_spec_symbols(self.sPostHeader)
             header_clean = header_clean.strip()
 
             # Генерируем ключевые слова: фиксированные + заголовок
