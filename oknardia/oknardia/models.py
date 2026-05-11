@@ -8,7 +8,8 @@ from datetime import date, datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from oknardia.settings import *
-
+from web.add_func import sanitize_slug, safe_html_spec_symbols
+import re
 
 # Таблица: Каталог профилей, стеклопакетов (добавлено 09.авг.2017)
 # create table oknardia_catalog2profile
@@ -1074,19 +1075,15 @@ class BlogPosts(models.Model):
         """
         # Шаг 1: Автоматически генерируем слаг из заголовка, если он не указан
         if not self.sSlug and self.sPostHeader:
-            from web.add_func import sanitize_slug
             self.sSlug = sanitize_slug(self.sPostHeader, max_length=200)
         
         # Шаг 2: Автоматически генерируем sMetaDescription из контента (тизер)
         if not self.sMetaDescription and self.sPostContent:
-            import re
-            from web.add_func import sanitize_slug
-
             # Удаляем теги <cut> из контента
             content_clean = re.sub(r'<cut[\s\S]*?>', '', self.sPostContent, flags=re.IGNORECASE)
 
             # Генерируем тизер (очищенный текст без HTML)
-            tizer = sanitize_slug(content_clean, max_length=200)
+            tizer = safe_html_spec_symbols(content_clean)
 
             # Обрезаем до 160 символов для мета-description
             if len(tizer) > 160:
@@ -1097,8 +1094,6 @@ class BlogPosts(models.Model):
 
         # Шаг 3: Автоматически генерируем sMetaKeywords из заголовка
         if not self.sMetaKeywords and self.sPostHeader:
-            from web.add_func import sanitize_slug
-            import re
 
             # Берём заголовок и удаляем HTML-теги
             header_clean = re.sub(r'<[^>]+>', '', self.sPostHeader)

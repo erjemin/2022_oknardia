@@ -21,7 +21,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from oknardia.models import BlogPosts
-from web.add_func import sanitize_slug
+from web.add_func import sanitize_slug, safe_html_spec_symbols
 
 
 class Command(BaseCommand):
@@ -115,7 +115,7 @@ class Command(BaseCommand):
                 # Генерируем sMetaDescription
                 if not post.sMetaDescription and post.sPostContent:
                     content_clean = re.sub(r"<cut[\s\S]*?>", "", post.sPostContent, flags=re.IGNORECASE)
-                    tizer = sanitize_slug(content_clean, max_length=200)
+                    tizer = safe_html_spec_symbols(content_clean)
 
                     if len(tizer) > 160:
                         # Обрезаем по последнему пробелу перед 160-й позицией
