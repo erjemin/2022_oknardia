@@ -126,7 +126,7 @@ class Command(BaseCommand):
 
                 # Генерируем sMetaKeywords
                 if not post.sMetaKeywords and post.sPostHeader:
-                    header_clean = re.sub(r"<[^>]+>", "", post.sPostHeader).strip()
+                    header_clean = safe_html_spec_symbols(post.sPostHeader).strip()
                     fixed_keywords = "oknardia, окнардия, блог, публикация"
                     post.sMetaKeywords = f"{fixed_keywords}, {header_clean}"[:256]
                     stats["sMetaKeywords"] += 1
