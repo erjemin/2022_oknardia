@@ -1,56 +1,102 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %}Блог :: {{ HEADER|striptags }}{% endblock %}
+{% block Title %}{{ HEADER|striptags }}{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}{{ TIZER|striptags|truncatewords:25 }}{% endblock %}
+{% block Description %}{% if META_DESC %}{{ META_DESC }}{% else %}{{ TIZER|striptags|truncatewords:25 }}{% endif %}{% endblock %}
 
-{% block Keywords %}oknardia, окнардия, blog, блог, публикация, {{ HEADER|striptags }}{% endblock %}
+{% block Keywords %}{% if META_KW %}{{ META_KW }}{% else %}oknardia, окнардия, блог, публикация, {{ HEADER|striptags }}{% endif %}{% endblock %}
 
 {% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
 {% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Author4Meta %}: {{ USERNAME }}{% if NAME1 != "" or NAME2 != "" %} ({{ NAME1 }}{% if NAME2 != "" %}&nbsp;{{ NAME2 }}{% endif %}){% endif %}{% endblock %}
+{% block Author4Meta %}{{ NAME1 }}{% if NAME2 %} {{ NAME2 }}{% endif %} ({{ USERNAME }}) в Блоге Окнардия{% endblock %}
 
-{% block CopyrightAuthor4Meta %}: Блоги{% endblock %}
+{% block CopyrightAuthor4Meta %}Окнардия — Блог{% endblock %}
 
-{% block Top_Meta1 %}
-  {# <!-- Дополнительные Metatags --> #}{% if NAME1 != '' or NAME2 != '' %}
-  <meta itemprop="author" content="{{ NAME1 }} {{ NAME2 }}" />{% endif %}
-  <meta itemprop="image" content="{{ request.scheme }}://{{ request.get_host }}/media/{{ USER_AVATAR }}" />
-  <meta itemprop="datePublished" content="{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}" />
-  <span itemprop="publisher" itemscope itemtype="http://schema.org/Organization"><meta itemprop="name" content="ОКНАРДИЯ: сборник цен на пластиковые окна" /></span>
-  <span itemprop="author" itemscope itemtype="http://schema.org/Person"><meta itemprop="name" content="{% if NAME1 != '' or NAME2 != '' %}{{ NAME1 }}{% if NAME2 != '' %} {{ NAME2 }}{% endif %}{% endif %}" /></span>
-  <meta itemprop="articleSection" content="ОКНАРДИЯ: Блог «{{ USERNAME }}»" />
-  <meta itemprop="headline" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
-  <meta name="news_keywords" content="{{ HEADER|striptags }}" />
-  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
-  <link rel="standout" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
-  {# <!-- Разметка для соц-сетей Facebook Open Graph --> #}<meta property="fb:admins" name="admins" content="100000084781830" />
-  <meta property="fb:pages" content="276108456054163" />
-  <meta property="fb:app_id" content="258354027974262" />
-  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
-  {# <!-- Разметка OG-теги для соц-сетей и мессенджеров --> #}<meta property="og:locale" content="ru_RU" />
-  <meta property="og:site_name" content="oknardia.ru" />
-  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
+{% block Top_Meta1 %}{# <!-- Canonical разметка --> #}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />{% if not BACK_DISABLE %}
+  <link rel="prev" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ BACK_ID }}/{{ BACK_HEADER_T }}?page-back={{ PAGE_BACK|add:'-1' }}" />{% endif %}{% if not FORW_DISABLE %}
+  <link rel="next" href="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ FORW_ID }}/{{ FORW_HEADER_T }}?page-back={{ PAGE_BACK }}" />{% endif %}
+  {# <!-- Meta-теги для социальных сетей (B2B/B2C для компаний и клиентов) --> #}
+  <meta property="og:locale" content="ru_RU" />
   <meta property="og:type" content="article" />
-  <meta property="og:title" content="{{ HEADER|striptags }} | oknardia.ru" />
-  <meta property="og:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
-  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
-  <link rel="image_src" href="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
-  <!-- Разметка для соц-сетей Twitter Card -->
-  <meta name="twitter:title" content="{{ HEADER|striptags }} | oknardia.ru" />
-  <meta name="twitter:description" content="{{ TIZER|striptags|truncatewords_html:25 }}" />
-  <meta name="twitter:card" content="summary">
+  <meta property="og:title" content="{{ HEADER|striptags }}" />
+  <meta property="og:description" content="{% if META_DESC %}{{ META_DESC|escapejs|truncatewords:30 }}{% else %}{{ TIZER|striptags|truncatewords:25 }}{% endif %}" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:site" content="@oknardia" />
-  <meta name="twitter:domain" content="oknardia.ru" />
-  <meta property="twitter:url" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}" />
-  <meta name="relap-image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{% endif %}{{ IMG_FOR_BLOG|default:"{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" }}">{% endblock %}
+  <meta name="twitter:title" content="{{ HEADER|striptags }}" />
+  <meta name="twitter:description" content="{% if META_DESC %}{{ META_DESC|escapejs|truncatewords:30 }}{% else %}{{ TIZER|striptags|truncatewords:25 }}{% endif %}" />
+  <meta name="twitter:image" content="{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}" />
+{# <!-- /Meta-теги --> #}{% endblock %}
 
 {% block Top_JS3%}
   <script type="text/javascript">$(window).load(function(){var images = $('.half');images.each(function(i){$(this).width($(this).width()/2);});});</script>{% endblock %}
+
+{% block ADD_TO_HEAD %}{# <!-- Schema.org JSON-LD разметка для отдельного блог-поста --> #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ HEADER|escapejs }}",
+  "description": "{% if META_DESC %}{{ META_DESC|escapejs }}{% else %}{{ TIZER|striptags|escapejs|truncatewords:25 }}{% endif %}",
+  "image": "{% if IMG_FOR_BLOG %}{{ request.scheme }}://{{ request.get_host }}/media/{{ IMG_FOR_BLOG|escapejs }}{% else %}{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg{% endif %}",
+  "datePublished": "{{ PUB_DAT|date:'Y-m-d' }}T{{ PUB_DAT|date:'H:i:s' }}Z",
+  "dateModified": "{% if PUB_MODIFY %}{{ PUB_MODIFY|date:'Y-m-d' }}T{{ PUB_MODIFY|date:'H:i:s' }}Z{% else %}{{ PUB_DAT|date:'Y-m-d' }}T{{ PUB_DAT|date:'H:i:s' }}Z{% endif %}",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Блог",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/blog/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": "Страница {{ PAGE_BACK|add:'1' }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/blog/P{{ PAGE_BACK }}"
+      },
+      {
+        "@type": "ListItem",
+        "position": 4,
+        "name": "{{ HEADER|escapejs }}",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/blogpost/{{ ID }}/{{ HEADER_T }}"
+      }
+    ]
+  },
+  "author": {
+    "@type": "Person",
+    "name": "{{ NAME1 }}{% if NAME2 %} {{ NAME2 }}{% endif %}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ОКНАРДИЯ",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/static/img/oknardia_logo.svg"
+    }
+  },
+  "keywords": "{% if META_KW %}{{ META_KW|escapejs }}{% else %}блог, публикация, окна, поставщики{% endif %}"
+}
+</script>
+{# <!-- /Schema.org JSON-LD --> #}{% endblock %}
 
 {% block Main_Content %}
 <dIv class="container-fluid" itemscope itemtype="http://schema.org/Article">
@@ -78,7 +124,7 @@
     </DIv>
   </DiV>
   {# Листалка: НАЧАЛО #}<div class="row">
-    <div class="col-md-11 col-xs-12">
+    <nav class="col-md-11 col-xs-12">
       <hr class="dotted-black" />
       {% if not IS_ARCHIVE %}<nav aria-label="перелистывание записей блога">
         <ul class="pager">
@@ -90,7 +136,7 @@
           {% else %}<li class="next"><a href="/blogpost/{{ FORW_ID }}/{{ FORW_HEADER_T }}?page-back={{ PAGE_BACK }}">Следующая запись <span aria-hidden="true">&rarr;</span></a></li>{% endif %}
         </ul>
       </nav>{% endif %}
-    </div>
+    </nav>
   </div>{# Листалка: КОНЕЦ #}&nbsp;
   {# --- Баннер: НАЧАЛО --- #}
   <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
@@ -103,4 +149,3 @@
     {# ОТЛАДКА, ГАСИМ ВЕРХНЕЕ МЕНЮ #}
 {% endblock %}
 {% endcomment %}
-
