@@ -13,12 +13,10 @@ from oknardia.models import (
     Win_MountDim,
     Building_Info,
 )
-from web.report1 import get_last_all_user_visit_list, get_last_user_visit_list
+from web.report1 import get_last_all_user_visit_list
 from web.add_func import get_flaps_for_big_pictures, sanitize_slug
 import time
 import os
-import math
-import pytils
 
 
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
