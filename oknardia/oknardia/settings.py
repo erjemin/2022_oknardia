@@ -25,15 +25,25 @@ STATIC_SOURCE_ROOT = PUBLIC_ROOT / 'static'
 env = environ.Env()
 environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 
+def _normalize_admin_url(value: str) -> str:
+    """Приводит URL админки к виду `segment/` без ведущего слэша."""
+    normalized = value.strip().lstrip('/')
+    if not normalized:
+        return 'admin/'
+    if not normalized.endswith('/'):
+        normalized += '/'
+    return normalized
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env(
-    'DJANGO_SECRET_KEY',
+    var='DJANGO_SECRET_KEY',
     default='django-insecure-pd&1$j6z*1w#(j*16b+(@@#&2)+@x^^ot4)zqt-e67*1+$^qch',
 )
+ADMIN_URL = _normalize_admin_url(env(var='ADMIN_URL', default='admin/'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # ПРЕДУПРЕЖДЕНИЕ БЕЗОПАСНОСТИ: не работайте в режиме DEBUG в продашене!
