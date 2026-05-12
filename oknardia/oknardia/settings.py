@@ -16,15 +16,6 @@ def _env_admins(raw_items: list[str]) -> tuple[tuple[str, str], ...]:
             admins.append((admin_name, admin_email))
     return tuple(admins)
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-PROJECT_ROOT = BASE_DIR.parent
-PUBLIC_ROOT = PROJECT_ROOT / 'public'
-STATIC_SOURCE_ROOT = PUBLIC_ROOT / 'static'
-
-env = environ.Env()
-environ.Env.read_env(str(PROJECT_ROOT / '.env'))
-
 def _normalize_admin_url(value: str) -> str:
     """Приводит URL админки к виду `segment/` без ведущего слэша."""
     normalized = value.strip().lstrip('/')
@@ -34,6 +25,14 @@ def _normalize_admin_url(value: str) -> str:
         normalized += '/'
     return normalized
 
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = BASE_DIR.parent
+PUBLIC_ROOT = PROJECT_ROOT / 'public'
+STATIC_SOURCE_ROOT = PUBLIC_ROOT / 'static'
+
+env = environ.Env()
+environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
