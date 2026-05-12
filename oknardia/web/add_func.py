@@ -170,13 +170,13 @@ def get_rating_set_for_stars(rating: float = 0.) -> list:
 #     return distance
 
 
-def normalize(val: float, val_max: int = 5, val_min: int = 0) -> float:
+def normalize(val: float, val_max: float = 5.0, val_min: float = 0.0) -> float:
     """ Нормализация значения
 
     :param val: float -- значение которое надо нормализовать
-    :param val_max: int -- максимальное значение в нормализуемом диапазоне
-    :param val_min: int -- минимальное значение в нормализуемом диапазоне
-    :return: float: float -- нормализованное значение
+    :param val_max: float -- максимальное значение в нормализуемом диапазоне
+    :param val_min: float -- минимальное значение в нормализуемом диапазоне
+    :return: float -- нормализованное значение
     """
     return float(val - val_min) / float(val_max - val_min)
 
