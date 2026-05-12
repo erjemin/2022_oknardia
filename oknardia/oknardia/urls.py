@@ -22,7 +22,7 @@ from web import views, autocomplete_addr, user_manager, blog, diagrams, report1,
     catalog_profiles, catalog_series, catalog_openings, catalog_companies
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
 
     # главная страница
     re_path(r'^$', views.main_init),
