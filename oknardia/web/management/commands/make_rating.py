@@ -61,9 +61,31 @@ Django management command: make_rating
 - iGlazingThickness (мм) → БОЛЬШЕ толщина = ЛУЧШЕ → revers=False
 - iGlazingCamerasN (камер) → БОЛЬШЕ камер = ЛУЧШЕ теплоизоляция → revers=False
 
+НАБОРЫ УСЛУГ (SetKit) - КОМБИНИРОВАННЫЙ РЕЙТИНГ:
+Рейтинг набора = k1 (услуги) + k2 (стеклопакет) + k3 (профиль)
+
+Параметры услуг ранжирования:
+- dModify (дата последнего обновления) → МЕНЬШЕ дата = ЛУЧШЕ (свежее) → revers=True
+- bSetDelivery (доставка включена) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- bSetUninstallInstall (монтаж/демонтаж) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- sSetSill (подоконник) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- sSetPanes (водоотлив) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- sSetSlope (откос) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- sSetClimateControl (климат-контроль) → БОЛЬШЕ = ЛУЧШЕ → revers=False
+- NumOffer (кол-во предложений) → БОЛЬШЕ = ЛУЧШЕ (популярность) → revers=False
+- iDiscountVariantsCount (гибкость скидок) → БОЛЬШЕ вариантов = ЛУЧШЕ → revers=False
+- fDiscountMax (размер скидок) → БОЛЬШЕ скидка = ЛУЧШЕ → revers=False
+
+Веса компонентов набора в итоговом рейтинге:
+- k1 (услуги): RARING_SET_MAX - RARING_WEIGHT_PVC_PROFILE_IN_SET - RARING_WEIGHT_GLAZING_IN_SET (остаток)
+- k2 (стеклопакет): RARING_WEIGHT_GLAZING_IN_SET (обычно 1.5)
+- k3 (профиль): RARING_WEIGHT_PVC_PROFILE_IN_SET (обычно 1.5)
+- Итого: от 0.0 до 5.0 звёзд
+
 ВАЖНО:
 - sGlazingLightReflectance (строка "30/20") - НЕ РАНЖИРУЕТСЯ, это только информация
-- В России отопление независимое, поэтому низкий SHGC (PassingSun) лучше для литнего охлаждения
+- В России отопление независимое, поэтому низкий SHGC (PassingSun) лучше для летнего охлаждения
+- Рейтинг наборов зависит от качества входящих компонентов (профиль + стеклопакет) И услуг (доставка, монтаж и т.д.)
 
 ТЕХНИЧЕСКАЯ ИНФОРМАЦИЯ:
 =======================
@@ -82,7 +104,7 @@ from django.core.management.base import BaseCommand
 import json
 import time
 
-from oknardia.models import PVCprofiles, Glazing
+from oknardia.models import PVCprofiles, Glazing, SetKit
 from oknardia.settings import (
     RANK_PVCP_SOUNDPROOFING, RANK_PVCP_HEAT_TRANSFER,
     RANK_PVCP_HEIGHT, RANK_PVCP_RABBET, RANK_PVCP_G_THICKNESS,
@@ -91,13 +113,18 @@ from oknardia.settings import (
     RANK_PVCP_HEIGHT_NAME, RANK_PVCP_RABBET_NAME, RANK_PVCP_G_THICKNESS_NAME,
     RANK_PVCP_THICKNESS_NAME, RANK_PVCP_SEALS_NAME, RANK_PVCP_CAMERAS_NUM_NAME,
     RANK_PVCP_CAMERAS_POPULARITY_NAME,
-    RANK_STEP_SET_NUM_OFFER,
+    RANK_STEP_SET_NUM_OFFER, RANK_STEP_SET_MODIFY, RANK_STEP_SET_DELIVERY,
+    RANK_STEP_SET_UNINSTALL_INSTALL, RANK_STEP_SET_SILL, RANK_STEP_SET_PANES,
+    RANK_STEP_SET_SLOPE, RANK_STEP_SET_CLIMATE_CONTROL,
+    RANK_STEP_DISCOUNT_FLEX, RANK_STEP_DISCOUNT_MAX,
     RANK_GLAZ_SOUNDPROOFING, RANK_GLAZ_HEAT_TRANSFER,
     RANK_GLAZ_LIGHT_TRANSMISSION, RANK_GLAZ_PASSING_SUN,
     RANK_GLAZ_THICKNESS, RANK_GLAZ_CAMERAS_NUM,
     RARING_PVC_PROFILE_MIN, RARING_PVC_PROFILE_MAX,
     RARING_GLAZING_MIN, RARING_GLAZING_MAX,
-    KEY_RATING, KEY_RATING_VIRTUAL
+    RARING_SET_MAX, RARING_SET_MIN,
+    RARING_WEIGHT_PVC_PROFILE_IN_SET, RARING_WEIGHT_GLAZING_IN_SET,
+    KEY_RATING, KEY_RATING_VIRTUAL, KEY_DICSOUNT
 )
 from web.add_func import sum_through, normalize
 
@@ -160,7 +187,12 @@ def get_rank(set_dictionary, key, key_weight: float = 1, rank_name="", revers=Fa
 
     # Нормализуем ранги для этого параметра (0.0 … 1.0)
     for i in new_set_dictionary:
-        i["RatingConsist"].update({rank_name: round(normalize(i["RatingConsist"][rank_name], val_max=rank), 3)})
+        # Если rank == 0, значит все значения одинаковые (ноль изменений)
+        if rank > 0:
+            i["RatingConsist"].update({rank_name: round(normalize(i["RatingConsist"][rank_name], val_max=rank), 3)})
+        else:
+            # Если нет различий, то все имеют одинаковый ранг (0.5 по нормализации)
+            i["RatingConsist"].update({rank_name: 0.5})
 
     return new_set_dictionary, rank
 
@@ -337,6 +369,213 @@ def ranking_pvc(pvc_dictionary):
     return dimension_to_template, pvc_dictionary
 
 
+def prepare_setkit_dictionary(setkit_use_list):
+    """
+    Конвертирует RawQuerySet в список словарей и исправляет данные для ранжирования.
+
+    Коррекции:
+    1. Строковые поля (sSetSill, sSetPanes, sSetSlope, sSetClimateControl) преобразуются в 0/1
+    2. sOfficeDiscountMetaFormula парсится для максимальной скидки и количества вариантов
+    3. dModify (datetime) преобразуется в timestamp (число) для ранжирования
+    4. Логические поля должны быть числами для алгоритма ранжирования
+
+    :param setkit_use_list: RawQuerySet с объектами наборов
+    :return: список словарей с исправленными данными
+    """
+    import datetime
+
+    setkit_dictionary = []
+
+    for setkit in setkit_use_list:
+        setkit_dict = setkit.__dict__.copy()
+
+        # Коррекция: преобразуем дату в timestamp для ранжирования
+        # Свежие данные (большие timestamp) должны иметь более высокий ранг
+        if 'dModify' in setkit_dict and setkit_dict['dModify']:
+            # Если это datetime-объект, конвертируем в timestamp
+            if isinstance(setkit_dict['dModify'], datetime.datetime):
+                setkit_dict['dModify'] = setkit_dict['dModify'].timestamp()
+            elif isinstance(setkit_dict['dModify'], datetime.date):
+                # Если это просто date, конвертируем в datetime сначала
+                dt = datetime.datetime.combine(setkit_dict['dModify'], datetime.time())
+                setkit_dict['dModify'] = dt.timestamp()
+            else:
+                # Если это строка, пытаемся распарсить
+                try:
+                    dt = datetime.datetime.fromisoformat(str(setkit_dict['dModify']))
+                    setkit_dict['dModify'] = dt.timestamp()
+                except:
+                    setkit_dict['dModify'] = 0  # Если не смогли распарсить, ставим 0
+        else:
+            setkit_dict['dModify'] = 0  # Если нет даты, ставим 0
+
+        # Коррекция: преобразуем строковые поля в 0/1
+        # Подоконник: если нет, — то 0, иначе 1
+        if setkit_dict.get("sSetSill", "").lower() in ["нет", "-", "—", "", " "]:
+            setkit_dict["sSetSill"] = 0
+        else:
+            setkit_dict["sSetSill"] = 1
+
+        # Водоотлив: если нет, — то 0, иначе 1
+        if setkit_dict.get("sSetPanes", "").lower() in ["нет", "-", "—", "", " "]:
+            setkit_dict["sSetPanes"] = 0
+        else:
+            setkit_dict["sSetPanes"] = 1
+
+        # Откос: если нет, — то 0, иначе 1
+        if setkit_dict.get("sSetSlope", "").lower() in ["нет", "-", "—", "", " "]:
+            setkit_dict["sSetSlope"] = 0
+        else:
+            setkit_dict["sSetSlope"] = 1
+
+        # Климат-контроль: если нет, — то 0, иначе 1
+        if setkit_dict.get("sSetClimateControl", "").lower() in ["нет", "-", "—", "", " "]:
+            setkit_dict["sSetClimateControl"] = 0
+        else:
+            setkit_dict["sSetClimateControl"] = 1
+
+        # Парсим формулу скидок офиса и извлекаем информацию о скидках
+        try:
+            import json as json_module
+            discount_formula = json_module.loads(setkit_dict.get("sOfficeDiscountMetaFormula", "{}"))
+            discount_values = discount_formula.get(KEY_DICSOUNT, {})
+
+            # Количество вариантов скидок
+            setkit_dict["iDiscountVariantsCount"] = len(discount_values.keys()) if discount_values else 0
+
+            # Максимальная скидка из всех вариантов
+            if discount_values:
+                setkit_dict["fDiscountMax"] = float(max(discount_values.values()))
+            else:
+                setkit_dict["fDiscountMax"] = 0.0
+
+        except (ValueError, KeyError, AttributeError):
+            # Если парс неудался, то скидок нет
+            setkit_dict["iDiscountVariantsCount"] = 0
+            setkit_dict["fDiscountMax"] = 0.0
+
+        # Инициализация: количество коммерческих предложений
+        if 'NumOffer' not in setkit_dict:
+            setkit_dict['NumOffer'] = 0
+
+        setkit_dictionary.append(setkit_dict)
+
+    return setkit_dictionary
+
+
+def ranking_setkit(setkit_dictionary):
+    """
+    Ранжирует наборы (SetKit) по всем параметрам используя алгоритм Манна-Уитни.
+
+    Параметры ранжирования (в порядке применения):
+    1. Актуальность — дата последнего обновления (dModify) ← МЕНЬШЕ=ЛУЧШЕ (свежее) → revers=True
+    2. Доставка (bSetDelivery) — включена ли в стоимость → БОЛЬШЕ=ЛУЧШЕ
+    3. Монтаж/демонтаж (bSetUninstallInstall) — включён ли → БОЛЬШЕ=ЛУЧШЕ
+    4. Подоконник (sSetSill) — включён ли → БОЛЬШЕ=ЛУЧШЕ
+    5. Водоотлив (sSetPanes) — включён ли → БОЛЬШЕ=ЛУЧШЕ
+    6. Откос (sSetSlope) — включён ли → БОЛЬШЕ=ЛУЧШЕ
+    7. Климат-контроль (sSetClimateControl) — включён ли → БОЛЬШЕ=ЛУЧШЕ
+    8. Число предложений (NumOffer) — популярность → БОЛЬШЕ=ЛУЧШЕ
+    9. Гибкость скидок (iDiscountVariantsCount) — кол-во вариантов → БОЛЬШЕ=ЛУЧШЕ
+    10. Размер скидок (fDiscountMax) — максимальная скидка → БОЛЬШЕ=ЛУЧШЕ
+
+    :param setkit_dictionary: список словарей с наборами
+    :return: ранжированный список словарей
+    """
+
+    # 1. Актуальность (дата последнего обновления) - МЕНЬШЕ = ЛУЧШЕ → revers=True
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "dModify",
+        key_weight=RANK_STEP_SET_MODIFY,
+        rank_name="Актуальность",
+        revers=True
+    )
+
+    # 2. Доставка включена в стоимость - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "bSetDelivery",
+        key_weight=RANK_STEP_SET_DELIVERY,
+        rank_name="Доставка",
+        revers=False
+    )
+
+    # 3. Монтаж/демонтаж включен - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "bSetUninstallInstall",
+        key_weight=RANK_STEP_SET_UNINSTALL_INSTALL,
+        rank_name="Монтаж",
+        revers=False
+    )
+
+    # 4. Подоконник включен - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "sSetSill",
+        key_weight=RANK_STEP_SET_SILL,
+        rank_name="Подоконник",
+        revers=False
+    )
+
+    # 5. Водоотлив включен - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "sSetPanes",
+        key_weight=RANK_STEP_SET_PANES,
+        rank_name="Водоотлив",
+        revers=False
+    )
+
+    # 6. Откос включен - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "sSetSlope",
+        key_weight=RANK_STEP_SET_SLOPE,
+        rank_name="Откос",
+        revers=False
+    )
+
+    # 7. Климат-контроль включен - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "sSetClimateControl",
+        key_weight=RANK_STEP_SET_CLIMATE_CONTROL,
+        rank_name="Климат-контроль",
+        revers=False
+    )
+
+    # 8. Число предложений (популярность) - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "NumOffer",
+        key_weight=RANK_STEP_SET_NUM_OFFER,
+        rank_name="Число предложений",
+        revers=False
+    )
+
+    # 9. Гибкость скидок (количество вариантов) - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "iDiscountVariantsCount",
+        key_weight=RANK_STEP_DISCOUNT_FLEX,
+        rank_name="Гибкость скидок",
+        revers=False
+    )
+
+    # 10. Размер скидок (максимальная скидка) - БОЛЬШЕ = ЛУЧШЕ → revers=False
+    setkit_dictionary, _ = get_rank(
+        setkit_dictionary,
+        "fDiscountMax",
+        key_weight=RANK_STEP_DISCOUNT_MAX,
+        rank_name="Размер скидок",
+        revers=False
+    )
+
+    return setkit_dictionary
+
+
 def ranking_glazing(glaz_dictionary):
     """
     Ранжирует стеклопакеты по всем параметрам используя алгоритм Манна-Уитни.
@@ -506,7 +745,53 @@ class Command(BaseCommand):
 
             output.append(f"  {'-'*100}")
             output.append(f"  ИТОГО: Рейтинг = {glazing_obj.fGlazingRating:.2f}/5.0 "
-                          f"'*' * int(glazing_obj.fGlazingRating)}")
+                          f"{'*' * int(glazing_obj.fGlazingRating)}")
+
+        return "\n".join(output)
+
+    def format_setkit_table(self, setkit_item, setkit_obj):
+        """Форматирует таблицу характеристик набора для подробного вывода"""
+        output = []
+        output.append(f"\n  {'='*120}")
+        output.append(f"  НАБОР: {setkit_obj.sSetName} (ID: {setkit_item['id']})")
+        output.append(f"  {'='*120}")
+
+        # Основные параметры из RatingConsist
+        if 'RatingConsist' in setkit_item:
+            output.append(f"  {'Параметр':<35} {'Значение':<20} {'Ранг (0..1)':<15} {'Вклад':<15}")
+            output.append(f"  {'-'*120}")
+
+            for param_name, rank_value in sorted(setkit_item['RatingConsist'].items()):
+                # Извлекаем значение параметра
+                if param_name == "Актуальность":
+                    # dModify кодируется в специальный формат, просто показываем дату
+                    value = "свежий" if setkit_item.get("dModify") else "старый"
+                elif param_name == "Доставка" and 'bSetDelivery' in setkit_item:
+                    value = "✓ Да" if setkit_item['bSetDelivery'] else "✗ Нет"
+                elif param_name == "Монтаж" and 'bSetUninstallInstall' in setkit_item:
+                    value = "✓ Да" if setkit_item['bSetUninstallInstall'] else "✗ Нет"
+                elif param_name == "Подоконник" and 'sSetSill' in setkit_item:
+                    value = "✓ Да" if setkit_item['sSetSill'] else "✗ Нет"
+                elif param_name == "Водоотлив" and 'sSetPanes' in setkit_item:
+                    value = "✓ Да" if setkit_item['sSetPanes'] else "✗ Нет"
+                elif param_name == "Откос" and 'sSetSlope' in setkit_item:
+                    value = "✓ Да" if setkit_item['sSetSlope'] else "✗ Нет"
+                elif param_name == "Климат-контроль" and 'sSetClimateControl' in setkit_item:
+                    value = "✓ Да" if setkit_item['sSetClimateControl'] else "✗ Нет"
+                elif param_name == "Число предложений" and 'NumOffer' in setkit_item:
+                    value = f"{setkit_item['NumOffer']} шт"
+                elif param_name == "Гибкость скидок" and 'iDiscountVariantsCount' in setkit_item:
+                    value = f"{setkit_item['iDiscountVariantsCount']} вариантов"
+                elif param_name == "Размер скидок" and 'fDiscountMax' in setkit_item:
+                    value = f"{setkit_item['fDiscountMax']:.1f}%"
+                else:
+                    value = "—"
+
+                rank_str = f"{rank_value:.3f}" if isinstance(rank_value, float) else str(rank_value)
+                output.append(f"  {param_name:<35} {value:<20} {rank_value:.3f} {'*' * int(float(rank_str)*5):<15}")
+
+            output.append(f"  {'-'*120}")
+            output.append(f"  ИТОГО: Рейтинг = {setkit_obj.fSetRating:.2f}/5.0 {'*' * int(setkit_obj.fSetRating)}")
 
         return "\n".join(output)
 
@@ -695,9 +980,127 @@ class Command(BaseCommand):
 
         self.stdout.write(f'  ✓ Сохранено {len(glaz_dictionary)} стеклопакетов с финальными рейтингами')
 
+        # ========== РАНЖИРОВАНИЕ НАБОРОВ ==========
+        self.stdout.write('\n================================================')
+        self.stdout.write('[ЭТАП 3]: Пересчёт рейтингов НАБОРОВ (SetKit)...')
+        self.stdout.write('================================================\n')
+
+        # Обнуляем все рейтинги наборов
+        setkit_all_num = SetKit.objects.all().update(fSetRating=0.0)
+        self.stdout.write(f'  ✓ Обнулены рейтинги у {setkit_all_num} наборов')
+
+        # Извлекаем наборы которые используются в коммерческих предложениях
+        q = SetKit.objects.raw(
+            "SELECT oknardia_setkit.*, COUNT(oknardia_priceoffer.id) AS NumOffer, "
+            "MAX(oknardia_priceoffer.dOfferModify) AS dModify, "
+            "oknardia_pvcprofiles.fProfileRating, "
+            "oknardia_glazing.fGlazingRating, "
+            "oknardia_merchantoffice.sOfficeDiscountMetaFormula "
+            "FROM oknardia_setkit "
+            "INNER JOIN oknardia_priceoffer "
+            "  ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id "
+            "INNER JOIN oknardia_glazing "
+            "  ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id "
+            "INNER JOIN oknardia_pvcprofiles "
+            "  ON oknardia_pvcprofiles.id = oknardia_setkit.kSet2PVCprofiles_id "
+            "INNER JOIN oknardia_ouruser "
+            "  ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id "
+            "INNER JOIN oknardia_merchantoffice "
+            "  ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id "
+            "WHERE oknardia_setkit.sSetActive = TRUE "
+            "GROUP BY oknardia_pvcprofiles.fProfileRating, "
+            "         oknardia_glazing.fGlazingRating, "
+            "         oknardia_merchantoffice.sOfficeDiscountMetaFormula, "
+            "         oknardia_setkit.sSetActive, oknardia_setkit.id "
+            "ORDER BY MAX(oknardia_priceoffer.dOfferModify)"
+        )
+
+        setkit_use_list = list(q)
+        self.stdout.write(f'  ✓ Найдено {len(setkit_use_list)} наборов для ранжирования')
+
+        # Подготавливаем словарь наборов с коррекциями
+        setkit_dictionary = prepare_setkit_dictionary(setkit_use_list)
+
+        # Ранжируем наборы
+        setkit_dictionary = ranking_setkit(setkit_dictionary)
+
+        # Сортируем по рейтингу
+        setkit_dictionary = sorted(setkit_dictionary, key=lambda item: item["TmpRating"])
+
+        # Нахождение минимального и максимального рейтинга
+        num_max_rank = 0
+        num_min_rank = -1
+        for j, i in enumerate(setkit_dictionary):
+            if i["NumOffer"] != 0:
+                num_max_rank = j
+                if num_min_rank == -1:
+                    num_min_rank = j
+
+        # Сохраняем финальные рейтинги в БД
+        for j, i in enumerate(setkit_dictionary):
+            obj = SetKit.objects.get(id=i["id"])
+
+            # Загружаем JSON описание набора
+            try:
+                getted_json = json.loads(obj.sSetDescription)
+            except:
+                getted_json = {}
+
+            # Обновляем JSON рейтингом
+            if i["NumOffer"] != 0:
+                try:
+                    del getted_json[KEY_RATING_VIRTUAL]
+                except:
+                    pass
+                getted_json[KEY_RATING] = i["RatingConsist"]
+            else:
+                try:
+                    del getted_json[KEY_RATING]
+                except:
+                    pass
+                getted_json[KEY_RATING_VIRTUAL] = i["RatingConsist"]
+
+            obj.sSetDescription = json.dumps(
+                getted_json,
+                separators=(",", ":"),
+                sort_keys=True,
+                ensure_ascii=False
+            )
+
+            # Вычисляем финальный рейтинг набора как комбинацию:
+            # k1 = нормализованный TmpRating (параметры сервиса) * вес сервиса
+            # k2 = рейтинг стеклопакета * вес стеклопакета в наборе
+            # k3 = рейтинг профиля * вес профиля в наборе
+            # fSetRating = k1 + k2 + k3
+            if j <= num_max_rank:
+                # Нормализуем TmpRating (от 0 до максимума)
+                norm_tmp_rating = normalize(
+                    i["TmpRating"],
+                    setkit_dictionary[num_max_rank]["TmpRating"]
+                )
+
+                # вес для TmpRating (всё что не профиль и не стеклопакет)
+                service_rating_weight = (
+                    RARING_SET_MAX - RARING_WEIGHT_PVC_PROFILE_IN_SET - RARING_WEIGHT_GLAZING_IN_SET - RARING_SET_MIN
+                )
+
+                k1 = norm_tmp_rating * service_rating_weight
+                k2 = normalize(i["fGlazingRating"], RARING_GLAZING_MAX) * RARING_WEIGHT_GLAZING_IN_SET
+                k3 = normalize(i["fProfileRating"], RARING_PVC_PROFILE_MAX) * RARING_WEIGHT_PVC_PROFILE_IN_SET
+
+                obj.fSetRating = k1 + k2 + k3
+            else:
+                obj.fSetRating = 5.0
+
+            obj.save()
+
+            # Подробный вывод в режиме verbosity >= 3
+            if verbose >= 3:
+                self.stdout.write(self.format_setkit_table(i, obj))
+
+        self.stdout.write(f'  ✓ Сохранено {len(setkit_dictionary)} наборов с финальными рейтингами')
+
         self.stdout.write(self.style.SUCCESS('\n[OK!] ПЕРЕСЧЁТ РЕЙТИНГОВ ЗАВЕРШЁН УСПЕШНО!'))
         self.stdout.write(f'   • Обновлено профилей: {len(pvc_dictionary)}')
         self.stdout.write(f'   • Обновлено стеклопакетов: {len(glaz_dictionary)}')
-
-
-
+        self.stdout.write(f'   • Обновлено наборов: {len(setkit_dictionary)}')
