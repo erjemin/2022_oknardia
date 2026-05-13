@@ -6,7 +6,12 @@ Django management command: make_rating
 Вычисление базируется на ренкинге методом Манна-Уитни (Mann-Whitney U test шаг).
 
 В базовом ренкинге участвуют только профили и стеклопакеты, присутствующие
-в коммерческих предложениях размещённых в ОКНАРДИИ.
+в коммерческих предложениях, размещённых в ОКНАРДИИ.
+
+ОБНОВЛЕНИЕ: Все raw SQL запросы заменены на Django ORM (v2.0):
+- Профили: использует PVCprofiles.objects.annotate(Count(...))
+- Стеклопакеты: используется Glazing.objects.annotate(Count(...))
+- Наборы: используется SetKit.objects.select_related().annotate(Count/Max/F(...))
 
 АЛГОРИТМ РАНЖИРОВАНИЯ (Mann-Whitney U Step Rank):
 ====================================================
@@ -101,6 +106,7 @@ Django management command: make_rating
 """
 
 from django.core.management.base import BaseCommand
+from django.db.models import Count, Max, F
 import json
 import time
 
@@ -199,7 +205,7 @@ def get_rank(set_dictionary, key, key_weight: float = 1, rank_name="", revers=Fa
 
 def prepare_pvc_dictionary(profile_use_list):
     """
-    Конвертирует RawQuerySet в список словарей и исправляет данные для ранжирования.
+    Конвертирует QuerySet объектов профилей (с аннотациями) в список словарей и исправляет данные для ранжирования.
 
     Коррекции:
     1. iProfileCameras: конвертирует строку "3/3" в число суммированием цифр
@@ -207,13 +213,19 @@ def prepare_pvc_dictionary(profile_use_list):
     2. iProfileHeight: для значений < 10 см → ставим 1000 (невалидные данные)
     3. NumOffer: добавляем поле если его нет (количество коммерческих предложений)
 
-    :param profile_use_list: RawQuerySet с объектами профилей
+    :param profile_use_list: список объектов профилей (QuerySet или list)
     :return: список словарей с исправленными данными
     """
     pvc_dictionary = []
 
     for profile in profile_use_list:
+        # Конвертируем объект модели в dict, включая аннотированные поля
         profile_dict = profile.__dict__.copy()
+        # Добавляем annotate-поля которые не в __dict__
+        if hasattr(profile, 'NumOffer'):
+            profile_dict['NumOffer'] = profile.NumOffer
+        else:
+            profile_dict['NumOffer'] = 0
 
         # Коррекция: количество камер из строки в число
         if 'iProfileCameras' in profile_dict:
@@ -237,19 +249,24 @@ def prepare_pvc_dictionary(profile_use_list):
 
 def prepare_glaz_dictionary(glazing_use_list):
     """
-    Конвертирует RawQuerySet в список словарей и исправляет данные для ранжирования.
+    Конвертирует QuerySet объектов стеклопакетов (с аннотациями) в список словарей и исправляет данные для ранжирования.
 
     Коррекции:
     1. fGlazingLightTransmission: если < 1% → ставим 10000 (нет данных о светопропускании)
     2. fGlazingPassingSun: если < 1% → ставим 10000 (нет данных о солнцепропускании)
 
-    :param glazing_use_list: RawQuerySet с объектами стеклопакетов
+    :param glazing_use_list: список объектов стеклопакетов (QuerySet или list)
     :return: список словарей с исправленными данными
     """
     glaz_dictionary = []
 
     for glazing in glazing_use_list:
         glazing_dict = glazing.__dict__.copy()
+        # Добавляем annotate-поля которые не в __dict__
+        if hasattr(glazing, 'NumOffer'):
+            glazing_dict['NumOffer'] = glazing.NumOffer
+        else:
+            glazing_dict['NumOffer'] = 0
 
         # Коррекция: светопропускание < 1% означает нет данных
         if glazing_dict.get("fGlazingLightTransmission", 0) < 1:
@@ -371,15 +388,16 @@ def ranking_pvc(pvc_dictionary):
 
 def prepare_setkit_dictionary(setkit_use_list):
     """
-    Конвертирует RawQuerySet в список словарей и исправляет данные для ранжирования.
+    Конвертирует QuerySet объектов наборов (с аннотациями) в список словарей и исправляет данные для ранжирования.
 
     Коррекции:
     1. Строковые поля (sSetSill, sSetPanes, sSetSlope, sSetClimateControl) преобразуются в 0/1
     2. sOfficeDiscountMetaFormula парсится для максимальной скидки и количества вариантов
-    3. dModify (datetime) преобразуется в timestamp (число) для ранжирования
+    3. dModify (datetime/timestamp) преобразуется в timestamp (число) для ранжирования
     4. Логические поля должны быть числами для алгоритма ранжирования
+    5. Аннотированные поля (NumOffer, fProfileRating, fGlazingRating) извлекаются из атрибутов модели
 
-    :param setkit_use_list: RawQuerySet с объектами наборов
+    :param setkit_use_list: список объектов наборов (QuerySet или list)
     :return: список словарей с исправленными данными
     """
     import datetime
@@ -388,6 +406,19 @@ def prepare_setkit_dictionary(setkit_use_list):
 
     for setkit in setkit_use_list:
         setkit_dict = setkit.__dict__.copy()
+
+        # Добавляем annotate-поля которые не в __dict__
+        if hasattr(setkit, 'NumOffer'):
+            setkit_dict['NumOffer'] = setkit.NumOffer or 0
+        else:
+            setkit_dict['NumOffer'] = 0
+
+        if hasattr(setkit, 'fProfileRating'):
+            setkit_dict['fProfileRating'] = setkit.fProfileRating or 0.0
+        if hasattr(setkit, 'fGlazingRating'):
+            setkit_dict['fGlazingRating'] = setkit.fGlazingRating or 0.0
+        if hasattr(setkit, 'sOfficeDiscountMetaFormula'):
+            setkit_dict['sOfficeDiscountMetaFormula'] = setkit.sOfficeDiscountMetaFormula or ""
 
         # Коррекция: преобразуем дату в timestamp для ранжирования
         # Свежие данные (большие timestamp) должны иметь более высокий ранг
@@ -811,17 +842,14 @@ class Command(BaseCommand):
         profile_all_num = PVCprofiles.objects.all().update(fProfileRating=0.0)
         self.stdout.write(f'  ✓ Обнулены рейтинги у {profile_all_num} профилей')
 
-        # Извлекаем профили которые используются в коммерческих предложениях
-        q = PVCprofiles.objects.raw(
-            "SELECT oknardia_pvcprofiles.*, COUNT(oknardia_priceoffer.id) AS NumOffer "
-            "FROM oknardia_setkit "
-            "INNER JOIN oknardia_priceoffer "
-            "  ON oknardia_setkit.id = oknardia_priceoffer.kOffer2SetKit_id "
-            "RIGHT OUTER JOIN oknardia_pvcprofiles "
-            "  ON oknardia_setkit.kSet2PVCprofiles_id = oknardia_pvcprofiles.id "
-            "GROUP BY oknardia_pvcprofiles.id"
+        # Извлекаем ВСЕ профили с количеством коммерческих предложений
+        # (включая те что без предложений - для них NumOffer = 0)
+        # ORM эквивалент: RIGHT OUTER JOIN в SQL
+        profile_use_list = list(
+            PVCprofiles.objects.annotate(
+                NumOffer=Count('setkit__priceoffer', distinct=True)
+            )
         )
-        profile_use_list = list(q)
         self.stdout.write(f'  ✓ Найдено {len(profile_use_list)} профилей для ранжирования')
 
         # Подготавливаем словарь профилей с коррекциями
@@ -900,17 +928,13 @@ class Command(BaseCommand):
         glazing_all_num = Glazing.objects.all().update(fGlazingRating=0.0)
         self.stdout.write(f'  ✓ Обнулены рейтинги у {glazing_all_num} стеклопакетов')
 
-        # Извлекаем стеклопакеты которые используются в коммерческих предложениях
-        q = Glazing.objects.raw(
-            "SELECT oknardia_glazing.*, COUNT(oknardia_priceoffer.id) AS NumOffer "
-            "FROM oknardia_setkit "
-            "INNER JOIN oknardia_priceoffer "
-            "  ON oknardia_setkit.id = oknardia_priceoffer.kOffer2SetKit_id "
-            "RIGHT OUTER JOIN oknardia_glazing "
-            "  ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id "
-            "GROUP BY oknardia_glazing.id"
+        # Извлекаем ВСЕ стеклопакеты с количеством коммерческих предложений
+        # (включая те что без предложений - для них NumOffer = 0)
+        glazing_use_list = list(
+            Glazing.objects.annotate(
+                NumOffer=Count('setkit__priceoffer', distinct=True)
+            )
         )
-        glazing_use_list = list(q)
         self.stdout.write(f'  ✓ Найдено {len(glazing_use_list)} стеклопакетов для ранжирования')
 
         # Подготавливаем словарь стеклопакетов с коррекциями
@@ -990,32 +1014,25 @@ class Command(BaseCommand):
         self.stdout.write(f'  ✓ Обнулены рейтинги у {setkit_all_num} наборов')
 
         # Извлекаем наборы которые используются в коммерческих предложениях
-        q = SetKit.objects.raw(
-            "SELECT oknardia_setkit.*, COUNT(oknardia_priceoffer.id) AS NumOffer, "
-            "MAX(oknardia_priceoffer.dOfferModify) AS dModify, "
-            "oknardia_pvcprofiles.fProfileRating, "
-            "oknardia_glazing.fGlazingRating, "
-            "oknardia_merchantoffice.sOfficeDiscountMetaFormula "
-            "FROM oknardia_setkit "
-            "INNER JOIN oknardia_priceoffer "
-            "  ON oknardia_priceoffer.kOffer2SetKit_id = oknardia_setkit.id "
-            "INNER JOIN oknardia_glazing "
-            "  ON oknardia_setkit.kSet2Glazing_id = oknardia_glazing.id "
-            "INNER JOIN oknardia_pvcprofiles "
-            "  ON oknardia_pvcprofiles.id = oknardia_setkit.kSet2PVCprofiles_id "
-            "INNER JOIN oknardia_ouruser "
-            "  ON oknardia_setkit.kSet2User_id = oknardia_ouruser.id "
-            "INNER JOIN oknardia_merchantoffice "
-            "  ON oknardia_ouruser.kMerchantOffice_id = oknardia_merchantoffice.id "
-            "WHERE oknardia_setkit.sSetActive = TRUE "
-            "GROUP BY oknardia_pvcprofiles.fProfileRating, "
-            "         oknardia_glazing.fGlazingRating, "
-            "         oknardia_merchantoffice.sOfficeDiscountMetaFormula, "
-            "         oknardia_setkit.sSetActive, oknardia_setkit.id "
-            "ORDER BY MAX(oknardia_priceoffer.dOfferModify)"
+        # ORM эквивалент: SELECT setkit с JOIN к PriceOffer, Glazing, PVCprofiles, OurUser, MerchantOffice
+        # и агрегацией COUNT(PriceOffer), MAX(dOfferModify)
+        setkit_use_list = list(
+            SetKit.objects.filter(
+                sSetActive=True
+            ).select_related(
+                'kSet2PVCprofiles',      # PVCprofiles для получения fProfileRating
+                'kSet2Glazing',          # Glazing для получения fGlazingRating
+                'kSet2User__kMerchantOffice'  # OurUser -> MerchantOffice для sOfficeDiscountMetaFormula
+            ).annotate(
+                NumOffer=Count('priceoffer', distinct=True),  # COUNT(PriceOffer)
+                dModify=Max('priceoffer__dOfferModify'),      # MAX(dOfferModify)
+                fProfileRating=F('kSet2PVCprofiles__fProfileRating'),
+                fGlazingRating=F('kSet2Glazing__fGlazingRating'),
+                sOfficeDiscountMetaFormula=F('kSet2User__kMerchantOffice__sOfficeDiscountMetaFormula')
+            ).filter(
+                NumOffer__gt=0
+            ).order_by('-dModify')
         )
-
-        setkit_use_list = list(q)
         self.stdout.write(f'  ✓ Найдено {len(setkit_use_list)} наборов для ранжирования')
 
         # Подготавливаем словарь наборов с коррекциями
