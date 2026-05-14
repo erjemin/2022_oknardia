@@ -92,7 +92,8 @@ urlpatterns = [
     # --- ПОДГРУЖАЕМЫЙ ФРЕЙМ ЦЕНОВОЙ ВЫДАЧИ (ОСТАВЛЯЕМ СТАРЫЙ)
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
-    # --- СТАРЫЙ URL ЦЕНОВОЙ ВЫДАЧИ (ДОБАВИМ РЕДИРЕКТ)
+    # --- СТАРЫЙ URL ЦЕНОВОЙ ВЫДАЧИ (ДОБАВИМ РЕДИРЕКТ) ДЛЯ ПОИСКОВИКОВ
+    # --- НЕ УДАЛЯТЬ! КАРТА С СЕРИЯМИ ДОМОВ ИСПОЛЬЗУЕТ ЭТОТ РОУТИНГ, Т.К. ТАКИЕ URL КОРОЧЕ И ДЕЛАЮТ JS КОПАКТНЕЕ
     re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price_legacy_redirect),
     # СРАВНЕНИЕ ОКОННЫХ НАБОРОВ
     re_path(r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
