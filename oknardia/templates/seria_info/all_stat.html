@@ -3,17 +3,17 @@
 {% load filters %}
 {% load humanize %}
 
-{% block Title %} Статистика типового строительства СССР и России.{% endblock %}
+{% block Title %} Статистика типовых серий домов в России | Панельное строительство{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{# block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock #}
+{% block Description %}Статистика типового строительства в России: анализ распределения панельных домов по сериям и регионам. Данные о 18228 зданиях, общей площади жилого фонда, графиках ввода в эксплуатацию. Здания серий: {% for CountSeria in SERIA_NAV_DIM %}{{ CountSeria.SERIA_R }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endblock %}
 
-{# block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock #}
+{% block Keywords %}типовые серии домов, панельное строительство, статистика жилого фонда, каталог типовых зданий, распределение серий по регионам, статистика типовых домов, кирпичные дома, износ жилого фонда, площадь жилого фонда, количество зданий, годы возведения, анализ панельной застройки{% endblock %}
 
-{% block Description %}Статистика типового строительства СССР и России. Географи, график ввода в эксплуатацтяю, метраж. Здания проектов серии: {% for CountSeria in SERIA_NAV_DIM %}{{ CountSeria.SERIA_R }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endblock %}
+{% block Author4Meta %}: Статистика типовых серий домов «Окнардия»{% endblock %}
 
-{% block Keywords %}типовые проекты зданий, панельное строительство, {% for CountSeria in SERIA_NAV_DIM %}серия {{ CountSeria.SERIA_R }}, {{ CountSeria.SERIA_R }}, {% endfor %}, года простойки, регионы построки, распространенность{% endblock %}
+{% block CopyrightAuthor4Meta %}: Статистика типовых серий домов «Окнардия»{% endblock %}
 
 {% block Top_JS1%}
 <script type="text/javascript">
@@ -21,7 +21,95 @@ $(window).load(function(){let images = $('.half');images.each(function(i){$(this
 </script>
 {% endblock %}
 
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags --> #}
+  {# Удалить: itemprop microdata, rel=standout, twitter:domain — устаревшие теги #}
+  <meta name="news_keywords" content="типовые серии домов, панельное строительство, статистика жилого фонда, распределение серий по регионам" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/stat_all/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/stat_all/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Статистика типового строительства - Окнардия" />
+  <meta property="og:description" content="Статистика типового строительства в России. Анализ распределения серий домов по регионам, площадь жилого фонда, количество зданий." />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Статистика типового строительства - Окнардия" />
+  <meta name="twitter:description" content="Статистика типового строительства в России. Анализ распределения серий домов по регионам." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@oknardia" />
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/stat_all/" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{# <!-- END Дополнительные Metатags --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}
+  {# JSON-LD: страница статистики типовых серий — CollectionPage + BreadcrumbList + DataCatalog #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Статистика типовых серий домов",
+    "description": "Анализ распределения типовых серий строительства в России: количество зданий, общая площадь, география и годы возведения.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/stat_all/",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Окнардия",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    "mainEntity": {
+      "@type": "DataCatalog",
+      "name": "Статистика типовых серий",
+      "description": "База данных типовых серий строительства в СССР и России",
+      "dataset": [{% for CountSeria in SERIA_NAV_DIM %}
+        {
+          "@type": "Dataset",
+          "name": "Данные серии {{ CountSeria.SERIA_R }}",
+          "description": "Информация о типовой серии {{ CountSeria.SERIA_R }}"
+        }{% if not forloop.last %},{% endif %}{% endfor %}
+      ]
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Статистика",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/stat_all/"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
+
 {% block Main_Content %}<div class="container-fluid">
+{# Хлебные крошки: НАЧАЛО #}
+<div class="row">
+  <div class="col-md-11 col-xs-12">
+    <ol class="breadcrumb">
+      <li><a href="/">Главная</a></li>
+      <li class="active">Статистика типового строительства России</li>
+    </ol>
+  </div>
+</div>
+{# Хлебные крошки: КОНЕЦ #}
+
 <div class="row">
   <div class="col-md-9"><h1>Типовые серии домов в&nbsp;базе &laquo;Окнардия&raquo;</h1></div>
 </div>
@@ -38,15 +126,6 @@ DimColor = [];
 for (i1=0; i1<=step; i1++ )
 	for (i2=step; i2>=0; i2-- )
 	  for (i3=0; i3<=step; i3++ ) {
-		  //document.write("&nbsp;<span style='color:#"
-			//	  + ("00"+(i1*step_tone).toString(16)).substr(-2)
-			//	  + ("00"+(i2*step_tone).toString(16)).substr(-2)
-			//	  + ("00"+(i3*step_tone).toString(16)).substr(-2)
-			//	  + ";'>█</span> -- ");
-		  //document.write( "#"
-			//	  + ("00"+(i1*step_tone).toString(16)).substr(-2)
-			//	  + ("00"+(i2*step_tone).toString(16)).substr(-2)
-			//	  + ("00"+(i3*step_tone).toString(16)).substr(-2) + "<br>");
 		  DimColor.push("#"
 				  + ("00"+(i1*step_tone).toString(16)).substr(-2)
 				  + ("00"+(i2*step_tone).toString(16)).substr(-2)
