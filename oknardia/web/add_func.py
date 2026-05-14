@@ -3,7 +3,7 @@ __author__ = 'Sergei Erjemin'
 
 from PIL import Image, ImageDraw
 from oknardia.settings import *
-from pytils.translit import slugify
+from pytils.translit import slugify, translify
 import os
 import math
 import re
@@ -114,35 +114,6 @@ def sanitize_slug(text: str, separator: str = '-', max_length: int = 200) -> str
     return slug.lower()
 
 
-# def Rus2Lat(RusString):
-#     return translit(re.sub(
-#         r'<[\s\S]*?>', '',  re.sub(r'&[\S]*?;', '-', RusString)
-#     ), "ru", reversed=True).replace(u" ", u"-").replace(u"'", u"").replace(u"/", u"~").replace(u"\\", u"~").replace(u"--", u"-")
-
-
-# def Rus2Url (RusString):
-#     return re.sub(r'^-|-$', '',
-#                   re.sub(r'-{1,}', '-',
-#                          re.sub(r'<[\s\S]*?>|&[\S]*?;|[\W]', '-',
-#                                 re.sub(r'\+', '-plus', translit(RusString, "ru", reversed=True))
-#                                 )
-#                          )
-#                   ).lower()
-#
-#
-# # Суммирует все цифры в строке через произвольные (не цифровые) разделители
-# def sum_through(string_w_slash):
-#     string_w_slash = re.sub( r"[^0-9]", u",", string_w_slash)
-#     ListTerms = string_w_slash.split(u',')
-#     Summ = 0
-#     for Count in ListTerms:
-#         try:
-#             Summ += int(Count)
-#         except:
-#             pass
-#     return Summ
-#
-#
 def get_rating_set_for_stars(rating: float = 0.) -> list:
     """ Возвращает массив 1 и 0 для отрисовки звёздочек.
 
@@ -158,17 +129,6 @@ def get_rating_set_for_stars(rating: float = 0.) -> list:
         else:
             rating_set.append(0)
     return rating_set
-
-
-#
-#
-# # рассчитывает дистанцию в км. между двумя геокоординатами
-# def get_geo_distance(lon1, lat1, lat2, lon2):
-#     lonA, latA, latB, lonB = map(math.radians, [lon1, lat1, lat2, lon2])
-#     distance = 2 * math.asin(math.sqrt(math.sin((latB - latA) / 2) ** 2 + math.cos(latA) * math.cos(latB) * math.sin(
-#         (lonB - lonA) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
-#     return distance
-
 
 def normalize(val: float, val_max: float = 5.0, val_min: float = 0.0) -> float:
     """ Нормализация значения

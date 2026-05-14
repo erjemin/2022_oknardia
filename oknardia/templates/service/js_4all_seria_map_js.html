@@ -1,0 +1,58 @@
+step = Math.round( Math.pow({{ SERIA_NAV_DIM|length }}, 1./3.)-1);
+step_tone = Math.floor(0xF0/step);
+DimColor = [];
+for (i1=0; i1<=step; i1++ )
+	for (i2=step; i2>=0; i2-- )
+	  for (i3=0; i3<=step; i3++ ) {
+		  DimColor.push("#"+("00"+(i1*step_tone).toString(16)).substr(-2)+("00"+(i2*step_tone).toString(16)).substr(-2)+("00"+(i3*step_tone).toString(16)).substr(-2));
+	  }
+// Объекты для хранения цветов и названий серий (вместо отдельных переменных)
+c = {};
+s = {};
+{% for CountSeria in SERIA_NAV_DIM %}c[{{ CountSeria.ID2URL }}] = DimColor[{{ forloop.counter0 }}];	s[{{ CountSeria.ID2URL }}] = "{{ CountSeria.SERIA_R }}";	{% endfor %}
+
+b = '<a href="/';
+z = '/0/">Смотреть цены на установку окон</a>';
+w = '<b>Здание серии ';
+
+// Функция-фабрика для создания маркеров (оптимизация размера JS)
+function m(coord, id, sId) {
+	return new ymaps.Placemark(coord,
+		{balloonContent: b + id + z, hintContent: w + (s[sId] || 'нет данных') + '</b>'},
+		{preset: 'islands#circleIcon', iconColor: c[sId]}
+	);
+}
+
+// Функция для декодирования Base64-обфускованных координат (защита геоданных)
+function decodeGeoData(b64str) {
+	try {
+		var json = atob(b64str);
+		return JSON.parse(json);
+	} catch(e) {
+		console.error('Ошибка декодирования геоданных:', e);
+		return [];
+	}
+}
+
+ymaps.ready(function () {
+	var myMap = new ymaps.Map('SeriaMap', {
+		center: [55.75, 37.57],
+		zoom: 10,
+		behaviors: ['default', 'scrollZoom'],
+		controls: ['rulerControl', 'zoomControl', 'geolocationControl', 'fullscreenControl']
+	});
+ 	myMap.behaviors.disable('scrollZoom');
+	ymaps.modules.require(['PieChartClusterer'], function (PieChartClusterer) {
+		var clusterer = new PieChartClusterer({margin: 10});
+		// Декодируем обфускованные координаты: [lat, lon, addr_id, ser_id]
+		var geoData = decodeGeoData('{{ DATA4GEO_B64 }}');
+		var points = [];
+		for (var i = 0; i < geoData.length; i++) {
+			points.push(m([geoData[i][1], geoData[i][0]], String(geoData[i][2]), geoData[i][3]));
+		}
+	clusterer.add(points);
+	myMap.geoObjects.add(clusterer);
+	});
+// позиционирование карты так, чтобы на ней были видны все объекты клястера.
+// myMap.setBounds(clusterer.getBounds(), { checkZoomRange: true });
+});
