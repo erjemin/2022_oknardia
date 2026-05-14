@@ -101,23 +101,19 @@ urlpatterns = [
     re_path(r'^specification_set/\d$', views.main_init),       # заглушка (позже будет спецификация оконного набора)
     # отображение всех составлющих рейтинга
     re_path( r'^show_rating_components/(?P<win_set>\d+)$', report1.show_rating_components),
-    # СЛУЖЕБНЫЕ СТРАНИЦЫ (для администратора)
-    # --- страничка "главная сервис-утилит"
-    re_path(r'^service[/*]$', service.service),
-    # --- страничка для тестирования верстки текста в блоге
-    re_path(r'^service/tmp[/*]$', service.tmp),
-    # --- страничка "нет доступа"
-    re_path(r'^service/not-denice[/*]$', service.not_denice),
 
 ]
 
 
 if DEBUG:
+    # Медиа-файлы
+    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+    # --- страничка для тестирования верстки текста в блоге
+    urlpatterns += [re_path(r'^blog/tmp[/*]$', service.tmp),]
     #  ___    ____      _              _____         _ _              _____             _
     # | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
     # |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |
     #   |_|  |____/|___|___|___|_  |    |_| |___|___|_|___|__,|_|    |__|  |__,|_|_|___|_|
     #                          |___|
     urlpatterns = [path('__debug__/', include('debug_toolbar.urls')), *urlpatterns]
-    # Медиа-файлы
-    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+
