@@ -25,29 +25,8 @@
   <link href="{% static 'css/oknardia1.css' %}" rel="stylesheet" type="text/css"  />{% block Top_CSS1 %}{% endblock %}{% block Top_CSS2 %}{% endblock %}{% block Top_CSS3 %}{% endblock %}
   <script src="{% static 'js/jquery-2.1.1.min.js' %}" type="text/javascript"></script>{#  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js" type="text/javascript"></script>#}
   <script src="{% static 'js/bootstrap.min.js' %}" type="text/javascript"></script>{#  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" type="text/javascript"></script>#}{% block Top_JS1 %}{% endblock %}{% block Top_JS2 %}{% endblock %}{% block Top_JS3 %}{% endblock %}{% block Top_JS4 %}{% endblock %}{% block Top_JS5 %}{% endblock %}{% block Top_Meta1 %}{% endblock %}
-  {# Аналитика: Google Analytics 4, Yandex.Metrika, Top.Mail.Ru #}
-  <script src="{% static 'js/analytics.js' %}" type="text/javascript"></script>
-  <script type="text/javascript">
-    function openLoginLogout(event) {
-      if (event) event.preventDefault();
-      var $box = $('#login-logout');
-      function openDropdown() {
-        var $toggle = $box.find('.dropdown-toggle').first();
-        if (!$toggle.length) return;
-        if (typeof $toggle.dropdown === 'function')
-          $toggle.dropdown('toggle');
-        else
-          $toggle.trigger('click');
-      }
-      if (!$box.data('loginLoaded')) {
-        $box.load('/login-logout', function () {
-          $box.data('loginLoaded', true);
-          openDropdown();
-        });
-      } else openDropdown();
-      return false;
-    }
-  </script>{% block ADD_TO_HEAD %}{% endblock %}
+  {# Аналитика: Google Analytics 4, Yandex.Metrika, Top.Mail.Ru #}<script src="{% static 'js/analytics.js' %}" type="text/javascript"></script>
+  {# Модуль авторизации: управление dropdown меню логина/логаута #}<script src="{% static 'js/auth.js' %}" type="text/javascript"></script>{% block ADD_TO_HEAD %}{% endblock %}
 </head>
 
 <body{% block Add_Body_Attribute %}{% endblock %}>
