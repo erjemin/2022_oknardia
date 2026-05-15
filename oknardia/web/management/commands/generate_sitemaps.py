@@ -507,7 +507,10 @@ def build_sitemaps(
                 {"loc": "/catalog/seria", "lastmod": latest_seria_modify, "changefreq": "weekly", "priority": 0.95},
                 {"loc": "/catalog/standard_opening", "lastmod": latest_seria_modify, "changefreq": "monthly", "priority": 0.86},
                 {"loc": "/catalog/company", "lastmod": latest_company_date, "changefreq": "weekly", "priority": 0.90},
+                {"loc": "/stat_all/", "lastmod": generated_at, "changefreq": "weekly", "priority": 0.81},
                 {"loc": "/stat/rating/profiles_rank", "lastmod": latest_profile_modify, "changefreq": "monthly", "priority": 0.76},
+                {"loc": "/tariff/", "lastmod": generated_at, "changefreq": "monthly", "priority": 0.85},
+                {"loc": "/contact/", "lastmod": generated_at, "changefreq": "yearly", "priority": 0.60},
             ]
         ),
         BlogListSitemap(lastmod_value=latest_blog_modify),
