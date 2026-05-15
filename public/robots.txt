@@ -1,7 +1,63 @@
-# для агрегатора коммерческих предложений пластиковых окон -- ОКНАРДИЯ
+# Маркетплейс-агрегатор цен на установку пластиковых и деревянных окон — ОКНАРДИЯ
+# robots.txt последняя версия: 2026-05-15
+
 User-Agent: *
 Allow: /
-Host: https://oknardia.ru
+Disallow: /user_manager/
+Disallow: /*?*email*
+Disallow: /*?*password*
+Disallow: /*?*token*
+Disallow: /*.json$
+Disallow: /.*\.(js|css)$ # CSS и JS обслуживаются отдельно через CDN
+
+# Быстрые краулеры
+User-agent: YandexBot
+Crawl-delay: 15
+Allow: /
+
+User-agent: Googlebot
+Crawl-delay: 10
+Allow: /
+
+# Образовательные и AI-системы
+User-agent: Claude-Web
+Allow: /
+Crawl-delay: 30
+
+User-agent: GPTBot
+Allow: /
+Crawl-delay: 30
+
+User-agent: CCBot
+Allow: /
+Crawl-delay: 30
+
+# Медленные краулеры
+User-agent: DataForSeoBot
+Crawl-delay: 60
+Allow: /
+
+User-agent: Gecko
+Crawl-delay: 40
+Allow: /
+
+User-agent: AppleWebKit
+Crawl-delay: 40
+Allow: /
+
+User-agent: Googlebot-Image
+Crawl-delay: 60
+Allow: /
+
+# Carousels и мобильные браузеры
+User-agent: (?:.*[iI]phone|.*[iI]pad|.*mac.*os x.*applewebkit)
+Crawl-delay: 30
+Allow: /
 
 # Указываем расположение карты сайта для поисковых систем
 Sitemap: https://oknardia.ru/media/_serv_sitemap/sitemap.xml
+
+# Общая информация
+# Сайт: https://oknardia.ru/
+# Контакты: info@oknardia.ru
+# Инструкции для LLM-агентов см. /llms.txt (стандарт https://llmsdotxt.org/)
