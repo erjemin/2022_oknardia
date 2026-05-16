@@ -1,0 +1,113 @@
+# Git и версионирование
+.git
+.gitignore
+.gitattributes
+
+# Документация и инструкции
+*.md
+README.md
+SETUP.md
+AGENTS.md
+MANAGEMENT_RUNBOOK.md
+
+# Python и виртуальное окружение
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE и редакторы
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+.project
+.pydevproject
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# Тестирование и линтинг
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.hypothesis/
+
+# Локальные данные и конфиги
+.env
+.env.local
+local_settings.py
+database/*.sqlite3
+database/*.db
+logs/
+*.log
+
+# Статика для разработки и bootstrap-стили
+public/static/bootstrap-3.3.7-dist.zip
+public/static/css/*.map
+public/static/js/*.map
+public/static/**/*.map
+
+# Временные файлы
+*.tmp
+*.temp
+*.bak
+
+# Системные файлы macOS
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.VolumeIcon.icns
+
+# Системные файлы Linux
+.Xauthority
+.Xdefaults
+
+# Docker и CI/CD
+docker-compose.override.yml
+.dockerignore
+Dockerfile*
+
+# Node modules (если понадобятся в будущем)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Конфиги оставляем как пример!
+# config/ -> НЕ ИСКЛЮЧАЕМ (нужен как образец)
+# *.ini, *.conf -> НЕ ИСКЛЮЧАЕМ (нужны как примеры)
+
+# Базы данных и кеши
+*.sqlite3
+*.db
+database/oknadria_backup*.sqlite3
+
+# Миграции можем оставить, они нужны для контейнера
+# oknardia/oknardia/migrations/ -> НЕ ИСКЛЮЧАЕМ
+
