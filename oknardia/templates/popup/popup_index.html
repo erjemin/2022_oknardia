@@ -75,11 +75,7 @@
         <button type="submit" class="btn btn-primary btn-add">Найти</button>
       </span>
     </div>
-    {% if LAST_VISIT %}<div><h5>Ваши последние просмотры:</h5>
-    <ul style="font-size:small">{% for ITEM in LAST_VISIT %}
-      <li><a href="{{ ITEM.LastURL }}">{{ ITEM.LastApart }} <small>({{ ITEM.LastAddress }})</small></a> <small style="font-size: xx-small;">{{ ITEM.Time }}</small></li>{% endfor %}
-    </ul>
-    </div>{% endif %}
+    {% include 'report/report_last_user_visit.html' with background_color="None" %}
 
   </form>
   <p></p>{% endwith %}

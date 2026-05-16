@@ -3,10 +3,9 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from oknardia.models import PVCprofiles
 from oknardia.settings import *
-from web.add_func import normalize, get_rating_set_for_stars
+from web.add_func import normalize, get_rating_set_for_stars, sanitize_slug
 from time import time
 import json
-import pytils
 
 
 def ratings(request: HttpRequest) -> HttpResponse:
@@ -35,7 +34,7 @@ def profiles_rating(request: HttpRequest) -> HttpResponse:
     keys = [RANK_PVCP_HEAT_TRANSFER_NAME, RANK_PVCP_SOUNDPROOFING_NAME, RANK_PVCP_SEALS_NAME,
             RANK_PVCP_HEIGHT_NAME,        RANK_PVCP_G_THICKNESS_NAME,   RANK_PVCP_THICKNESS_NAME,
             RANK_PVCP_RABBET_NAME,        RANK_PVCP_CAMERAS_NUM_NAME,   RANK_PVCP_CAMERAS_POPULARITY_NAME]
-    to_template = {'KEYS': keys}
+    to_template: dict[str, object] = {'KEYS': keys}
     for profile in q_pvc_profiles:
         try:
             received_json = json.loads(profile.sProfileDescription)
@@ -73,9 +72,9 @@ def profiles_rating(request: HttpRequest) -> HttpResponse:
             "ID": profile.id,
             "R_REAL": rating_real,
             "BRAND": profile.sProfileManufacturer,
-            "BRAND_URL": pytils.translit.slugify(profile.sProfileManufacturer),
+            "BRAND_URL": sanitize_slug(profile.sProfileManufacturer),
             "NAME": profile.sProfileName,
-            "NAME_URL": pytils.translit.slugify(profile.sProfileName),
+            "NAME_URL": sanitize_slug(profile.sProfileName),
             "K_ARR": k_arr,
             "RATING_STAR": get_rating_set_for_stars(profile.fProfileRating),
             "RATING_N": profile.fProfileRating,

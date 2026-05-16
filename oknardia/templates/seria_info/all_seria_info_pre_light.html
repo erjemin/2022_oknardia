@@ -7,9 +7,107 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Description %}Дома серии {{ THIS_SERIA_NAME }}: детальная информация{% endblock %}
+{% block Description %}Серия {{ THIS_SERIA_NAME }}: типовые размеры оконных проёмов, схемы открывания, планировки квартир, карта зданий, статистика и цены на замену окон в домах этой серии.{% endblock %}
 
-{% block Keywords %} {{ THIS_SERIA_NAME }}, серия {{ THIS_SERIA_NAME }}, проект {{ THIS_SERIA_NAME }}, года постройки зданий серии {{ THIS_SERIA_NAME }}, размеры окон в домах серии {{ THIS_SERIA_NAME }}, оконные проемы зданий серии {{ THIS_SERIA_NAME }}, дома серии {{ THIS_SERIA_NAME }} на карте, установка окон, цены на пластиковые окна{% endblock %}
+{% block Keywords %}{{ THIS_SERIA_NAME }}, серия {{ THIS_SERIA_NAME }}, проект {{ THIS_SERIA_NAME }}, года постройки зданий серии {{ THIS_SERIA_NAME }}, размеры окон в домах серии {{ THIS_SERIA_NAME }}, оконные проемы зданий серии {{ THIS_SERIA_NAME }}, дома серии {{ THIS_SERIA_NAME }} на карте, установка окон, цены на пластиковые окна{% endblock %}
+
+{% block Top_Meta1 %}
+    {# Canonical — предотвращает дубли при возможных GET-параметрах #}<link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+    <!-- Разметка для соц-сетей Facebook Open Graph -->
+    <meta property="fb:admins" name="admins" content="100000084781830" />
+    <meta property="fb:pages" content="276108456054163" />
+    <meta property="fb:app_id" content="258354027974262" />
+    <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+    <meta property="og:type"        content="article" />
+    <meta property="og:site_name"   content="oknardia.ru" />
+    <meta property="og:locale"      content="ru_RU" />
+    <meta property="og:url"         content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+    <meta property="og:title"       content="Серия {{ THIS_SERIA_NAME }}: размеры окон, планировки и карта домов | oknardia.ru" />
+    <meta property="og:description" content="Типовые размеры и схемы открывания оконных проёмов в домах серии {{ THIS_SERIA_NAME }}. Карта зданий, статистика ввода в эксплуатацию по годам и цены на замену окон." />{% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
+    <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />
+    <link rel="image_src"           href="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
+    <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+    <link rel="image_src"           href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />{% endif %}
+    <!-- Разметка для соц-сетей Twitter Card -->
+    <meta name="twitter:card"        content="summary" />
+    <meta name="twitter:site"        content="@oknardia" />
+    <meta name="twitter:title"       content="Серия {{ THIS_SERIA_NAME }}: размеры окон, планировки и карта домов | oknardia.ru" />
+    <meta name="twitter:description" content="Типовые оконные проёмы, схемы открывания и цены на замену окон в домах серии {{ THIS_SERIA_NAME }}." />{% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
+    <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}" />{% else %}
+    <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />{% endif %}
+    <meta property="twitter:url"     content="{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/" />
+{% endblock %}
+
+{% block ADD_TO_HEAD %}{% comment %}
+JSON-LD для страницы серии типового строительства.
+BreadcrumbList: Google показывает хлебные крошки в сниппете вместо сырого URL — это важно,
+                т.к. URL вида /catalog/seria/p-44/all7 выглядит некрасиво без расшифровки.
+TechArticle: описывает страницу как технический справочный материал по серии домов.
+{% endcomment %}
+  {# JSON-LD: BreadcrumbList #}<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": "{{ request.scheme }}://{{ request.get_host }}/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Каталог",
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Типовые серии домов",
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": "Серия {{ THIS_SERIA_NAME|escapejs }}",
+                "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/"
+            }
+        ]
+    }
+    </script>
+    {# JSON-LD: TechArticle — технический справочный материал о серии типового строительства #}<script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "inLanguage": "ru-RU",
+        "headline": "Серия {{ THIS_SERIA_NAME|escapejs }}: типовые размеры оконных проёмов, схемы открывания и карта зданий",
+        "description": "Технические характеристики оконных проёмов в домах типовой серии {{ THIS_SERIA_NAME|escapejs }}: размеры, схемы открывания, планировки квартир, карта зданий на территории России. Статистика ввода зданий в эксплуатацию по годам.",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ THIS_SERIA_NAME_T }}/all{{ THIS_SERIA_ID }}/", {% if THIS_SERIA_IMAGE_URL and THIS_SERIA_IMAGE_URL != "null.gif" %}
+        "image": "{{ request.scheme }}://{{ request.get_host }}/media/{{ THIS_SERIA_IMAGE_URL }}",{% else %}
+        "image": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg",{% endif %}
+        "about": {
+            "@type": "Thing",
+            "name": "Серия типового строительства {{ THIS_SERIA_NAME|escapejs }}",
+            "description": "Типовой проект жилых зданий серии {{ THIS_SERIA_NAME|escapejs }} в России"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Окнардия",
+            "url": "{{ request.scheme }}://{{ request.get_host }}",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg"
+            }
+        },
+        "isPartOf": {
+            "@type": "WebSite",
+            "name": "Окнардия — агрегатор цен на замену окон",
+            "url": "{{ request.scheme }}://{{ request.get_host }}"
+        }
+    }
+    </script>
+{% endblock %}
 
 {% block Top_JS1 %}
 	<script type="text/javascript">
@@ -39,7 +137,7 @@
 
 	<div class="row">
     <div class="col-lg-10">
-      <h2 class="header">Дома серии {{ THIS_SERIA_NAME }}: типовые размеры и схемы открывания</h2>
+      <h2 class="header">Дома серии {{ THIS_SERIA_NAME }}: типовые размеры и&nbsp;схемы открывания</h2>
     </div>
     <div class="col-lg-12" style="padding:1em 0 0 0;margin-left:-1em">
       {% include 'report/show_big_flap_pictures.html' %}
@@ -48,22 +146,18 @@
 
   <div class="row">
     <div class="col-lg-8 col-xs-12 col-md-offset-1">
-      <h3 class="header">Оконные проёмы в типовых квартирах <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
+      <h3 class="header">Оконные проёмы в&nbsp;типовых квартирах <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
     </div>
     <div class="col-lg-8 col-xs-12 col-md-offset-1">
-      <!--- прешаблон начало ---><table style="padding:2px;">{% templatetag openblock %} for row in TABLE_OF_WINDOWS {% templatetag closeblock %}
-        <tr class="tr2">
-          <td>{% templatetag openvariable %} row.APART_NAME|safe {% templatetag closevariable %}</td>{% templatetag openblock %} for col in row.WIN_IN_APART {% templatetag closeblock %}
-          <td class="cntr">{% templatetag openblock %} if col.WIN_ID {% templatetag closeblock %}<nobr	title="{% templatetag openvariable %} col.WIN_Q {% templatetag closevariable %} × {% templatetag openvariable %} col.WIN_DESCRIPTION {% templatetag closevariable %}: {% templatetag openvariable %} col.WIN_WIDTH {% templatetag closevariable %}шт.: {% templatetag openvariable %} col.WIN_HEIGHT {% templatetag closevariable %} (Ш×В, см.). Схема открывания: {% templatetag openvariable %} col.WIN_FLAPCFG {% templatetag closevariable %}">{% templatetag openblock %} for I_II in col.WIN_NUM {% templatetag closeblock %}<span	style="background-image:url('{% static 'img/svg/mark' %}{% templatetag openvariable %} I_II {% templatetag closevariable %}.svg');">&nbsp;</span>{% templatetag openblock %} endfor {% templatetag closeblock %}</nobr>{% templatetag openblock %} else {% templatetag closeblock %}—{% templatetag openblock %} endif {% templatetag closeblock %}</td>{% templatetag openblock %} endfor {% templatetag closeblock %}
-          <td style="background:#f9f9f9;"><a href="#{% templatetag openvariable %} row.APART_ID {% templatetag closevariable %}" class="badge" title="Оконных предложений для квартиры: {% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} row.NUM_OFFERS {% templatetag closevariable %}</a></td>
-        </tr>{% templatetag openblock %} endfor {% templatetag closeblock %}
-        <tr class="trZ">
-          <td style="font-size: xx-small;vertical-align:text-top">© 2015-{% now "Y" %}, данные: oknardia.ru</td>{% templatetag openblock %} for i in WIN_OFFER_AND_MERCHANT {% templatetag closeblock %}
-          <td class="cntr" style="background:#f9f9f9;"><a href="/tsena-odnogo-okna/{% templatetag openvariable %} i.WIN_W|floatformat:0 {% templatetag closevariable %}0x{% templatetag openvariable %} i.WIN_H|floatformat:0 {% templatetag closevariable %}0mm/tip{% templatetag openvariable %} i.WIN_ID {% templatetag closevariable %}" class="badge" title="Ценовых предложений для окна: {% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}"><small class="glyphicon glyphicon-tags" aria-hidden="true"></small>&nbsp;{% templatetag openvariable %} i.WIN_OFFER {% templatetag closevariable %}</a></td>{% templatetag openblock %} endfor {% templatetag closeblock %}
-          <td></td>
-        </tr>
-      </table>
-    <!--- прешаблон конец  ---></div>
+      {# --- ОСНОВНОЙ БЛОК С ТАБЛИЦЕЙ --- #}
+      {# Если есть кешированный файл, включаем его. Иначе - рендерим блок на лету. #}
+      {% if PRE_RENDERED_INCLUDE_PATH %}
+        {% include PRE_RENDERED_INCLUDE_PATH %}
+      {% else %}
+        {% include "seria_info/all_seria_info_pre_light_include.html" %}
+      {% endif %}
+      {# --- КОНЕЦ ОСНОВНОГО БЛОКА --- #}
+    </div>
   </div>
 
 	<div class="row">
@@ -84,7 +178,9 @@
     </div>
 		<div class="col-md-7 col-lg-offset-1">
       <p><small>Чтобы посмотреть цены на&nbsp;установку и&nbsp;замену окон от&nbsp;партнёров &laquo;Окнардия&raquo; в&nbsp;своей квартире: найдите дом на&nbsp;карте; кликните на&nbsp;него; перейдите по&nbsp;ссылке &laquo;Смотреть коммерческие предложения&raquo;. При необходимости смените типовую планировку квартиры (на&nbsp;странице ценовой выдачи, справа от&nbsp;изображения типовых проёмов и&nbsp;схем открывания).</small></p>
-			<div style="height:350px;">{% include 'seria_info/geo_map.html' %}</div>
+			<div style="height:350px;">
+        {% include 'seria_info/geo_map.html' with first_apart_id=TABLE_OF_WINDOWS.0.APART_ID %}
+      </div>
 			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
 		</div>
 
@@ -103,15 +199,15 @@
 	</div>
 
 	<div class="row">
-		<div class="col-md-4 col-lg-offset-8" style="margin-top: 1em;">{# <div class="col-md-4"> #}
+		<div class="col-md-4 col-lg-offset-8" style="margin-top: 1em;">
 			<h5>Информация о&nbsp;других, отличных от&nbsp;{{ THIS_SERIA_NAME }}, типовых сериях в&nbsp;базе &laquo;Окнардия&raquo;, типовых планировках квартир и&nbsp;оконных проёмах в&nbsp;них, а&nbsp;также рекомендации по&nbsp;замене&nbsp;окон:</h5>
-			<div class="href_d">{% include 'seria_info/seria_nav.html' %}</div>
-      <p style="text-align:right;padding-top:1em;padding-bottom:1em;"><a href="/stat_all/">Агрегированная информация<br />по&nbsp;типовым сериям домов<br />в&nbsp;базе &laquo;Окнардия&raquo;</a>.</p>
+			<div class="href_d">{% include 'seria_info/seria_nav.html' with current_seria_id=THIS_SERIA_ID %}</div>
+      <p style="text-align:left;padding: 1em 50% 2em 0;"><small>Смотри так же <a href="/stat_all/">агрегированную информацию</a> по&nbsp;типовым сериям типового строительства в&nbsp;базе &laquo;Окнардия&raquo;.</small></p>
 		</div>
 	</div>
   <div class="row">
-    {% templatetag openblock %}include "report/report_last_user_visit.html" {% templatetag closeblock %}
-    {% templatetag openblock %} include "report/report_log_user_visit.html" {% templatetag closeblock %}
+    {% include "report/report_last_user_visit.html" %}
+    {% include "report/report_log_user_visit.html" %}
   </div>
 </div>
 {% endblock %}

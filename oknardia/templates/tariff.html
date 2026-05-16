@@ -1,16 +1,20 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %}Тарифы и услуги{% endblock %}
+{% block Title %}Тарифы и услуги маркетплейса Окнардия | Цены на размещение предложений окон{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Description %}Тарифы и услуги маркетплейс-агрегатора Окнардия. Размещение предложений пластиковых и деревянных окон, обновление цен на окна, рекламные баннеры и виджеты на сайт оконной компании.{% endblock %}
+{% block Description %}Тарифы размещения предложений по установке пластиковых и деревянных окон на маркетплейсе Окнардия. Пять тарифных планов: альфа (бесплатно), бета, дельта, мю (медийный), омега (виджет). Обновление цен, баннеры, публикации в блог, электронные заявки.{% endblock %}
 
-{% block Keywords %}типовые проекты зданий, панельное строительство, {% for CountSeria in SERIA_NAV_DIM %}серия {{ CountSeria.SERIA_R }}, {{ CountSeria.SERIA_R }}, {% endfor %}, года простойки, регионы построки, распространенность{% endblock %}
+{% block Keywords %}тарифы окнардия, размещение предложений окон, цены на окна, маркетплейс окон, услуги для оконных компаний, виджет окон, баннеры на сайт, каталог окон, установка окон, продажа пластиковых окон, медийное продвижение окон{% endblock %}
+
+{% block Author4Meta %}: Тарифы и услуги маркетплейса «Окнардия»{% endblock %}
+
+{% block CopyrightAuthor4Meta %}: Тарифы маркетплейса «Окнардия»{% endblock %}
 
 {% block Top_JS1%}
 <script type="text/javascript">
@@ -18,14 +22,288 @@ $(window).load(function(){let images = $('.half');images.each(function(i){$(this
 </script>
 {% endblock %}
 
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metatags --> #}
+  {# Удалить: itemprop microdata, rel=standout, twitter:domain — устаревшие теги #}
+  <meta name="news_keywords" content="тарифы окнардия, размещение окон, маркетплейс окон, услуги оконных компаний, медийное продвижение" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/tariff/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:pages" content="276108456054163" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="fb:profile_id" name="profile_id" content="https://www.facebook.com/oknardia/" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/tariff/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Тарифы и услуги маркетплейса Окнардия" />
+  <meta property="og:description" content="Пять тарифных планов для размещения предложений пластиковых и деревянных окон. От альфа (бесплатно) до омега (виджет)." />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Тарифы и услуги маркетплейса Окнардия" />
+  <meta name="twitter:description" content="Пять тарифных планов для размещения предложений окон на маркетплейсе." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@oknardia" />
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/tariff/" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="relap-image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{# <!-- END Дополнительные Metатags --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}
+  {# JSON-LD: страница тарифов — CollectionPage + BreadcrumbList + PriceSpecification #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Тарифы и услуги маркетплейса Окнардия",
+    "description": "Пять тарифных планов для размещения предложений пластиковых и деревянных окон на маркетплейсе Окнардия с различными услугами и ценами.",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/tariff/",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Окнардия",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/"
+    },
+    "mainEntity": {
+      "@type": "PriceSpecification",
+      "priceCurrency": "RUB",
+      "name": "Тарифные планы Окнардия",
+      "description": "Пять вариантов сотрудничества: альфа (бесплатно), бета, дельта, мю и омега"
+    },
+    "hasPart": [
+      {
+        "@type": "Offer",
+        "name": "{α} Альфа — Старт",
+        "description": "Размещение цен на установку пластиковых окон. Расширенная информация о компании в каталоге Окнардии.",
+        "price": "0",
+        "priceCurrency": "RUB",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4",
+          "bestRating": "5",
+          "worstRating": "1",
+          "ratingCount": "100"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "{β} Бета — Коммерческий",
+        "description": "Основное размещение цен на установку окон. Два предложения для разных комплектаций, одно обновление в месяц, логотип компании, информация о вашей компании в каталоге.",
+        "price": "300",
+        "priceCurrency": "RUB",
+        "billingIncrement": "P1M",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "1000",
+          "priceCurrency": "RUB",
+          "name": "Стартовая установка"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "{δ} Дельта — Продвинутый",
+        "description": "Расширенное размещение цен на установку окон. Двенадцать предложений для полного ассортимента, шесть обновлений в месяц, всплытие в выдаче, логотип компании, публикации в блог.",
+        "price": "1500",
+        "priceCurrency": "RUB",
+        "billingIncrement": "P1M",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "5000",
+          "priceCurrency": "RUB",
+          "name": "Стартовая установка"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "{μ} Мю — Медийный",
+        "description": "Медийное продвижение услуг на установку окон. Баннеры в ценовой выдаче, публикации о ваших услугах в блог, ежемесячные аналитические отчёты.",
+        "price": "500",
+        "priceCurrency": "RUB",
+        "billingIncrement": "P1M",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "500",
+          "priceCurrency": "RUB",
+          "name": "Стартовая установка"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "{ω} Омега — Виджет",
+        "description": "Полный пакет для продвижения услуг на установку окон. Виджет на ваш сайт, восемнадцать предложений на установку, логотип компании, публикации в блог, все функции плана Дельта.",
+        "price": "9000",
+        "priceCurrency": "RUB",
+        "billingIncrement": "P1M",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "price": "45000",
+          "priceCurrency": "RUB",
+          "name": "Стартовая установка"
+        }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Тарифы",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/tariff/"
+      }
+     ]
+   }
+   </script>
+   <script type="application/ld+json">
+   {
+     "@context": "https://schema.org",
+     "@type": "FAQPage",
+     "name": "FAQ: Тарифы и услуги маркетплейса Окнардия",
+     "description": "Ответы на часто задаваемые вопросы о тарифах, услугах и возможностях размещения предложений на маркетплейсе Окнардия",
+     "mainEntity": [
+       {
+         "@type": "Question",
+         "name": "Что такое маркетплейс Окнардия?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Окнардия — это агрегатор (маркетплейс) для сравнения цен на установку пластиковых и деревянных окон в зданиях типового строительства в России. Пользователи указывают адрес дома, система распознаёт серию здания и выдаёт типовые размеры оконных проёмов, а затем показывает предложения от поставщиков на установку и замену окон."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Как выбрать подходящий тариф для моей компании?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Выбор тариф зависит от ваших целей: Альфа (бесплатно) — для тестирования; Бета (300₽/мес) — для базового размещения с логотипом; Дельта (1500₽/мес) — для расширенного каталога и публикаций; Мю (500₽/мес) — для медийного продвижения с баннерами; Омега (9000₽/мес) — полный пакет с виджетом на сайт рекламодателя."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Какой SEO-эффект даёт размещение на Окнардии?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Логотип вашей компании в ценовой выдаче содержит ссылку на ваш сайт — это мощный источник качественных внешних ссылок (backlinks), что положительно влияет на ранжирование вашего сайта в поисковых системах. Публикации в блог «Окнардии» также способствуют SEO за счёт релевантного контента и внутридомовых ссылок."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Что такое виджет Окнардия и зачем он нужен?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "«Виджет. ОКНАРДИЯ» — это встраиваемый фрейм-блок (iframe), который устанавливается на сайт поставщика. Виджет позволяет посетителям указать адрес дома и выбрать квартиру, после чего видят типовые размеры проёмов, схемы открывания и ваши предложения (наборы окон) с ценами — всё прямо на вашем сайте, без перехода на Окнардию."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Как работает система «всплытия» (поднятия) предложений?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "«Всплытие» — это возможность поднять ваши ценовые предложения в приоритетный блок выдачи. Гарантируется присутствие в блоке (позиция может варьироваться из-за сортировки по удаленности офиса от адреса клиента, но видимость гарантирована). Всплытие также способствует попаданию предложений в Rich Snippet'ы и виджеты поисковиков (Google и Яндекс). Частые обновления и всплытия заставляют поисковиков чаще переиндексировать ваши данные, что повышает вероятность появления в снипетах. На плане Дельта доступно 8 всплытий в месяц, на Омега — тоже 8."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Можно ли обновлять цены и описания в течение месяца?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Да, каждый тариф предусматривает определённое количество обновлений в месяц. Альфа — ⅓ обновления, Бета — 1 обновление, Дельта — 6 обновлений, Мю — нет обновлений (только баннеры и публикации), Омега — 8 обновлений. Обновления применяются ко всем проёмам и ценам выбранного набора."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Что входит в стартовую установку (запуск)?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Стартовая установка — это единовременный платёж за подготовку и размещение вашей первой ценовой информации, настройку профиля компании, загрузку логотипа и описаний. Стоимость варьируется от 0₽ (Альфа) до 45 000₽ (Омега). После включения тариф переходит на ежемесячное взимание."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Есть ли скидки при оплате на год вперёд?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Да, при оплате годовым авансом предусмотрены скидки: Бета -30%, Дельта -40%, Мю -20%, Омега -35%. Авансовый тариф за год включает запуск и установку, что позволяет сэкономить значительную сумму при планировании долгосрочного сотрудничества."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Как долго эффект от размещения логотипа с ссылкой?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Логотип с ссылкой на ваш сайт работает пока ваша подписка активна, плюс сохраняет SEO-эффект ещё примерно 6 месяцев после завершения подписки (кеширование поисковыми системами и остаточная ценность backlinks)."
+         }
+       },
+       {
+         "@type": "Question",
+         "name": "Какой SEO-эффект от публикаций в блоге Окнардии?",
+         "acceptedAnswer": {
+           "@type": "Answer",
+           "text": "Публикации в блог «Окнардии» — это постоянный источник SEO-трафика. Ссылки на ваш сайт остаются на сайте навсегда и продолжают работать даже после завершения подписки — это постоянная ценность в SEO. Публикации отлично подходят для продвижения акций и скидок на установку окон. На планах Дельта и Омега публикации включены; на плане Мю также доступны публикации. Каждая статья может содержать до 25 000 знаков, иллюстрации, видео и анимацию."
+         }
+        },
+        {
+          "@type": "Question",
+          "name": "Какой эффект от баннеров на Окнардии?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Баннеры имеют мощный престижный эффект: ваша компания отображается между ценовыми предложениями и в каталоге, позиционируя вас как ведущего поставщика. Можно практически забрендировать весь сайт так, что он будет восприниматься как собственный проект компании. Плюс баннеры содержат прямые HTML-ссылки, которые поисковики индексируют — это качественные backlinks для SEO."
+          }
+         },
+         {
+           "@type": "Question",
+           "name": "Что такое виджет Окнардия и как его установить?",
+           "acceptedAnswer": {
+             "@type": "Answer",
+             "text": "Виджет — это встраиваемый фрейм-блок (iframe) для вашего сайта. Посетители указывают адрес дома и выбирают квартиру, видят размеры проёмов и ваши предложения прямо на вашем сайте. Это повышает конверсию и удержание клиента. Примеры и инструкции на widget.oknardia.ru"
+           }
+         },
+         {
+          "acceptedAnswer": {
+            "@type": "Answer",
+           "text": "Проект «Окнардия» гибкий и открыт к сотрудничеству. Если вас интересуют специальные условия, кастомные решения, расширенные возможности или нестандартные формы партнёрства, свяжитесь с командой через форму обратной связи. Мы обсуждаем любые предложения: универсальные калькуляторы окон, специализированные виджеты, интеграцию ваших систем, генераторы смет и прейскурантов, и многое другое."
+           }
+         },
+         {
+          "@type": "Question",
+          "name": "Какие типовые размеры окон покрывает Окнардия?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Размеры окон в каталоге зависят от серии типового строительства. Система распознаёт серию по адресу и выдаёт все типовые раскладки проёмов и схемы открывания для данной серии (например, П-44, 5-этажка, кирпичный). На каждый набор вы можете разместить предложения под разные комплектации: профили, стеклопакеты, фурнитуру, варианты монтажа и отделки."
+          }
+        }
+      ]
+   }
+   </script>
+{% endblock %}
+
 {% block Main_Content %}<div class="container-fluid">
+{# Хлебные крошки: НАЧАЛО #}
+<div class="row">
+  <div class="col-md-11 col-xs-12">
+    <ol class="breadcrumb">
+      <li><a href="/">Главная</a></li>
+      <li class="active">Тарифы</li>
+    </ol>
+  </div>
+</div>
+{# Хлебные крошки: КОНЕЦ #}
+
 <div class="row">
   <div class="col-md-9 col-md-offset-1 col-xs-12"><h1>Направления сотрудничества с&nbsp;«Окнардия» и&nbsp;тарифы</h1></div>
 </div>
 
 <div class="row">
 	<div class="col-md-10 col-md-offset-1 col-xs-12 tariff">
-    {% if SENDER %}{% if SENDER == "Ok!" %}<p style="background: lightgreen;">Спасибо за ваше обращение. Мы обязательно свяжемся с вами.</p>{% elif SENDER == "Error!" %}<p style="background: lightsalmon;">Что-то пошло не так. Не удалось отправить e-mail. Попробуйте еще раз или используте для связи info@oknardia.ru </p>{% endif %}{% endif %}
+    {% if SENDER %}{% if SENDER == "Ok!" %}<p style="background: lightgreen;">Спасибо за ваше обращение. Мы обязательно свяжемся с вами.</p>{% elif SENDER == "Error!" %}<p style="background: lightsalmon;">Что-то пошло не так. Не удалось отправить e-mail. Попробуйте еще раз или используете для связи info@oknardia.ru </p>{% endif %}{% endif %}
 		<table>
       <thead>
         <tr>
@@ -216,12 +494,318 @@ $(window).load(function(){let images = $('.half');images.each(function(i){$(this
         </tr>
       </tbody>
     </table>
-    <P>&nbsp;</P>
-    <P>Мы открыты к сотрудничеству. Много идей в&nbsp;наших планах (в&nbsp;том числе универсальный калькулятор окон, виджет калькулятора, генератор смет и&nbsp;прейскурантов и&nbsp;еще много чего) и&nbsp;если у вас есть потребность в&nbsp;дополнительных разработках для рынка окон, будем рады обсудить возможные формы сотрудничества.</P>
-    </div>
+     <P>&nbsp;</P>
+     <P>Мы открыты к сотрудничеству. Много идей в&nbsp;наших планах (в&nbsp;том числе универсальный калькулятор окон, виджет калькулятора, генератор смет и&nbsp;прейскурантов и&nbsp;еще много чего) и&nbsp;если у вас есть потребность в&nbsp;дополнительных разработках для рынка окон, будем рады обсудить возможные формы сотрудничества.</P>
+     </div>
 </div>
 
-<!-- Модальное окно обратной связи -->
+{# FAQ секция для SEO: НАЧАЛО #}
+<div class="row" style="margin-top: 60px; margin-bottom: 40px;">
+  <div class="col-md-10 col-md-offset-1 col-xs-12">
+    <h2 style="margin-bottom: 30px;">Часто задаваемые вопросы о тарифах и услугах</h2>
+
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true" style="font-size: 120%;">
+
+      {# Вопрос 1: Что такое Окнардия #}
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title">
+            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true"
+               aria-controls="collapseOne">
+              Что такое маркетплейс Окнардия?
+            </a>
+          </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            Окнардия&nbsp;— это агрегатор (маркетплейс) для&nbsp;сравнения цен на&nbsp;установку пластиковых и&nbsp;деревянных
+            окон в&nbsp;зданиях типового строи&shy;тельства России. Пользователи указывают адрес дома, система
+            распознаёт серию здания и&nbsp;выдаёт типовые размеры оконных проёмов, а&nbsp;затем показывает предложения
+            от&nbsp;поставщиков на&nbsp;установку и&nbsp;замену окон.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 2: Выбор тарифа #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingTwo" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseTwo" aria-expanded="true" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseTwo" role="button">
+              Как&nbsp;выбрать подходящий тариф для&nbsp;моей компании?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingTwo" class="panel-collapse collapse in" id="collapseTwo" role="tabpanel">
+          <div class="panel-body">
+            Выбор тарифа зависит от&nbsp;ваших целей:
+            <ul style="margin-top: 10px;">
+              <li><strong>Альфа (бесплатно)</strong>&nbsp;— для&nbsp;тестирования и&nbsp;ознакомления с&nbsp;платформой;
+              </li>
+              <li><strong>Бета (300₽/мес)</strong>&nbsp;— для&nbsp;базового размещения с&nbsp;логотипом и&nbsp;двумя
+                предло&shy;жениями;
+              </li>
+              <li><strong>Дельта (1500₽/мес)</strong>&nbsp;— для&nbsp;расширенного каталога с&nbsp;12 наборами,
+                публикациями и&nbsp;всплытиями;
+              </li>
+              <li><strong>Мю (500₽/мес)</strong>&nbsp;— для&nbsp;медийного продвижения с&nbsp;баннерами и&nbsp;публикациями
+                в&nbsp;блог;
+              </li>
+              <li><strong>Омега (9000₽/мес)</strong>&nbsp;— полный пакет с&nbsp;виджетом на&nbsp;ваш сайт и&nbsp;максимум
+                возможностей.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 3: SEO эффект #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingThree" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseThree" aria-expanded="true" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseThree" role="button">
+              Какой SEO-эффект даёт размещение на&nbsp;Окнардии?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="collapseThree" class="panel-collapse collapse in" id="collapseThree" role="tabpanel">
+          <div class="panel-body">
+            Логотип&nbsp;вашей компании&nbsp;в&nbsp;ценовой выдаче содержит ссылку на&nbsp;ваш сайт&nbsp;— это мощный
+            источник качественных внешних ссылок (backlinks), что положительно влияет на&nbsp;ранжирование вашего сайта
+            в&nbsp;поисковых системах. Публикации в&nbsp;блог «Окнардии» также способствуют SEO за&nbsp;счёт
+            релевантного контента и&nbsp;внутренних ссылок. SEO-эффект сохраняется пока ваша подписка активна, плюс ещё
+            примерно шесть месяцев после завершения (кеширование и&nbsp;остаточная ценность ссылок).
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 4: Всплытия #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingFour" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseFour" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseFour" role="button">
+              Как&nbsp;работает система «всплытия» (поднятия) предложений в&nbsp;выдаче?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="collapseFour" class="panel-collapse collapse" id="collapseFour" role="tabpanel">
+          <div class="panel-body">
+            «Всплытие» гарантирует присутствие ваших предложений в&nbsp;приоритетном блоке выдачи и&nbsp;в&nbsp;Rich
+            Snippet&apos;ах (виджеты, острова) поисковиков. Позиция может варьи&shy;роваться из-за&nbsp;сортировки по&nbsp;удалённости
+            офиса от&nbsp;адреса клиента, но&nbsp;видимость в&nbsp;блоке гаранти&shy;рована. Важный бонус: поисковики
+            интенсивнее переинде&shy;ксируют предложения с&nbsp;частыми обновлениями, что повышает вероятность появления
+            в&nbsp;поисковых сниппетах и&nbsp;медийных виджетах (Google и&nbsp;Яндекс). На&nbsp;плане Дельта доступно
+            восемь всплытий в&nbsp;месяц, на&nbsp;Омега&nbsp;— тоже восемь.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 5: Обновления цен #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingSix" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseSix" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseSix" role="button">
+              Можно&nbsp;ли обновлять цены и&nbsp;описания в&nbsp;течение месяца?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingSix" class="panel-collapse collapse" id="collapseSix" role="tabpanel">
+          <div class="panel-body">
+            Да, каждый тариф предусма&shy;тривает определённое количество обновлений в&nbsp;месяц. Обновления
+            применяются ко&nbsp;всем проёмам и&nbsp;ценам выбранного набора:
+            <ul style="margin-top: 10px;">
+              <li><strong>Альфа</strong>&nbsp;— ⅓&nbsp;обновления (в&nbsp;среднем один раз в&nbsp;три месяца);</li>
+              <li><strong>Бета</strong>&nbsp;— одно обновление в&nbsp;месяц;</li>
+              <li><strong>Дельта</strong>&nbsp;— шесть обновлений в&nbsp;месяц;</li>
+              <li><strong>Мю</strong>&nbsp;— нет обновлений (фокус на&nbsp;медийном продвижении&nbsp;и&nbsp;баннерах);
+              </li>
+              <li><strong>Омега</strong>&nbsp;— восемь обновлений в&nbsp;месяц.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 7: Стартовая установка #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingSeven" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseSeven" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseSeven" role="button">
+              Что входит в&nbsp;стартовую установку (запуск)?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingSeven" class="panel-collapse collapse" id="collapseSeven" role="tabpanel">
+          <div class="panel-body">
+            Стартовая установка&nbsp;— это единовре&shy;менный платёж за&nbsp;подготовку и&nbsp;размещение вашей первой
+            ценовой информации, настройку профиля компании, загрузку логотипа, описания компании&nbsp;и&nbsp;ваших
+            наборов. Стоимость варьируется от&nbsp;0₽ (Альфа) до&nbsp;45 000₽ (Омега) в&nbsp;зависимости от&nbsp;сложности
+            и&nbsp;объёма работ. После включения тариф переходит на&nbsp;ежемесячное взимание по&nbsp;устано&shy;вленной
+            цене.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 8: Скидки за год #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingEight" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseEight" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseEight" role="button">
+              Есть&nbsp;ли скидки при&nbsp;оплате на&nbsp;год вперёд?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingEight" class="panel-collapse collapse" id="collapseEight" role="tabpanel">
+          <div class="panel-body">
+            Да, при&nbsp;оплате годовым авансом преду&shy;смотрены щедрые скидки:
+            <ul style="margin-top: 10px;">
+              <li><strong>Бета</strong>&nbsp;— 30% скидка (2 520₽ вместо 3 600₽);</li>
+              <li><strong>Дельта</strong>&nbsp;— 40% скидка (13 800₽ вместо 23 000₽);</li>
+              <li><strong>Мю</strong>&nbsp;— 20% скидка (5 200₽ вместо 6 500₽);</li>
+              <li><strong>Омега</strong>&nbsp;— 35% скидка (70 200₽ вместо 108 000₽).</li>
+            </ul>
+            Авансовый платёж включает стартовую установку и&nbsp;полный год взимания ежемесячного тарифа.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 9: Длительность эффекта #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingNine" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseNine" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseNine" role="button">
+              Как&nbsp;долго эффект от&nbsp;размещения логотипа с&nbsp;ссылкой сохраняется?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingNine" class="panel-collapse collapse" id="collapseNine" role="tabpanel">
+          <div class="panel-body">
+            Логотип&nbsp;с&nbsp;ссылкой на&nbsp;ваш сайт работает пока ваша подписка активна. После завершения подписки
+            SEO-эффект продолжает сохраняться примерно 6 месяцев благодаря кешированию поисковыми системами и&nbsp;остаточной
+            ценности внешних ссылок. Это означает, что даже если вы&nbsp;временно прекратили размещение, ваш сайт
+            получает положи&shy;тельный эффект от&nbsp;ссылок ещё полгода.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 10: Публикации в блоге #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingNine" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseNine" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseNine" role="button">
+              Как&nbsp;долго эффект от&nbsp;размещения логотипа с&nbsp;ссылкой сохраняется?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingNine" class="panel-collapse collapse" id="collapseNine" role="tabpanel">
+          <div class="panel-body">
+            Логотип с&nbsp;ссылкой на&nbsp;ваш сайт работает пока ваша подписка активна. После завершения подписки
+            SEO-эффект продолжает сохраняться примерно шесть месяцев благодаря кешированию поисковыми системами
+            и&nbsp;остаточной ценности внешних ссылок. Это означает, что даже если вы&nbsp;временно прекратили
+            размещение, ваш сайт получает положи&shy;тельный эффект от&nbsp;ссылок ещё полгода.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 11: Баннеры и SEO #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingEleven" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseEleven" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseEleven" role="button">
+              Какой SEO-эффект от&nbsp;баннеров на&nbsp;Окнардии? Можно&nbsp;ли ими брендировать?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="collapseEleven" class="panel-collapse collapse" id="collapseEleven" role="tabpanel">
+          <div class="panel-body">
+            Баннеры имеют мощный престижный эффект: ваша компания отображается между блоками ценовых предложений и&nbsp;на&nbsp;страницах
+            каталога, украшая платформу и&nbsp;позиционируя вас как&nbsp;ведущего поставщика. Благодаря баннерам можно
+            практически «забренди&shy;ровать» весь сайт так, что он&nbsp;будет воспри&shy;ниматься почти как&nbsp;собственный
+            проект вашей компании. Баннеры размером 100%&nbsp;×&nbsp;175px могут быть графическими, видео или HTML с&nbsp;CSS/JS
+            анимацией. Доступны на&nbsp;плане Мю (медийный). Кроме того, баннеры на&nbsp;Окнардии содержат прямые
+            HTML-ссылки (без&nbsp;редиректов и&nbsp;JavaScript), что позволяет поисковикам их&nbsp;полностью индекси&shy;ровать.
+            Каждый баннер&nbsp;— это полноценный backlink на&nbsp;ваш сайт, дающий SEO-эффект.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 12: Виджет #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingTwelve" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseTwelve" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseTwelve" role="button">
+              Что такое виджет Окнардия и&nbsp;как&nbsp;его установить на&nbsp;сайт?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingTwelve" class="panel-collapse collapse" id="collapseTwelve" role="tabpanel">
+          <div class="panel-body">
+            «Виджет. ОКНАРДИЯ»&nbsp;— это встраиваемый фрейм-блок (iframe), который устана&shy;вливается на&nbsp;сайт
+            поставщика окон. Виджет позволяет посетителям указать адрес дома и&nbsp;выбрать квартиру, после чего видят
+            типовые размеры проёмов, схемы открывания и&nbsp;ваши предложения (наборы окон) с&nbsp;ценами&nbsp;— всё
+            прямо на&nbsp;вашем сайте. Это повышает конверсию и&nbsp;удержание клиента. Пример и&nbsp;инструкции по&nbsp;установке
+            доступны на&nbsp;<a href="https://widget.oknardia.ru/" target="_blank">widget.oknardia.ru</a> (примечание:
+            сайт может быть временно недоступен).
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 13: Специальные пожелания и гибкость #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingThirteen" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseThirteen" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseThirteen" role="button">
+              Что делать, если есть специальные пожелания или неста&shy;ндартные условия?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="collapseThirteen" class="panel-collapse collapse" id="collapseThirteen" role="tabpanel">
+          <div class="panel-body">
+            «Окнардия»&nbsp;— гибкий и&nbsp;открытый к&nbsp;сотрудни&shy;честву проект. Если вас интересуют специальные условия,
+            кастомные решения, расширенные возможности или неста&shy;ндартные формы партнёрства, <a href="/contact/">свяжитесь
+            с&nbsp;командой проекта</a>. Мы&nbsp;обсуждаем любые предложения: униве&shy;рсальные калькуляторы окон,
+            специали&shy;зированные виджеты, интеграция ваших систем, генераторы смет и&nbsp;прейску&shy;рантов, анали&shy;тические
+            отчёты и&nbsp;многое другое. Ваши идеи и&nbsp;пожелания&nbsp;— важная часть развития платформы.
+          </div>
+        </div>
+      </div>
+
+      {# Вопрос 14: Типовые размеры #}
+      <div class="panel panel-default">
+        <div class="panel-heading" id="headingFourteen" role="tab">
+          <h4 class="panel-title">
+            <a aria-controls="collapseFourteen" aria-expanded="false" data-parent="#accordion" data-toggle="collapse"
+               href="#collapseFourteen" role="button">
+              Какие типовые размеры окон покрывает Окнардия?
+            </a>
+          </h4>
+        </div>
+        <div aria-labelledby="headingFourteen" class="panel-collapse collapse" id="collapseFourteen" role="tabpanel">
+          <div class="panel-body">
+            Размеры окон в&nbsp;каталоге зависят от&nbsp;серии типового строи&shy;тельства. Система распознаёт серию по&nbsp;адресу
+            и&nbsp;выдаёт все типовые раскладки проёмов и&nbsp;схемы открывания для&nbsp;данной серии (например, П-44,
+            5-этажка, кирпичный и&nbsp;т.&thinsp;п.). На&nbsp;каждый набор наборов окон вы&nbsp;можете разместить
+            предложения под&nbsp;разные комплектации: разные профили, стеклопакеты, фурнитуру, варианты монтажа и&nbsp;отделки.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{# FAQ секция для SEO: КОНЕЦ #}
+
+
 <div class="modal fade" id="Form_for_Feedback" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">

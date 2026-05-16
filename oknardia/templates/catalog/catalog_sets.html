@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+{% load static %}
+{% load filters %}
+
+{% block Title %}Оконные наборы: характеристики, комплектации и сравнение — каталог «Окнардия»{% endblock %}
+
+{% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
+
+{% block Description %}Каталог оконных наборов «Окнардия»: готовые комплектации для замены окон с профилем, стеклопакетом и монтажом в одном предложении. Подробные характеристики, рейтинг и сравнение от разных поставщиков.{% endblock %}
+
+{% block Keywords %}оконные наборы, комплектации окон, сравнение окон, профиль и стеклопакет, монтаж окон, окнардия{% endblock %}
+
+{% block Top_Meta1 %}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/catalog/sets/" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:site_name"   content="oknardia.ru" />
+  <meta property="og:locale"      content="ru_RU" />
+  <meta property="og:url"         content="{{ request.scheme }}://{{ request.get_host }}/catalog/sets/" />
+  <meta property="og:title"       content="Оконные наборы: характеристики, комплектации и сравнение | oknardia.ru" />
+  <meta property="og:description" content="Каталог готовых комплектаций окон от партнёров «Окнардии»: профиль, стеклопакет, фурнитура и монтаж. Сравнивайте по рейтингу и характеристикам." />
+  <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:site"        content="@oknardia" />
+  <meta name="twitter:title"       content="Оконные наборы: каталог и сравнение | oknardia.ru" />
+  <meta name="twitter:description" content="Готовые комплектации окон — профиль, стеклопакет, фурнитура и монтаж от партнёров «Окнардии»." />
+  <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{% endblock %}
+
+{% block ADD_TO_HEAD %}
+{# JSON-LD: CollectionPage каталога наборов — BreadcrumbList + ItemList с кратким описанием каждого Product #}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная", "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+        {"@type": "ListItem", "position": 2, "name": "Каталог", "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/"},
+        {"@type": "ListItem", "position": 3, "name": "Оконные наборы",
+         "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/sets/"}
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "name": "Оконные наборы: характеристики, комплектации и сравнение",
+      "description": "Каталог готовых комплектаций окон от партнёров «Окнардии»: профиль, стеклопакет, фурнитура и монтаж в одном предложении.",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/sets/",
+      "mainEntity": {
+        "@type": "ItemList",
+        "name": "Оконные наборы",
+        "numberOfItems": {{ SET_LIST|length }},
+        "itemListElement": [{% for item in SET_LIST %}
+          {
+            "@type": "ListItem",
+            "position": {{ forloop.counter }},
+            "item": {
+              "@type": "Product",
+              "name": "{{ item.kit.sSetName|escapejs }}",
+              {% if item.merchant_name %}"brand": {"@type": "Brand", "name": "{{ item.merchant_name|escapejs }}"},{% endif %}
+              "description": "Профиль {{ item.profile.sProfileName|escapejs }} ({{ item.profile.sProfileManufacturer|escapejs }}), стеклопакет {{ item.glazing.sGlazingMark|default:item.glazing.sGlazingName|escapejs }}.{% if item.profile.fProfileHeatTransf > 0.1 %} Ro профиля: {{ item.profile.fProfileHeatTransf }} м²·°C/Вт.{% endif %}{% if item.glazing.fGlazingHeatTransfer > 0.1 %} Ro стеклопакета: {{ item.glazing.fGlazingHeatTransfer }} м²·°C/Вт.{% endif %}",
+              "url": "{{ request.scheme }}://{{ request.get_host }}/compare_offers/{{ item.kit.id }}/",
+              {% if item.kit.fSetRating > 0.1 %}
+              "review": {
+                "@type": "Review",
+                "author": {
+                  "@type": "Organization",
+                  "name": "Окнардия",
+                  "url": "{{ request.scheme }}://{{ request.get_host }}"
+                },
+                "reviewRating": {
+                  "@type": "Rating",
+                  "ratingValue": "{{ item.kit.fSetRating|stringformat:".2f" }}",
+                  "bestRating": "5",
+                  "worstRating": "0"
+                },
+                "reviewBody": "Алгоритмический рейтинг «Окнардии», рассчитанный по критерию Манна-Уитни на основе характеристик профиля и стеклопакета, а также дополнительных услу и скидок"
+              },
+              {% endif %}
+              "additionalProperty": [
+                {"@type": "PropertyValue", "name": "Профиль",            "value": "{{ item.profile.sProfileName|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Стеклопакет",        "value": "{{ item.glazing.sGlazingName|escapejs }}"},
+                {% if item.profile.iProfileThickness > 5 %}{"@type": "PropertyValue", "name": "Монтажная ширина профиля", "unitCode": "MMT", "unitText": "мм", "value": {{ item.profile.iProfileThickness }}},{% endif %}
+                {% if item.glazing.iGlazingCamerasN >= 1 %}{"@type": "PropertyValue", "name": "Камер в стеклопакете",    "unitText": "шт.", "value": {{ item.glazing.iGlazingCamerasN }}},{% endif %}
+                {"@type": "PropertyValue", "name": "Доставка",           "value": "{{ item.kit.sSetDelivery|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Монтаж",             "value": "{{ item.kit.sSetUninstallInstall|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Метод ранжирования", "value": "Mann-Whitney (Манна-Уитни)"},
+                {"@type": "PropertyValue", "name": "Источник данных",    "value": "oknardia.ru"}
+              ]
+            }
+          }{% if not forloop.last %},{% endif %}{% endfor %}
+        ]
+      }
+    }
+  ]
+}
+</script>
+
+{# CSS для плавающей панели выбора сравнения #}
+<style>
+  /* Карточка набора — небольшой отступ снизу */
+  .kit-card { margin-bottom: 16px; }
+  /* Таблица характеристик — минимальные отступы */
+  .kit-specs th { font-weight: normal; color: #777; white-space: nowrap; }
+  .kit-specs th, .kit-specs td { padding: 2px 6px !important; font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block Main_Content %}<!--- ------------------------------------------------------------------------------------------------------------------------- --->
+<div class="container-fluid">
+
+  {# Хлебные крошки #}
+  <div class="row">
+    <div class="col-md-11 col-xs-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/">Каталог</a></li>
+        <li>Оконные наборы</li>
+      </ol>
+      <h1>Оконные наборы: характеристики, комплектации и&nbsp;сравнение</h1>
+      <p>Оконный набор&nbsp;&mdash; готовая комплектация для&nbsp;замены окон в&nbsp;вашем доме: профиль, стеклопакет,
+        фурнитура и&nbsp;монтаж в&nbsp;одном предложении от&nbsp;компаний-партнёров&nbsp;&laquo;Окнардии&raquo;.
+        Отметьте несколько интересных наборов и&nbsp;сравните их детально по&nbsp;всем характеристикам.</p>
+    </div>
+  </div>
+
+  {# Список карточек #}
+  {% for item in SET_LIST %}
+  <div class="panel panel-default kit-card" id="kit-card-{{ item.kit.id }}">
+
+    {# ---- ШАПКА КАРТОЧКИ: название + рейтинг + логотип ---- #}
+    <div class="panel-heading">
+      <div class="row" style="display:flex;align-items:center;">
+
+        {# Название + звёздочки рейтинга #}
+        <div class="col-xs-9 col-md-10">
+          <h2 class="panel-title" style="font-size:1.15em;">{{ item.kit.sSetName }}</h2>
+          <div style="margin-top:3px;"{% if item.kit.sSetDescription %} title="{{ item.kit.sSetDescription }}"{% endif %}>
+            <nobr>{% for star in item.stars %}{% if star %}<b class="glyphicon glyphicon-star" style="color:#f0a500;"></b>{% else %}<i class="glyphicon glyphicon-star-empty" style="color:#ccc;"></i>{% endif %}{% endfor %}{% if item.kit.fSetRating > 0.1 %} <tt class="badge">{{ item.kit.fSetRating|stringformat:".2f" }}</tt>{% endif %}</nobr>
+          </div>
+        </div>
+
+        {# Логотип компании — кликабельный, ведёт на карточку компании в каталоге #}
+        <div class="col-xs-3 col-md-2 text-right">
+          {% if item.merchant_logo %}
+          {% if item.merchant_id %}<a href="/catalog/company/{{ item.merchant_id }}-{{ item.merchant_slug }}/" title="{{ item.merchant_name }}">{% endif %}
+          <img src="http://oknardia.ru/media/{{ item.merchant_logo }}"
+               style="max-height:36px;max-width:110px;object-fit:contain;"
+               alt="{{ item.merchant_name }}" />
+          {% if item.merchant_id %}</a>{% endif %}
+          {% endif %}
+        </div>
+
+      </div>
+    </div>{# /panel-heading #}
+
+    {# ---- ТЕЛО КАРТОЧКИ: три колонки — условия | профиль | стеклопакет ---- #}
+    <div class="panel-body">
+      <div class="row">
+
+        {# == Колонка 1: компания и условия поставки == #}
+        <div class="col-md-3 col-xs-12" style="border-right:1px solid #eee;margin-bottom:8px;">
+          <h3 style="font-size:1em;font-weight:bold;margin-top:0;">Поставщик</h3>
+          {% if item.merchant_id %}
+          <p style="margin-bottom:6px;">
+            <a href="/catalog/company/{{ item.merchant_id }}-{{ item.merchant_slug }}/">
+              <strong>{{ item.merchant_name }}</strong>
+            </a>
+          </p>
+          {% elif item.merchant_name %}
+          <p style="margin-bottom:6px;"><strong>{{ item.merchant_name }}</strong></p>
+          {% endif %}
+
+          <table class="table kit-specs" style="margin-bottom:4px;">
+            {% if item.kit.sSetImplementAll %}
+            <tr><th>Фурнитура:</th><td>{{ item.kit.sSetImplementAll|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetImplementHandles %}
+            <tr><th><sup>∟</sup>&nbsp;Ручки:</th><td>{{ item.kit.sSetImplementHandles|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetImplementHinges %}
+            <tr><th><sup>∟</sup>&nbsp;Петли:</th><td>{{ item.kit.sSetImplementHinges|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetImplementLatch %}
+            <tr><th><sup>∟</sup>&nbsp;Запоры:</th><td>{{ item.kit.sSetImplementLatch|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetImplementLimiter %}
+            <tr><th><sup>∟</sup>&nbsp;Огранич.:</th><td>{{ item.kit.sSetImplementLimiter|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetImplementCatch %}
+            <tr><th><sup>∟</sup>&nbsp;Фиксаторы:</th><td>{{ item.kit.sSetImplementCatch|capfirst }}</td></tr>
+            {% endif %}
+            {% if item.kit.sSetClimateControl|length > 3 %}
+            <tr><th>Климат-конт.:</th><td style="color:green;">{{ item.kit.sSetClimateControl|capfirst }}</td></tr>
+            {% endif %}
+            <tr>
+              <th>Подоконник:</th>
+              <td {% if item.kit.sSetSill|capfirst == "Нет" or item.kit.sSetSill|length < 4 %}style="color:red;"{% endif %}>
+                {% if item.kit.sSetSill %}{{ item.kit.sSetSill|capfirst }}{% else %}—{% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Водоотлив:</th>
+              <td {% if item.kit.sSetPanes|capfirst == "Нет" or item.kit.sSetPanes|length < 4 %}style="color:red;"{% endif %}>
+                {% if item.kit.sSetPanes %}{{ item.kit.sSetPanes|capfirst }}{% else %}—{% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Откос:</th>
+              <td {% if item.kit.sSetSlope|capfirst == "Нет" or item.kit.sSetSlope|length < 4 %}style="color:red;"{% endif %}>
+                {% if item.kit.sSetSlope %}{{ item.kit.sSetSlope|capfirst }}{% else %}—{% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th>Доставка:</th>
+              <td style="color:{% if item.kit.bSetDelivery %}green{% else %}red{% endif %};">
+                {{ item.kit.sSetDelivery|capfirst }}
+              </td>
+            </tr>
+            <tr>
+              <th>Монтаж:</th>
+              <td style="color:{% if item.kit.bSetUninstallInstall %}green{% else %}red{% endif %};">
+                {{ item.kit.sSetUninstallInstall|capfirst }}
+              </td>
+            </tr>
+            {% if item.kit.sSetOtherConditions %}
+            <tr><th>Прочее:</th><td><small>{{ item.kit.sSetOtherConditions|capfirst }}</small></td></tr>
+            {% endif %}
+          </table>
+        </div>{# /col компания #}
+
+        {# == Колонка 2: профиль == #}
+        <div class="col-md-4 col-xs-12" style="border-right:1px solid #eee;margin-bottom:8px;">
+          <h3 style="font-size:1em;font-weight:bold;margin-top:0;">
+            Профиль:
+            <a href="/catalog/profile/{{ item.profile.id }}-{{ item.profile_manufacturer_slug }}/{{ item.profile.id }}-{{ item.profile_slug }}/">{{ item.profile.sProfileName }}</a>
+            <small style="font-weight:normal;color:#777;">&mdash;&nbsp;<a href="/catalog/profile/{{ item.profile.id }}-{{ item.profile_manufacturer_slug }}/">{{ item.profile.sProfileManufacturer }}</a></small>
+          </h3>
+          {% if item.profile.sProfileBriefDescription %}
+          <p style="font-size:small;color:#666;margin-bottom:6px;">{{ item.profile.sProfileBriefDescription }}</p>
+          {% endif %}
+          <table class="table kit-specs">
+            <tr><th>Производитель:</th><td>{{ item.profile.sProfileManufacturer }}</td></tr>
+            {% if item.profile.iProfileCameras %}<tr><th>Камер рамы/створки:</th><td>{{ item.profile.iProfileCameras }}&nbsp;шт.</td></tr>{% endif %}
+            {% if item.profile.iProfileThickness > 5 %}<tr><th>Монтажная ширина:</th><td>{{ item.profile.iProfileThickness }}&nbsp;мм</td></tr>{% endif %}
+            {% if item.profile.iProfileGlazingThickness > 4 %}<tr><th>Макс. толщина СП:</th><td>{{ item.profile.iProfileGlazingThickness }}&nbsp;мм</td></tr>{% endif %}
+            {% if item.profile.fProfileHeatTransf > 0.1 %}<tr><th>Теплопередача&nbsp;<i>Ro</i>:</th><td>{{ item.profile.fProfileHeatTransf }}&nbsp;м²·°C/Вт</td></tr>{% endif %}
+            {% if item.profile.fProfileSoundproofing > 1 %}<tr><th>Звукоизоляция:</th><td>{{ item.profile.fProfileSoundproofing }}&nbsp;дБ</td></tr>{% endif %}
+            {% if item.profile.fProfileSeals > 0 %}<tr><th>Контуры уплотнения:</th><td>{{ item.profile.fProfileSeals }}&nbsp;шт.</td></tr>{% endif %}
+            {% if item.profile.iProfileHeight > 15 %}<tr><th>Высота в проёме:</th><td>{{ item.profile.iProfileHeight }}&nbsp;мм</td></tr>{% endif %}
+            {% if item.profile.iProfileRabbet > 1 %}<tr><th>Фальц рамы:</th><td>{{ item.profile.iProfileRabbet }}&nbsp;мм</td></tr>{% endif %}
+            {% if item.profile.sProfileColor %}<tr><th>Цвет:</th><td>{{ item.profile.sProfileColor|capfirst }}</td></tr>{% endif %}
+            {% if item.profile.sProfileReinforcement %}<tr><th>Армирование:</th><td>{{ item.profile.sProfileReinforcement }}</td></tr>{% endif %}
+            {% if item.profile.sProfileSealDescription %}<tr><th>Уплотнитель:</th><td>{{ item.profile.sProfileSealDescription|capfirst }}</td></tr>{% endif %}
+            {% if item.profile.sProfileFillet %}<tr><th>Штапик:</th><td>{{ item.profile.sProfileFillet }}</td></tr>{% endif %}
+            {% if item.profile.sProfileOther %}<tr><th>Прочие хар-ки:</th><td><small>{{ item.profile.sProfileOther }}</small></td></tr>{% endif %}
+          </table>
+        </div>{# /col профиль #}
+
+        {# == Колонка 3: стеклопакет == #}
+        <div class="col-md-5 col-xs-12" style="margin-bottom:8px;">
+          <h3 style="font-size:1em;font-weight:bold;margin-top:0;">
+            Стеклопакет: {{ item.glazing.sGlazingName }}
+          </h3>
+          {% if item.glazing.sGlazingBriefDescription %}
+          <p style="font-size:small;color:#666;margin-bottom:6px;">{{ item.glazing.sGlazingBriefDescription|capfirst }}</p>
+          {% endif %}
+          <table class="table kit-specs">
+            {% if item.glazing.sGlazingMark and item.glazing.sGlazingMark != "—" %}<tr><th>Схема:</th><td>{{ item.glazing.sGlazingMark }}</td></tr>{% endif %}
+            {% if item.glazing.sGlazingManufacturer and item.glazing.sGlazingManufacturer != "—//—" and item.glazing.sGlazingManufacturer != "—" %}<tr><th>Производитель:</th><td>{{ item.glazing.sGlazingManufacturer }}</td></tr>{% endif %}
+            {% if item.glazing.iGlazingCamerasN >= 1 %}<tr><th>Камер:</th><td>{{ item.glazing.iGlazingCamerasN }}&nbsp;шт.</td></tr>{% endif %}
+            {% if item.glazing.iGlazingThickness >= 3 %}<tr><th>Толщина:</th><td>{{ item.glazing.iGlazingThickness }}&nbsp;мм</td></tr>{% endif %}
+            {% if item.glazing.fGlazingHeatTransfer > 0.1 %}<tr><th>Теплопередача&nbsp;<i>Ro</i>:</th><td>{{ item.glazing.fGlazingHeatTransfer }}&nbsp;м²·°C/Вт</td></tr>{% endif %}
+            {% if item.glazing.fGlazingSoundproofing >= 10 %}<tr><th>Звукоизоляция:</th><td>{{ item.glazing.fGlazingSoundproofing }}&nbsp;дБ</td></tr>{% endif %}
+            {% if item.glazing.fGlazingLightTransmission >= 1 %}<tr><th>Светопропускание:</th><td>{{ item.glazing.fGlazingLightTransmission }}&nbsp;%</td></tr>{% endif %}
+            {% if item.glazing.fGlazingPassingSun >= 1 %}<tr><th>Солнцепропускание:</th><td>{{ item.glazing.fGlazingPassingSun }}&nbsp;%</td></tr>{% endif %}
+            {% if item.glazing.sGlazingLightReflectance and item.glazing.sGlazingLightReflectance != "—/—" %}<tr><th>Светоотражение:</th><td>{{ item.glazing.sGlazingLightReflectance }}&nbsp;%</td></tr>{% endif %}
+            {% if item.glazing.sGlazingReflectionAndAbsorptionOfHeat and item.glazing.sGlazingReflectionAndAbsorptionOfHeat != "—/—" %}<tr><th>Теплоотражение/погл.:</th><td>{{ item.glazing.sGlazingReflectionAndAbsorptionOfHeat }}&nbsp;%</td></tr>{% endif %}
+            {% if item.glazing.sGlazingToning %}<tr><th>Тонирование:</th><td>{{ item.glazing.sGlazingToning|capfirst }}</td></tr>{% endif %}
+          </table>
+        </div>{# /col стеклопакет #}
+
+      </div>{# /row #}
+    </div>{# /panel-body #}
+
+    {# ---- ПОДВАЛ КАРТОЧКИ: чекбокс «отметить» + кнопка сравнения ---- #}
+    <div class="panel-footer" style="padding:6px 12px;">
+      {# Чекбокс «отметить для сравнения» — учитывается при клике на кнопку любой карточки #}
+      <label style="font-weight:normal;cursor:pointer;margin-right:14px;font-size:small;color:#555;">
+        <input type="checkbox"
+               class="kit-compare-check"
+               value="{{ item.kit.id }}"
+               style="vertical-align:middle;margin-right:3px;" />
+        отметить
+      </label>
+      {# Кнопка: сравнивает текущую карточку с отмеченными (или с лучшей по рейтингу, если ничего не отмечено) #}
+      <button type="button"
+              class="btn btn-default btn-xs"
+              onclick="compareWithKit('{{ item.kit.id }}')">
+        <b class="glyphicon glyphicon-th-list"></b>&nbsp;Сравнить с&nbsp;другими
+      </button>
+    </div>
+
+  </div>{# /panel kit-card #}
+  {% empty %}
+  <div class="alert alert-info">Нет доступных оконных наборов.</div>
+  {% endfor %}
+
+  {# --- Баннер --- #}
+  <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
+
+  <div class="row">
+    {% include "report/report_last_user_visit.html" %}
+    {% include "report/report_log_user_visit.html" %}
+  </div>
+
+</div>{# /container-fluid #}
+
+<!--- ------------------------------------------------------------------------------------------------------------------------- --->{% endblock %}
+
+{% block Top_JS3 %}<script>
+/* Логика кнопки «Сравнить с другими» на карточке набора.
+   ALL_KIT_IDS — все ID в порядке убывания рейтинга (как отсортирован queryset).
+   best2 — два лучших ID по рейтингу (порядок как в queryset, т.е. убывание рейтинга).
+
+   compareWithKit(currentId):
+     checked.length === 0 (ничего не отмечено):
+       — currentId входит в best2 → сравниваем best2 (оба лидера);
+       — иначе              → сравниваем currentId с best2[0] (лучшим).
+     checked.length >= 1 (что-то отмечено):
+       — берём checked (до 5 штук), добавляем currentId без дублей → до 6;
+       — если после сборки осталась только одна карточка (отметил только текущую
+         и нажал её) → добавляем best2[0] или best2[1] как партнёра;
+       — сортируем по возрастанию ID (стабильный URL).
+*/
+(function () {
+  var MAX_COMPARE = 6;
+
+  /* Все ID наборов в порядке убывания рейтинга */
+  var ALL_KIT_IDS = [{% for item in SET_LIST %}"{{ item.kit.id }}"{% if not forloop.last %},{% endif %}{% endfor %}];
+
+  /* Два лучших по рейтингу ID (первые два из отсортированного queryset) */
+  var best2 = ALL_KIT_IDS.slice(0, 2);
+
+  function getChecked() {
+    /* Возвращает массив ID всех отмеченных чекбоксов на странице */
+    return Array.from(document.querySelectorAll('.kit-compare-check:checked'))
+      .map(function (el) { return el.value; });
+  }
+
+  window.compareWithKit = function (currentId) {
+    currentId = String(currentId);
+    var checked = getChecked();
+    var ids;
+
+    if (checked.length === 0) {
+      /* Ничего не отмечено → сравниваем currentId с лучшим по рейтингу */
+      if (best2.indexOf(currentId) !== -1) {
+        /* currentId уже один из двух лидеров → берём обоих лидеров */
+        ids = best2.slice();
+      } else {
+        /* currentId — не лидер → сравниваем его с лучшим */
+        ids = [currentId, best2[0]];
+      }
+    } else {
+      /* Есть отмеченные → берём checked (до MAX_COMPARE-1=5), добавляем currentId без дублей */
+      ids = checked.slice(0, MAX_COMPARE - 1);
+      if (ids.indexOf(currentId) === -1) {
+        ids.push(currentId);
+      }
+      /* Краевой случай: отмечен только текущий и нажали его же кнопку → одна карточка.
+         Добавляем лучшего по рейтингу как партнёра для сравнения. */
+      if (ids.length === 1) {
+        var extra = (best2[0] !== currentId) ? best2[0] : (best2[1] || null);
+        if (extra) { ids.push(extra); }
+      }
+      /* Сортируем по возрастанию ID для стабильного URL */
+      ids.sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+    }
+
+    window.location.href = '/compare_offers/' + ids.join(',');
+  };
+}());
+</script>{% endblock %}
+

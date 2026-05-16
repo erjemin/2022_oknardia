@@ -15,14 +15,14 @@
      2. Добавьте URL-адрес в urlpatterns: path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
+from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from oknardia.settings import *
-from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service
-
+from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service, \
+    catalog_profiles, catalog_series, catalog_openings, catalog_companies
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(ADMIN_URL, admin.site.urls),
 
     # главная страница
     re_path(r'^$', views.main_init),
@@ -56,56 +56,64 @@ urlpatterns = [
     re_path(r'^stat/series/geo[/*]$', diagrams.statistic_menu),     # дубль для старых ссылок
     re_path(r'^stat/rating[/*]$', report2.ratings),
     re_path(r'^stat/rating/profiles_rank[/*]$', report2.profiles_rating),
-    # --- Каталог
-    # --- --- Каталог профилей
-    re_path(r'^catalog[/*]$', catalog.catalog_root),
-    re_path(r'^catalog/profile[/*]$', catalog.catalog_profile),
+    # --- КАТАЛОГ
+    re_path(r'^catalog[/*]$', catalog.catalog_root),  # ГЛАВНАЯ СТРАНИЦА КАТАЛОГА
+    # --- --- КАТАЛОГ ПРОФИЛЕЙ
+    re_path(r'^catalog/profile[/*]$', catalog_profiles.catalog_profile), # СПИСОК ВСЕХ ПРОФИЛЕЙ И ПРОИЗВОДИТЕЛЕЙ
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)'
-            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$', catalog.catalog_profile_model),
+            r'/(?P<model_id>\d+)-(?P<model_name>\S*)[/*]$',
+            catalog_profiles.catalog_profile_model),  # СТРАНИЦА ОПИСАНИЯ МОДЕЛИ ПРОФИЛЯ
     re_path(r'^catalog/profile/(?P<manufacture_id>\d+)-(?P<manufacture_name>\S*)[/*]$',
-            catalog.catalog_profile_manufacture),
-    # --- --- Каталог серий типового строительства
-    re_path(r'^catalog/seria[/*]$', catalog.catalog_seria),
-    re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$', catalog.catalog_seria_info),
+            catalog_profiles.catalog_profile_manufacture),  # КАРТОЧКА ОПИСАНИЯ ПРОИЗВОДИТЕЛЯ ПРОФИЛЯ
+    # --- --- КАТАЛОГ СЕРИЙ ТИПОВОГО СТРОИТЕЛЬСТВА
+    re_path(r'^catalog/seria[/*]$', catalog_series.catalog_seria), # СПИСОК ВСЕХ СЕРИЙ ЗДАНИЙ
+    re_path(r'^catalog/seria/(?P<seria_name_translit>[^/]*)/all(?P<seria_id>\d+)[/*]$',
+            catalog_series.catalog_seria_info), # КАРТОЧКА СЕРИИ ДОМА И ЕЕ СТАТИСТИКА
     re_path(r'^seria_[^/]*/all(?P<seria_id>\d+)/\S*$', catalog.report_all_info_seria_redirect),   # для старых ссылок
-    # --- --- Каталог стандартных проёмов и схем открывания длч типовых серий строительства
-    re_path(r'^catalog/standard_opening[/*]$', catalog.standard_opening),
-    # --- --- Каталог производителей окон
-    re_path(r'^catalog/company[/*]$', catalog.catalog_company),
-    re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$', catalog.catalog_company_detail),
+    # --- --- КАТАЛОГ СТАНДАРТНЫХ ПРОЁМОВ И СХЕМ ОТКРЫВАНИЯ ДЛЧ ТИПОВЫХ СЕРИЙ СТРОИТЕЛЬСТВА
+    re_path(r'^catalog/standard_opening[/*]$', catalog_openings.standard_opening), # СТРАНИЦА С ТАБЛИЦЕЙ ПРОЁМОМ
+    # --- --- КАТАЛОГ ПРОИЗВОДИТЕЛЕЙ ОКОН
+    re_path(r'^catalog/company[/*]$', catalog_companies.catalog_company), # СПИСОК ВСЕХ ПРОИЗВОДИТЕЛЕЙ ОКОН
+    re_path(r'^catalog/company/(?P<company_id>\d+)-(?P<company_name_slug>\S*)[/*]$',
+            catalog_companies.catalog_company_detail),  # КАРТОЧКА ПРОИЗВОДИТЕЛЯ-УСТАНОВЩИКА ОКОН
+    # --- --- КАТАЛОГ ОКОННЫХ НАБОРОВ (SetKit) — список комплектаций с переходом к сравнению
+    re_path(r'^catalog/sets[/*]$', catalog.catalog_sets),
     # ЦЕНОВЫЕ ПРЕДЛОЖЕНИЯ
-    # --- Одиночное окно
+    # --- ОДИНОЧНОЕ ОКНО
+    re_path(r'^catalog/standard_opening/price-(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm-tip(?P<win_id>\d+)[/*]$',
+            prices.report_one_win_price),  # КАНОНИЧЕСКИЙ SEO-URL СТРАНИЦЫ ЦЕН ДЛЯ ОДНОГО ПРОЕМА
     re_path(r'^tsena-odnogo-okna/(?P<win_width_mm>\d+)x(?P<win_height_mm>\d+)mm/tip(?P<win_id>\d+)[/*]$',
-            prices.report_one_win_price),
-    re_path(r'^next_price_one_flap_frame/idW(?P<win_id>\d+)N(?P<frame_begin_n>\d+)\S*$', prices.next_one_win_price),
-    # --- Ценовая выдача
-    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price),
-    # --- Подгружаемый фрейм ценовая выдачи
+            prices.redirect_one_win_price_legacy),  # LEGACY-URL: 301 -> КАНОНИЧЕСКИЙ ПУТЬ
+    re_path(r'^next_price_one_flap_frame/idW(?P<win_id>\d+)N(?P<frame_begin_n>\d+)\S*$',
+            prices.next_one_win_price),  # ПОДГРУЖАЕМЫЙ ФРЕЙМ С ЦЕНОВЫМИ ПРЕДЛОЖЕНИЯМИ ДЛЯ ОДНОГО ПРОЕМА
+    # --- ЦЕНОВАЯ ВЫДАЧА (НОВЫЙ РОУТИНГ)
+    # НОВЫЙ КРАСИВЫЙ URL С ПРЕФИКСАМИ SERIAID, APPARTAD, ADDRESSID
+    re_path(r'^price/seriaID(?P<seria_id>\d+)--(?P<seria_slug>[^/]+)/appartID(?P<apart_id>\d+)/addressID(?P<address_id>\d+)--(?P<address_slug>[^/]+)/?$', prices.report_price_new),
+    # --- ПОДГРУЖАЕМЫЙ ФРЕЙМ ЦЕНОВОЙ ВЫДАЧИ (ОСТАВЛЯЕМ СТАРЫЙ)
     re_path(r'^next_price_frame/idA(?P<apart_id>\d+)MDPO(?P<mount_dim_per_offer>\d+)LON(?P<address_longitude>\d+)'
             r'LAT(?P<address_latitude>\d+\.*\d*)N(?P<frame_begin_n>\d+\.*\d*)\S*[/*]$', prices.next_price_frame),
+    # --- СТАРЫЙ URL ЦЕНОВОЙ ВЫДАЧИ (ДОБАВИМ РЕДИРЕКТ) ДЛЯ ПОИСКОВИКОВ
+    # --- НЕ УДАЛЯТЬ! КАРТА С СЕРИЯМИ ДОМОВ ИСПОЛЬЗУЕТ ЭТОТ РОУТИНГ, Т.К. ТАКИЕ URL КОРОЧЕ И ДЕЛАЮТ JS КОПАКТНЕЕ
+    re_path(r'^(?P<build_id>\d+)/(?P<apart_id>\d+)/(?P<slug>[\s\S]*)$', prices.report_price_legacy_redirect),
     # СРАВНЕНИЕ ОКОННЫХ НАБОРОВ
     re_path(r'^compare_sets/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),   # дубль для старых ссылок
     re_path(r'^compare_offers/(?P<to_compare>[\s\S]+|.*)$', report1.compare_offers),
     re_path(r'^specification_set/\d$', views.main_init),       # заглушка (позже будет спецификация оконного набора)
     # отображение всех составлющих рейтинга
     re_path( r'^show_rating_components/(?P<win_set>\d+)$', report1.show_rating_components),
-    # СЛУЖЕБНЫЕ СТРАНИЦЫ (для администратора)
-    # --- страничка "главная сервис-утилит"
-    re_path(r'^service[/*]$', service.service),
-    # --- страничка для тестирования верстки текста в блоге
-    re_path(r'^service/tmp[/*]$', service.tmp),
-    # --- страничка "нет доступа"
-    re_path(r'^service/not-denice[/*]$', service.not_denice),
-    # --- создание файлов sitemap.xml
-    re_path(r'^service/make_sitemaps[/*]$', service.make_site_maps),
 
 ]
 
-if DEBUG:
-    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 
-#  ___    ____      _              _____         _ _              _____             _
-# | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
-# |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |
-#   |_|  |____/|___|___|___|_  |    |_| |___|___|_|___|__,|_|    |__|  |__,|_|_|___|_|
-#                          |___|
+if DEBUG:
+    # Медиа-файлы
+    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+    # --- страничка для тестирования верстки текста в блоге
+    urlpatterns += [re_path(r'^blog/tmp[/*]$', service.tmp),]
+    #  ___    ____      _              _____         _ _              _____             _
+    # | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
+    # |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |
+    #   |_|  |____/|___|___|___|_  |    |_| |___|___|_|___|__,|_|    |__|  |__,|_|_|___|_|
+    #                          |___|
+    urlpatterns = [path('__debug__/', include('debug_toolbar.urls')), *urlpatterns]
+

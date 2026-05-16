@@ -2,18 +2,175 @@
 {% load static %}
 {% load filters %}
 
-{% block Title %} Сравнение характеристик оконных профилей: {% for PROFILE in LIST_PROFILE %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ PROFILE }}{% endfor %}. Сравнение характеристик стеклопакетов: {% for GLAZING in LIST_GLAZING %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ GLAZING }}{% endfor %}. Сравнение предложений окон: {% for MERCANT in LIST_MERCHANT %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ MERCANT }}{% endfor %}.{% endblock %}
+{# Заголовок: человекочитаемый, ключевые слова в начале #}
+{% block Title %}Сравнение окон: {% for Count in SET_LIST %}{% if not forloop.first %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}«{{ Count.SET_NAME }}» ({{ Count.MERCHANT }}){% endfor %} — характеристики профилей и стеклопакетов{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
+{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"Y-m-d" }}{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
-
-
-{% block Description %}Сравнение характеристик окон от поставщиков: {% for MERCANT in LIST_MERCHANT %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ MERCANT }}{% endfor %}. Сравнение профилей пластиковых окон: {% for PROFILE in LIST_PROFILE %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ PROFILE }}{% endfor %}. Сравнение характеристик стеклопакетов: {% for GLAZING in LIST_GLAZING %}{% if forloop.first %}{% else %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ GLAZING }}{% endfor %}.{% endblock %}
+{# Description: первое слово — целевой запрос, потом конкретика #}
+{% block Description %}Детальное сравнение оконных наборов: {% for Count in SET_LIST %}{% if not forloop.first %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}«{{ Count.SET_NAME }}» от {{ Count.MERCHANT }}{% endfor %}. Профили: {% for PROFILE in LIST_PROFILE %}{{ PROFILE }}{% if not forloop.last %}, {% endif %}{% endfor %}. Стеклопакеты: {% for GLAZING in LIST_GLAZING %}{{ GLAZING }}{% if not forloop.last %}, {% endif %}{% endfor %}. Теплопередача, звукоизоляция, условия монтажа.{% endblock %}
 
 {% block Keywords %}сравнение профилей пластиковых окон, {% for PROFILE in LIST_PROFILE %}{{ PROFILE }}, {% endfor %}сравнение стеклопакетов, {% for GLAZING in LIST_GLAZING %}{{ GLAZING }}, {% endfor %}сравнение поставщиков пластиковых окон, {% for MERCANT in LIST_MERCHANT %}{{ MERCANT }}, {% endfor %}характеристики пластиковых окон.{% endblock %}
+
+{% block Top_Meta1 %}
+  {# Canonical — предотвращает дубли при разном порядке ID (1,2 и 2,1 — одна страница) #}
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/compare_offers/{% for Count in SET_LIST %}{{ Count.SET_ID }}{% if not forloop.last %},{% endif %}{% endfor %}/" />
+  <!-- Open Graph -->
+  <meta property="og:type"        content="article" />
+  <meta property="og:site_name"   content="oknardia.ru" />
+  <meta property="og:locale"      content="ru_RU" />
+  <meta property="og:url"         content="{{ request.scheme }}://{{ request.get_host }}/compare_offers/{% for Count in SET_LIST %}{{ Count.SET_ID }}{% if not forloop.last %},{% endif %}{% endfor %}/" />
+  <meta property="og:title"       content="Сравнение окон: {% for Count in SET_LIST %}{% if not forloop.first %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}«{{ Count.SET_NAME }}» ({{ Count.MERCHANT|escapejs }}){% endfor %} | oknardia.ru" />
+  <meta property="og:description" content="Сравнение характеристик оконных профилей и стеклопакетов: {% for Count in SET_LIST %}{% if not forloop.first %}, {% endif %}{{ Count.SET_NAME }} от {{ Count.MERCHANT }}{% endfor %}. Теплопередача, звукоизоляция, условия монтажа — агрегатор Окнардия." />
+  <meta property="og:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary" />
+  <meta name="twitter:site"        content="@oknardia" />
+  <meta name="twitter:title"       content="Сравнение окон: {% for Count in SET_LIST %}{% if not forloop.first %}, {% endif %}{{ Count.SET_NAME }}{% endfor %} | oknardia.ru" />
+  <meta name="twitter:description" content="Детальная таблица сравнения характеристик оконных профилей и стеклопакетов от поставщиков: {% for MERCANT in LIST_MERCHANT %}{{ MERCANT }}{% if not forloop.last %}, {% endif %}{% endfor %}." />
+  <meta name="twitter:image"       content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{% endblock %}
+
+{% block ADD_TO_HEAD %}{% comment %}
+JSON-LD разметка для страницы сравнения оконных наборов.
+BreadcrumbList: хлебные крошки в сниппете Google.
+TechArticle + mainEntity ItemList: описывает страницу как технический сравнительный материал.
+Каждый набор — Product с:
+  - additionalProperty: полный список условий поставки и монтажа
+  - hasPart[0]: профиль ПВХ как вложенный Product со всеми техническими PropertyValue
+  - hasPart[1]: стеклопакет как вложенный Product со всеми техническими PropertyValue
+Хак с запятыми: последним в каждом additionalProperty ставим фиксированный элемент
+  {"@type":"PropertyValue","name":"Источник данных","value":"oknardia.ru"} — благодаря этому
+  все условные элементы выше могут безопасно завершаться запятой.
+{% endcomment %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {"@type": "ListItem", "position": 1, "name": "Главная",            "item": "{{ request.scheme }}://{{ request.get_host }}/"},
+        {"@type": "ListItem", "position": 2, "name": "Каталог",            "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/"},
+        {"@type": "ListItem", "position": 3, "name": "Оконные наборы",     "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/sets/"},
+        {"@type": "ListItem", "position": 4,
+         "name": "Сравнение: {% for Count in SET_LIST %}{% if not forloop.first %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ Count.SET_NAME|escapejs }}{% endfor %}",
+         "item": "{{ request.scheme }}://{{ request.get_host }}/compare_offers/{% for Count in SET_LIST %}{{ Count.SET_ID }}{% if not forloop.last %},{% endif %}{% endfor %}/"}
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "inLanguage": "ru-RU",
+      "headline": "Сравнение оконных наборов: {% for Count in SET_LIST %}{% if not forloop.first %}{% if forloop.last %} и {% else %}, {% endif %}{% endif %}{{ Count.SET_NAME|escapejs }} ({{ Count.MERCHANT|escapejs }}){% endfor %}",
+      "description": "Детальная техническая таблица сравнения оконных профилей ({% for PROFILE in LIST_PROFILE %}{{ PROFILE|escapejs }}{% if not forloop.last %}, {% endif %}{% endfor %}) и стеклопакетов ({% for GLAZING in LIST_GLAZING %}{{ GLAZING|escapejs }}{% if not forloop.last %}, {% endif %}{% endfor %}) от поставщиков «Окнардии» — характеристики теплопередачи, звукоизоляции, условия монтажа.",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/compare_offers/{% for Count in SET_LIST %}{{ Count.SET_ID }}{% if not forloop.last %},{% endif %}{% endfor %}/",
+      "image": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Окнардия",
+        "url": "{{ request.scheme }}://{{ request.get_host }}",
+        "logo": {"@type": "ImageObject", "url": "{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg"}
+      },
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Окнардия — агрегатор цен на замену окон",
+        "url": "{{ request.scheme }}://{{ request.get_host }}"
+      },
+      "mainEntity": {
+        "@type": "ItemList",
+        "name": "Сравниваемые оконные наборы",
+        "numberOfItems": {{ SET_LIST|length }},
+        "itemListElement": [{% for Count in SET_LIST %}
+          {
+            "@type": "ListItem",
+            "position": {{ forloop.counter }},
+            "item": {
+              "@type": "Product",
+              "@id": "{{ request.scheme }}://{{ request.get_host }}/compare_offers/{% for C in SET_LIST %}{{ C.SET_ID }}{% if not forloop.last %},{% endif %}{% endfor %}/#set-{{ Count.SET_ID }}",
+              "name": "{{ Count.SET_NAME|escapejs }}",
+              "brand": {"@type": "Brand", "name": "{{ Count.MERCHANT|escapejs }}"},
+              "description": "Оконный набор с профилем {{ Count.PROFILE_NAME|escapejs }} ({{ Count.PROFILE_MANUFACTURER|escapejs }}) и стеклопакетом {{ Count.GLAZING_MARK|escapejs }}.{% if Count.PROFILE_HEAT_TRANSFER > 0.1 %} Сопротивление теплопередаче профиля {{ Count.PROFILE_HEAT_TRANSFER|stringformat:".2f" }} м²·°C/Вт.{% endif %}{% if Count.GLAZING_HEAT_TRANSFER > 0.1 %} Теплопередача стеклопакета {{ Count.GLAZING_HEAT_TRANSFER|stringformat:".2f" }} м²·°C/Вт.{% endif %}",
+              "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/company/{{ Count.MERCHANT_ID }}-{{ Count.MERCHANT_T }}/",
+              "image": "http://oknardia.ru/media/{{ Count.MERCHANT_LOGO }}",
+              {% if Count.RATING_SET_N > 0.1 %}
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "{{ Count.RATING_SET_N|stringformat:".2f" }}",
+                "bestRating": "5", "worstRating": "0", "reviewCount": "1"
+              },
+              {% endif %}
+              "additionalProperty": [
+                {% if Count.SET_IMPLEMENTS_ALL %}{"@type": "PropertyValue", "name": "Фурнитура",                  "value": "{{ Count.SET_IMPLEMENTS_ALL|escapejs }}"},{% endif %}
+                {% if Count.SET_IMPLEMENTS_HANDLES %}{"@type": "PropertyValue", "name": "Ручки",                 "value": "{{ Count.SET_IMPLEMENTS_HANDLES|escapejs }}"},{% endif %}
+                {% if Count.SET_IMPLEMENTS_HINGES %}{"@type": "PropertyValue", "name": "Петли",                  "value": "{{ Count.SET_IMPLEMENTS_HINGES|escapejs }}"},{% endif %}
+                {% if Count.SET_IMPLEMENTS_LATCH %}{"@type": "PropertyValue", "name": "Механизмы запирания",     "value": "{{ Count.SET_IMPLEMENTS_LATCH|escapejs }}"},{% endif %}
+                {% if Count.SET_IMPLEMENTS_LIMITER %}{"@type": "PropertyValue", "name": "Ограничители открывания", "value": "{{ Count.SET_IMPLEMENTS_LIMITER|escapejs }}"},{% endif %}
+                {% if Count.SET_IMPLEMENTS_CATCH %}{"@type": "PropertyValue", "name": "Фиксаторы открывания",    "value": "{{ Count.SET_IMPLEMENTS_CATCH|escapejs }}"},{% endif %}
+                {% if Count.SET_CLIMATE_CONTROL|length > 3 %}{"@type": "PropertyValue", "name": "Климат-контроль", "value": "{{ Count.SET_CLIMATE_CONTROL|escapejs }}"},{% endif %}
+                {"@type": "PropertyValue", "name": "Подоконники",  "value": "{{ Count.SET_STILL|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Водоотливы",   "value": "{{ Count.SET_PANES|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Откосы",       "value": "{{ Count.SET_SLOPE|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Доставка",     "value": "{{ Count.SET_DELIVERY|escapejs }}"},
+                {"@type": "PropertyValue", "name": "Демонтаж и монтаж", "value": "{{ Count.SET_UNINSTALL_INSTALL|escapejs }}"},
+                {% if Count.SET_OTHER_CONDITIONS %}{"@type": "PropertyValue", "name": "Прочие условия", "value": "{{ Count.SET_OTHER_CONDITIONS|escapejs }}"},{% endif %}
+                {"@type": "PropertyValue", "name": "Источник данных", "value": "oknardia.ru"}
+              ],
+              "hasPart": [
+                {
+                  "@type": "Product",
+                  "@id": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ Count.PROFILE_ID }}-{{ Count.PROFILE_MANUFACTURER_T }}/{{ Count.PROFILE_ID }}-{{ Count.PROFILE_NAME_T }}/",
+                  "name": "{{ Count.PROFILE_NAME|escapejs }}",
+                  "description": "ПВХ-профиль {{ Count.PROFILE_MANUFACTURER|escapejs }} {{ Count.PROFILE_NAME|escapejs }}",
+                  "brand": {"@type": "Brand", "name": "{{ Count.PROFILE_MANUFACTURER|escapejs }}"},
+                  "url": "{{ request.scheme }}://{{ request.get_host }}/catalog/profile/{{ Count.PROFILE_ID }}-{{ Count.PROFILE_MANUFACTURER_T }}/{{ Count.PROFILE_ID }}-{{ Count.PROFILE_NAME_T }}/",
+                  "additionalProperty": [
+                    {% if Count.PROFILE_NUM_COLOR %}{"@type": "PropertyValue", "name": "Цвет профиля", "value": "{{ Count.PROFILE_NUM_COLOR|escapejs }}"},{% endif %}
+                    {% if Count.PROFILE_NUM_CAMERAS and Count.PROFILE_NUM_CAMERAS != "—" %}{"@type": "PropertyValue", "name": "Число камер рамы/створки", "unitText": "шт.", "value": "{{ Count.PROFILE_NUM_CAMERAS }}"},{% endif %}
+                    {% if Count.PROFILE_NUM_SEALS > 0 %}{"@type": "PropertyValue", "name": "Контуры уплотнения", "unitText": "шт.", "value": {{ Count.PROFILE_NUM_SEALS }}},{% endif %}
+                    {% if Count.PROFILE_THICKNESS > 5 %}{"@type": "PropertyValue", "name": "Монтажная ширина профиля", "unitCode": "MMT", "unitText": "мм", "value": {{ Count.PROFILE_THICKNESS }}},{% endif %}
+                    {% if Count.PROFILE_GLAZING_THICKNESS > 4 %}{"@type": "PropertyValue", "name": "Макс. толщина стеклопакета", "unitCode": "MMT", "unitText": "мм", "value": {{ Count.PROFILE_GLAZING_THICKNESS }}},{% endif %}
+                    {% if Count.PROFILE_HEAT_TRANSFER > 0.1 %}{"@type": "PropertyValue", "name": "Сопротивление теплопередаче (Ro)", "unitText": "м²·°C/Вт", "value": {{ Count.PROFILE_HEAT_TRANSFER|stringformat:".2f" }}},{% endif %}
+                    {% if Count.PROFILE_SOUND_PROOFING > 1 %}{"@type": "PropertyValue", "name": "Коэффициент звукоизоляции", "unitText": "дБ", "value": {{ Count.PROFILE_SOUND_PROOFING|stringformat:".1f" }}},{% endif %}
+                    {% if Count.PROFILE_HEIGHT > 15 %}{"@type": "PropertyValue", "name": "Высота в световом проеме (рама+створка)", "unitCode": "MMT", "unitText": "мм", "value": {{ Count.PROFILE_HEIGHT }}},{% endif %}
+                    {% if Count.PROFILE_RABBET > 1 %}{"@type": "PropertyValue", "name": "Фальц рамы", "unitCode": "MMT", "unitText": "мм", "value": {{ Count.PROFILE_RABBET }}},{% endif %}
+                    {% if Count.PROFILE_REINFORCEMENT %}{"@type": "PropertyValue", "name": "Армирование профиля", "value": "{{ Count.PROFILE_REINFORCEMENT|escapejs }}"},{% endif %}
+                    {% if Count.PROFILE_FILLET %}{"@type": "PropertyValue", "name": "Штапик", "value": "{{ Count.PROFILE_FILLET|escapejs }}"},{% endif %}
+                    {% if Count.PROFILE_SEAL_DESCRIPTION %}{"@type": "PropertyValue", "name": "Уплотнитель", "value": "{{ Count.PROFILE_SEAL_DESCRIPTION|escapejs }}"},{% endif %}
+                    {% if Count.PROFILE_OTHER %}{"@type": "PropertyValue", "name": "Прочие характеристики профиля", "value": "{{ Count.PROFILE_OTHER|escapejs }}"},{% endif %}
+                    {"@type": "PropertyValue", "name": "Источник данных", "value": "oknardia.ru"}
+                  ]
+                },
+                {
+                  "@type": "Product",
+                  "name": "{{ Count.GLAZING_MARK|escapejs }}",
+                  "description": "{% if Count.GLAZING_BRIEF_DESCRIPTION %}{{ Count.GLAZING_BRIEF_DESCRIPTION|escapejs }}{% else %}Стеклопакет {{ Count.GLAZING_MARK|escapejs }}{% endif %}",
+                  {% if Count.GLAZING_MANUFACTURER and Count.GLAZING_MANUFACTURER != "—//—" %}"brand": {"@type": "Brand", "name": "{{ Count.GLAZING_MANUFACTURER|escapejs }}"},{% endif %}
+                  "additionalProperty": [
+                    {% if Count.GLAZING_CAMERAS_NUM >= 1 %}{"@type": "PropertyValue", "name": "Камер в стеклопакете", "unitText": "шт.", "value": {{ Count.GLAZING_CAMERAS_NUM }}},{% endif %}
+                    {% if Count.GLAZING_THICKNESS >= 3 %}{"@type": "PropertyValue", "name": "Толщина стеклопакета", "unitCode": "MMT", "unitText": "мм", "value": {{ Count.GLAZING_THICKNESS }}},{% endif %}
+                    {% if Count.GLAZING_HEAT_TRANSFER > 0.1 %}{"@type": "PropertyValue", "name": "Сопротивление теплопередаче (Ro)", "unitText": "м²·°C/Вт", "value": {{ Count.GLAZING_HEAT_TRANSFER|stringformat:".2f" }}},{% endif %}
+                    {% if Count.GLAZING_SOUNDPROOFING >= 10 %}{"@type": "PropertyValue", "name": "Коэффициент звукоизоляции", "unitText": "дБ", "value": {{ Count.GLAZING_SOUNDPROOFING|stringformat:".1f" }}},{% endif %}
+                    {% if Count.GLAZING_LIGHT_TRANSMISSION >= 1 %}{"@type": "PropertyValue", "name": "Коэффициент светопропускания", "unitCode": "P1", "unitText": "%", "value": {{ Count.GLAZING_LIGHT_TRANSMISSION|stringformat:".0f" }}},{% endif %}
+                    {% if Count.GLAZING_PASSING_SUN >= 1 %}{"@type": "PropertyValue", "name": "Коэффициент солнцепропускания", "unitCode": "P1", "unitText": "%", "value": {{ Count.GLAZING_PASSING_SUN|stringformat:".0f" }}},{% endif %}
+                    {% if Count.GLAZING_LIGHT_REFLECTION and Count.GLAZING_LIGHT_REFLECTION != "—/—" %}{"@type": "PropertyValue", "name": "Коэффициент светоотражения (внешний/внутренний)", "unitText": "%", "value": "{{ Count.GLAZING_LIGHT_REFLECTION|escapejs }}"},{% endif %}
+                    {% if Count.GLAZING_REFLECTION_AND_ABSORPTION and Count.GLAZING_REFLECTION_AND_ABSORPTION != "—/—" %}{"@type": "PropertyValue", "name": "Теплоотражение/теплопоглощение", "unitText": "%", "value": "{{ Count.GLAZING_REFLECTION_AND_ABSORPTION|escapejs }}"},{% endif %}
+                    {"@type": "PropertyValue", "name": "Тонирование", "value": "{{ Count.GLAZING_TONING|escapejs }}"},
+                    {"@type": "PropertyValue", "name": "Источник данных", "value": "oknardia.ru"}
+                  ]
+                }
+              ]
+            }
+          }{% if not forloop.last %},{% endif %}{% endfor %}
+        ]
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block Top_JS3%}<script type="text/javascript">
   $(function () {
@@ -36,23 +193,31 @@
   })
 </script>{% endblock %}
 
-
 {% block Top_CSS1 %}{%  endblock %}
 
 {% block Main_Content %}<!--- ------------------------------------------------------------------------------------------------------------------------- --->
 <div class="row col-xs-12">
   <div class="col-md-9 col-xs-8">
-    <h1>Сравнении оконных наборов:{% for Count in SET_LIST %}{% if forloop.first %} {% else %}{% if forloop.last %} и&nbsp;{% else %}, {% endif %}{% endif %}{{ Count.SET_NAME }}{% if forloop.last %}.{% endif %}{% endfor %}</h1>
+    {# Хлебные крошки: Главная → Каталог → Оконные наборы (ссылка) → текущее сравнение #}
+    <ol class="breadcrumb">
+      <li><a href="/">Главная</a></li>
+      <li><a href="/catalog/">Каталог</a></li>
+      <li><a href="/catalog/sets/">Оконные наборы</a></li>
+      <li>Сравнение:{% for Count in SET_LIST %}{% if forloop.first %} {% else %}{% if forloop.last %} и&nbsp;{% else %}, {% endif %}{% endif %}«{{ Count.SET_NAME }}»{% endfor %}</li>
+    </ol>
+    {# Исправлена опечатка: «Сравнении» → «Сравнение» #}
+    <h1>Сравнение оконных наборов:{% for Count in SET_LIST %}{% if forloop.first %} {% else %}{% if forloop.last %} и&nbsp;{% else %}, {% endif %}{% endif %}{{ Count.SET_NAME }}{% if forloop.last %}.{% endif %}{% endfor %}</h1>
     <p>Оконный набор&nbsp;&mdash; это комплект оконного профиля (рамы и&nbsp;сворки), стеклопакета, фурнитуры и&nbsp;уплотнителей&nbsp;&mdash; готовое окно в&nbsp;сборе для установки в&nbsp;проём. В&nbsp;набор может входить отлив, подоконник, откос, встраиваемые системы <nobr>климат-контроля</nobr>, оконная фурнитура открывания, запоры, уплотнители, москитная сетка&hellip; а&nbsp;также сопутствующие услуги: демонтаж старых и&nbsp;установка новых окон, доставка, гарантийное обслуживание, уборка, вынос и&nbsp;утилизация строительного мусора, защитное укрытие мебели на&nbsp;время монтажа и&nbsp;другое.</p>
-    <h4>В&nbsp;таблицу сравнения услуг и&nbsp;условий, входящих в&nbsp;оконные наборы, добавлены следующие производители и&nbsp;поставщики:</h4>
+    {# h4 → h2 для правильной иерархии заголовков (SEO); визуальный размер сохраняем через style #}
+    <h2 style="font-size:1em;font-weight:bold;margin-top:1em;">В&nbsp;таблицу сравнения услуг и&nbsp;условий, входящих в&nbsp;оконные наборы, добавлены следующие производители и&nbsp;поставщики:</h2>
     <ul>{% for MERCANT in LIST_MERCHANT %}
       <li>{{ MERCANT }}.</li>{% endfor %}
     </ul>
-    <h4>В&nbsp;средней части таблице вы&nbsp;сможете сравнить характеристики оконных профилей в&nbsp;наборах:</h4>
+    <h2 style="font-size:1em;font-weight:bold;margin-top:1em;">В&nbsp;средней части таблицы вы&nbsp;сможете сравнить характеристики оконных профилей в&nbsp;наборах:</h2>
     <ul>{% for PROFILE in LIST_PROFILE %}
       <li>{{ PROFILE }}.</li>{% endfor %}
     </ul>
-    <h4>Нижний блок таблицы посвящен характеристикам и&nbsp;сравнению стеклопакетов в&nbsp;наборах. Формулы выбранных стеклопакетов:</h4>
+    <h2 style="font-size:1em;font-weight:bold;margin-top:1em;">Нижний блок таблицы посвящен характеристикам и&nbsp;сравнению стеклопакетов в&nbsp;наборах. Формулы выбранных стеклопакетов:</h2>
     <ul>{% for GLAZING in LIST_GLAZING %}
       <li>{{ GLAZING }}.</li>{% endfor %}
     </ul>
@@ -66,14 +231,18 @@
       <thead>
         <tr style="background:white;">
           <th class="col-sm-2">Поставщик:<br /><small style="font-size:small;font-weight:100;">компания, предлагающая установку окон</small></th>{% for Count in SET_LIST %}
-          <th class="col-xs-1" title="Установку окон предлагает компания «{{ Count.MERCHANT }}»"><h2 style="font-size:1em;margin:0;font-weight:bold;">{{ Count.MERCHANT }}</h2><br />
+          <th class="col-xs-1" title="Установку окон предлагает компания «{{ Count.MERCHANT }}»">
+            {# h2 в ячейке таблицы — семантический мусор; заменяем на strong #}
+            <strong>{{ Count.MERCHANT }}</strong><br />
             <img src="http://oknardia.ru/media/{{ Count.MERCHANT_LOGO }}" style="height: 25px;width:auto;" alt="{{ Count.MERCHANT }}"><br />
             <div class="url"><nobr>{% if Count.IS_COMMERCIAL %}<a href="{{ Count.MERCHANT_URL }}" target="_blank" rel="nofollow">{{ Count.MERCHANT_URL_SHOT|truncatechars:30 }}</a>{% else %}{{ Count.MERCHANT_URL_SHOT|truncatechars:30 }}{% endif %}</nobr><br /><a href="/catalog/company/{{ Count.MERCHANT_ID }}-{{ Count.MERCHANT_T }}/">в&nbsp;каталоге</a></div>
           </th>{% endfor %}
-        </tr><tr>
+        </tr>
+        <tr>
           <th>Название набора:</th>{% for Count in SET_LIST %}
           <th title="Название оконного набора: «{{ Count.SET_NAME }}»">{{ Count.SET_NAME|truncatechars:25 }}</th>{% endfor %}
-        </tr><tr class="rating">
+        </tr>
+        <tr class="rating">
           <th><nobr>Рейтиг «Окнардии»:</nobr></th>{% for Count in SET_LIST %}
           <td{% if Count.RATING_SET_COLOR != "" %} style="background:{{ Count.RATING_SET_COLOR }};"{% endif %}>
             <nobr title="Рейтинг «Окнардии» для окон набора «{{ Count.SET_NAME }}» компании «{{ Count.MERCHANT }}» — {% if Count.RATING_SET_N > 0.1 %}{{ Count.RATING_SET_N|stringformat:".2f" }}{% else %}не присвоен{% endif %}"><!-- НАЧАЛО звездочки рейтинга -->{% for Star in Count.RATING_SET %}{% if Star == 0 %}<i class="glyphicon glyphicon-star-empty"></i>{% else %}<b class="glyphicon glyphicon-star"></b>{% endif %}{% endfor %}<!-- КОНЕЦ звездочки рейтинга НАЧАЛО бедж --> {% if Count.RATING_SET_N > 0.1 %}<tt class="badge">{{ Count.RATING_SET_N|stringformat:".2f" }}</tt>{% endif %}<!-- КОНЕЦ бедж --> <a
@@ -174,7 +343,7 @@
           <td{% if Count.PROFILE_FILLET != ""  %} title="Характеристики штапика: {{ Count.PROFILE_FILLET }}"{% endif %}>{% if Count.PROFILE_FILLET != ""  %}{{ Count.PROFILE_FILLET }}{% else %}—{% endif %}</td>{% endfor %}
         </tr><tr>
           <th>Уплотнитель:</th>{% for Count in SET_LIST %}
-          <td{% if Count.PROFILE_SEAL_DESCRIPTION != ""  %} title="Хараектеристики уплотнитель стеклопакета и контуров рама-створка: {{ Count.PROFILE_SEAL_DESCRIPTION|lower }}"{% endif %}>{% if Count.PROFILE_SEAL_DESCRIPTION != ""  %}{{ Count.PROFILE_SEAL_DESCRIPTION|capfirst }}{% else %}—{% endif %}</td>{% endfor %}
+          <td{% if Count.PROFILE_SEAL_DESCRIPTION != ""  %} title="Характеристики уплотнитель стеклопакета и контуров рама-створка: {{ Count.PROFILE_SEAL_DESCRIPTION|lower }}"{% endif %}>{% if Count.PROFILE_SEAL_DESCRIPTION != ""  %}{{ Count.PROFILE_SEAL_DESCRIPTION|capfirst }}{% else %}—{% endif %}</td>{% endfor %}
         </tr><tr>
           <th>Прочие характеристики:</th>{% for Count in SET_LIST %}
           <td{% if Count.PROFILE_OTHER != ""  %} title="Прочие характеристики рамы и створки: {{ Count.PROFILE_OTHER }}"{% endif %}><small>{% if Count.PROFILE_OTHER != ""  %}{{ Count.PROFILE_OTHER }}{% else %}—{% endif %}</small></td>{% endfor %}

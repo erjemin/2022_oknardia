@@ -3,73 +3,117 @@ __author__ = 'Sergei Erjemin'
 
 from PIL import Image, ImageDraw
 from oknardia.settings import *
-import django.utils.dateformat
-import django.utils.timezone
+from pytils.translit import slugify, translify
 import os
 import math
 import re
+import html
 import urllib3
 import xml.dom.minidom
 
 
 def safe_html_spec_symbols(s: str) -> str:
-    """ Очистка строки от HTML-разметки типографа
+    """ Очистка строки от HTML-разметки и получение чистого текста.
 
-    :param s: str --  строка которую надо очистить
-    :return: str: str -- очищенная строка
+    Функция удаляет HTML-теги, содержимое исключённых тегов (script, style, object, embed, applet,
+    iframe, svg, canvas, code, kbd, pre, var, samp, output, noscript, link, meta, form, input,
+    button, textarea, select, base, title, head, body, track, source, picture), заменяет HTML-мнемоники
+    на Unicode-символы и убирает лишние пробелы.
+
+    :param s: str -- строка которую надо очистить
+    :return: str -- очищенная строка с чистым текстом
     """
-    # очистка строки от некоторых спец-символов HTML
-    result = s.replace('&shy;', '­')
-    result = result.replace('<span class="laquo">', '')
-    result = result.replace('<span style="margin-right:0.44em;">', '')
-    result = result.replace('<span style="margin-left:-0.44em;">', '')
-    result = result.replace('<span class="raquo">', '')
-    result = result.replace('<span class="point">', '')
-    result = result.replace('<span class="thinsp">', ' ')
-    result = result.replace('<span class="ensp">', '')
-    result = result.replace('</span>', '')
-    result = result.replace('&nbsp;', ' ')
-    result = result.replace('&laquo;', '«')
-    result = result.replace('&raquo;', '»')
-    result = result.replace('&hellip;', '…')
-    result = result.replace('<nobr>', '')
-    result = result.replace('</nobr>', '')
-    result = result.replace('&mdash;', '—')
-    result = result.replace('&#8470;', '№')
-    result = result.replace('<br />', ' ')
-    result = result.replace('<br>', ' ')
+    # Шаг 1: Удаляем содержимое "опасных" и невидимых тегов
+    # Опасные: script, object, embed, applet, iframe, svg, canvas
+    # Техническое содержимое: style, code, kbd, pre, var, samp, output, noscript
+    # Формы: form, input, button, textarea, select
+    # Служебные: meta, link, base, title, head, body, track, source, picture
+    # Используем флаг IGNORECASE и DOTALL для работы с многострочным контентом
+    result = re.sub(
+        r'<(script|style|code|kbd|pre|var|samp|output|noscript|link|meta|iframe|object|embed|applet|form|input|button|textarea|select|svg|canvas|base|title|head|body|track|source|picture)(?:\s[^>]*)?>.*?</\1>',
+        '',
+        s,
+        flags=re.IGNORECASE | re.DOTALL
+    )
+
+    # Удаляем самозакрывающиеся теги (что-то типа <input/>, <embed/>, и т.д.)
+    result = re.sub(
+        r'<(input|embed|meta|link|base|track|source|img)(?:\s[^>]*)?/>',
+        '',
+        result,
+        flags=re.IGNORECASE
+    )
+
+    # Шаг 2: Удаляем все остальные HTML-теги (в т.ч. самозакрывающиеся)
+    result = re.sub(r'<[^>]+>', '', result)
+
+    # Шаг 3: Заменяем HTML-мнемоники на Unicode-символы (включая числовые и именованные)
+    # html.unescape() обрабатывает: &nbsp;, &lt;, &#8470;, &#x20AC; и т.д.
+    result = html.unescape(result)
+
+    # Шаг 4: Очищаем множественные пробелы (в т.ч. табуляцию и переводы строк)
+    result = re.sub(r'\s+', ' ', result)
+
+    # Шаг 5: Убираем пробелы в начале и конце строки
+    result = result.strip()
+
     return result
 
 
-# def Rus2Lat(RusString):
-#     return translit(re.sub(
-#         r'<[\s\S]*?>', '',  re.sub(r'&[\S]*?;', '-', RusString)
-#     ), "ru", reversed=True).replace(u" ", u"-").replace(u"'", u"").replace(u"/", u"~").replace(u"\\", u"~").replace(u"--", u"-")
+def sanitize_slug(text: str, separator: str = '-', max_length: int = 200) -> str:
+    """ Преобразует текст в URL-безопасный слаг (slug).
+
+    Функция очищает текст от HTML-разметки, выполняет транслитерацию русского текста в
+    латиницу, заменяет пробелы и недопустимые символы на разделитель (по умолчанию дефис),
+    и возвращает готовый к использованию в URL слаг.
+
+    Этапы обработки:
+    1. Очистка от HTML-разметки через safe_html_spec_symbols()
+    2. Транслитерация русского текста в латиницу через pytils.translit.slugify()
+    3. Замена множественных разделителей на один
+    4. Удаление разделителя в начале и конце
+    5. Прерывание на max_length символов
+
+    :param text: str -- исходный текст, может содержать HTML и русский текст
+    :param separator: str -- разделитель для слага (по умолчанию дефис '-')
+                             pytils.slugify() всегда использует дефис, этот параметр
+                             конвертирует результат в нужный разделитель
+    :param max_length: int -- максимальная длина слага в символах (по умолчанию 200)
+    :return: str -- очищенный и готовый к использованию слаг
+
+    Примеры:
+    >>> sanitize_slug('   Тест &mdash; HTML <b>текст</b>   ')
+    'test-html-tekst'
+    >>> sanitize_slug('Привет мир!!!   @#$')
+    'privet-mir'
+    >>> sanitize_slug('<p>Русский текст в слаге</p>')
+    'russkii-tekst-v-slage'
+    >>> sanitize_slug('Проверка_слага', separator='_')
+    'proverka_slaga'
+    """
+    # Шаг 1: Очищаем от HTML и мнемоник, убираем лишние пробелы
+    cleaned = safe_html_spec_symbols(text)
+
+    # Шаг 2: Транслитерируем русский текст в латиницу (pytils.slugify использует дефис)
+    slug = slugify(cleaned)
+
+    # Шаг 3: Конвертируем разделитель если нужен другой (не дефис)
+    if separator != '-':
+        slug = slug.replace('-', separator)
+
+    # Шаг 4: Убираем множественные разделители (например, '---' -> '-')
+    slug = re.sub(f'{re.escape(separator)}+', separator, slug)
+
+    # Шаг 5: Убираем разделитель в начале и конце если он есть
+    slug = slug.strip(separator)
+
+    # Шаг 6: Обрезаем по max_length если нужно (и убираем разделитель в конце)
+    if max_length and len(slug) > max_length:
+        slug = slug[:max_length].rstrip(separator)
+
+    return slug.lower()
 
 
-# def Rus2Url (RusString):
-#     return re.sub(r'^-|-$', '',
-#                   re.sub(r'-{1,}', '-',
-#                          re.sub(r'<[\s\S]*?>|&[\S]*?;|[\W]', '-',
-#                                 re.sub(r'\+', '-plus', translit(RusString, "ru", reversed=True))
-#                                 )
-#                          )
-#                   ).lower()
-#
-#
-# # Суммирует все цифры в строке через произвольные (не цифровые) разделители
-# def sum_through(string_w_slash):
-#     string_w_slash = re.sub( r"[^0-9]", u",", string_w_slash)
-#     ListTerms = string_w_slash.split(u',')
-#     Summ = 0
-#     for Count in ListTerms:
-#         try:
-#             Summ += int(Count)
-#         except:
-#             pass
-#     return Summ
-#
-#
 def get_rating_set_for_stars(rating: float = 0.) -> list:
     """ Возвращает массив 1 и 0 для отрисовки звёздочек.
 
@@ -86,24 +130,13 @@ def get_rating_set_for_stars(rating: float = 0.) -> list:
             rating_set.append(0)
     return rating_set
 
-
-#
-#
-# # рассчитывает дистанцию в км. между двумя геокоординатами
-# def get_geo_distance(lon1, lat1, lat2, lon2):
-#     lonA, latA, latB, lonB = map(math.radians, [lon1, lat1, lat2, lon2])
-#     distance = 2 * math.asin(math.sqrt(math.sin((latB - latA) / 2) ** 2 + math.cos(latA) * math.cos(latB) * math.sin(
-#         (lonB - lonA) / 2) ** 2)) * 6371.032  # РАДИУС ЗЕМЛИ 6371.032 КМ.
-#     return distance
-
-
-def normalize(val: float, val_max: int = 5, val_min: int = 0) -> float:
+def normalize(val: float, val_max: float = 5.0, val_min: float = 0.0) -> float:
     """ Нормализация значения
 
     :param val: float -- значение которое надо нормализовать
-    :param val_max: int -- максимальное значение в нормализуемом диапазоне
-    :param val_min: int -- минимальное значение в нормализуемом диапазоне
-    :return: float: float -- нормализованное значение
+    :param val_max: float -- максимальное значение в нормализуемом диапазоне
+    :param val_min: float -- минимальное значение в нормализуемом диапазоне
+    :return: float -- нормализованное значение
     """
     return float(val - val_min) / float(val_max - val_min)
 
@@ -201,7 +234,7 @@ def make_big_img_win_flap(img_file_name_with_path: str, width: int, height: int,
     # height_door = int(height_door)
     # создаем картинку с нужными размерами
     img = Image.new("RGBA", (int(width * PICT_H / height_max), PICT_H), (255, 255, 255, 0))
-    print(img_file_name_with_path)
+    # print(img_file_name_with_path)
     # находим крайние точки периметра (если окно -- выравнено вверх; если дверь -- вниз)
     top = 0
     left = 0
@@ -586,11 +619,4 @@ def sum_through(string_w_slash: str) -> int:
     return sum_result
 
 
-def touch_reload_wsgi(s: str = ''):
-    """ Функция перезагружает WSGI-сервер.
-
-    :return: None
-    """
-    with open(TOUCH_RELOAD, 'a', encoding="utf-8") as f:
-        f.write(f'\nreload wsgi by cash-template {s}'
-                f' {django.utils.dateformat.format(django.utils.timezone.now(), "Y-m-d H:i:s")}')
+# Удалить: touch_reload_wsgi() — серверный reload теперь оркестрируется внешним процесс-менеджером.

@@ -23,7 +23,7 @@
     <div class="btn-toolbar" style="width:80%">{% for I_APART in LIST_APART %}
       <button type="button" class="btn btn-default" style="margin:1ex"
               accesskey="{{ I_APART.id }}"
-              onclick="window.location.href='/{{ ADDRESS_ID }}/{{ I_APART.id }}/{{ addr_T }}';try{yaCounter32997984.reachGoal('CHOICE_APP');}catch(e){}">
+              onclick="window.location.href='/price/seriaID{{ BASE_SERIA_ID }}--{{ BASE_SERIA_LAT }}/appartID{{ I_APART.id }}/addressID{{ ADDRESS_ID }}--{{ addr_T }}';try{yaCounter32997984.reachGoal('CHOICE_APP');}catch(e){}">
               {{ I_APART.sNameApartment|safe }}
       </button>{% endfor %}
     </div>
