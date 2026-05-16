@@ -2,46 +2,28 @@
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.core.mail import send_mail
+from django.db.models import ExpressionWrapper, FloatField, F, Count
+from django.db.models.functions import Abs
 from smtplib import SMTPException
 from oknardia.models import Seria_Info, Building_Info, Apartment_Type
-from web.add_func import get_yandex_geocode_by_address, get_geo_distance
-import json
-import datetime
+from web.add_func import get_yandex_geocode_by_address, get_geo_distance, sanitize_slug
 import time
-import pytils
-
 # from django.core.context_processors import csrf
 
 
 def main_init(request: HttpRequest) -> HttpResponse:
-    """ Главная страница (статичная, только с проверками куков)
+    """ Главная страница (статичная, только с проверками кук)
 
     :param request: входящий http-запрос
     :return response: исходящий http-ответ
     """
-    to_template = {}  # словарь, для передачи шаблону
+    to_template: dict[str, object] = {}  # словарь, для передачи шаблону
     num_viz = 0  # как будто первый визит
     # проверяем куки числа визита
     if "NumVisit" in request.COOKIES:
         # стоят куки, и это не первый визит
         num_viz = request.COOKIES["NumVisit"]  # читаем число визитов
         num_viz = int(num_viz) + 1  # увеличиваем порядковый номер визитов
-    # ПРОВЕРЯЧЕМ КУКИ ПРОСМОТРЕ ЦЕНОВЫХ ПРЕДЛОЖЕНИЙ
-    if "LastVisit" in request.COOKIES:
-        # стоят куки
-        last_visit = json.loads(request.COOKIES["LastVisit"])
-        last_visit2 = []
-        for i in last_visit:
-            last_visit2.append({
-                "Time": datetime.datetime.fromtimestamp(i["Time"]),
-                "LastURL": i["LastURL"],
-                "LastAddress": i["LastAddress"],
-                "LastApart": i["LastApart"]
-            })
-        to_template.update({'LAST_VISIT': last_visit2[:3]})
-    else:
-        to_template.update({'LAST_VISIT': None})
-    to_template.update({'META_DOCUMENT_STATE': u"Static"})      # Эта страничка статичная (в шаблон)
     to_template.update({'NV': num_viz})
     # to_template.update(csrf(request))                           # токен, для метода POST и GET
     response = render(request, "index.html", to_template)
@@ -55,7 +37,7 @@ def tariff(request: HttpRequest) -> HttpResponse:
     :param request: входящий http-запрос
     :return response: исходящий http-ответ
     """
-    to_template = {}      # для передачи в шаблон
+    to_template: dict[str, object] = {}      # для передачи в шаблон
     if request.method == 'POST':
         # print request.POST
         if 'tariff' in request.POST and 'email_' in request.POST \
@@ -105,6 +87,22 @@ def contact(request: HttpRequest) -> HttpResponse:
     return render(request, "contact.html", {})
 
 
+def _fmt(value: object, fmt: str = ".1f", threshold: float = 0, default: str = "Нет данных") -> str:
+    """Вспомогательная функция: форматирует числовое поле здания или возвращает заглушку.
+
+    :param value:     значение поля модели (числовое)
+    :param fmt:       строка формата для f-string, например '.1f' или '.0f'
+    :param threshold: значения < threshold считаются «нет данных» (обычно 0 или -1)
+    :param default:   строка-заглушка при отсутствии данных
+    """
+    try:
+        if float(value) < threshold:
+            return default
+        return f"{value:{fmt}}"
+    except (TypeError, ValueError):
+        return default
+
+
 def get_address(request: HttpRequest) -> HttpResponse:
     """ Вызывается после ввода пользователем адреса. Получает строку с адресом методом POST
 
@@ -113,17 +111,17 @@ def get_address(request: HttpRequest) -> HttpResponse:
     :param request: request
     :return: response
     ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░ ░▒▓█▓▒░"""
-    time_start = time.time()
+    time_start = time.perf_counter()
     if request.method != 'POST':
         return redirect("/")
     if 'address' not in request.POST:
         return redirect("/")
     addr = request.POST['address']
-    to_template = {}
+    to_template: dict[str, object] = {}
     try:
         q = Building_Info.objects.get(sAddress=addr)
         # Если QuerySet не содержит GeoCode (такое бывает, что в Яндекс-Картах не было каких-то данных),
-        # то пробуем получить GeoCode повторно (вдруг, у Яндекс-Карт расширилась база адресов)
+        # то пробуем получить GeoCode повторно (вдруг у Яндекс-Карт расширилась база адресов)
         if int(q.fGeoCode_Longitude) != 0 and int(q.fGeoCode_Latitude != 0):
             # print("координаты не ноль")
             to_template.update({'LATITUDE':  str(q.fGeoCode_Latitude).replace(",", "."),
@@ -141,112 +139,59 @@ def get_address(request: HttpRequest) -> HttpResponse:
         # print(geocode)
         to_template.update({'LATITUDE':  str(geocode[0]).replace(",", ".")})
         to_template.update({'LONGITUDE': str(geocode[1]).replace(",", ".")})
-        q = Building_Info.objects.raw(
-            f"SELECT oknardia_building_info.*, "
-            f"ABS({geocode[0]} - oknardia_building_info.fGeoCode_Latitude) + "
-            f"ABS({geocode[1]} - oknardia_building_info.fGeoCode_Longitude) AS R2 "
-            f"FROM   oknardia_building_info "
-            f"ORDER BY R2 "
-            f"LIMIT 1;")[0]
-        if q.R2 > 0.67:     # Если расстояние между точками больше 670 метров, то не показываем результат
-            to_template.update({'ticks': float(time.time()-time_start)})
+        # Ищем ближайшее здание по манхэттенскому расстоянию (lat/lon в градусах, ~0.01 ≈ 1 км)
+        q = (Building_Info.objects
+             .annotate(
+                 R2=ExpressionWrapper(
+                     Abs(float(geocode[0]) - F('fGeoCode_Latitude'))
+                     + Abs(float(geocode[1]) - F('fGeoCode_Longitude')),
+                     output_field=FloatField()
+                 )
+             )
+             .order_by('R2')
+             .first())
+        if q is None or q.R2 > 0.67:  # Если расстояние > ~670 метров или ничего нет — не показываем
+            to_template.update({'ticks': float(time.perf_counter()-time_start)})
             to_template.update({'addr': addr})
             return render(request, "popup/popup_incorrect_address.html", to_template)
     addr = q.sAddress
     # print("addr", addr)
-    to_template.update({'ADDRESS_ID': q.id,
-                        'SERIA': q.sSerias_Project})
-    if q.fTotal_Area < 0:
-        to_template.update({'TOTAL_AREA': "Нет данных"})
-    else:
-        to_template.update({'TOTAL_AREA': f"{q.fTotal_Area: .1f}"})
-    to_template.update({'CADASTRE_NUM': q.sCadastre_Num_Area})
-    if q.fLand_Area < 0:
-        to_template.update({'LAND': "Нет данных"})
-    else:
-        to_template.update({'LAND': f"{q.fLand_Area: .1f}"})
-    to_template.update({'INVENTORY_NUM': q.sInventory_Num})
-    if q.iNum_Apartments < 0:
-        to_template.update({'NUM_APARTMENTS': "Нет данных"})
-    else:
-        to_template.update({'NUM_APARTMENTS': q.iNum_Apartments})
-    to_template.update({'TYPE_BUILDING': q.sType})
-    if q.iNum_Apartments < 0:
-        to_template.update({'STOREYS': "Нет данных"})
-    else:
-        to_template.update({'STOREYS': q.iStoreys})
-    if q.fCommon_Area < 0:
-        to_template.update({'COMMON_AREA': "Нет данных"})
-    else:
-        to_template.update({'COMMON_AREA': f"{q.fCommon_Area: .1f}"})
-    to_template.update({'ENERGY_EFFICIENCY': q.sEnergy_Efficiency})
-    if q.iEntrances_Porchs < 0:
-        to_template.update({'NUM_ENTERANCES': "Нет"})
-    else:
-        to_template.update({'NUM_ENTERANCES': q.iEntrances_Porchs})
-    if q.fUninhabited_Area < 0:
-        to_template.update({'UNINHABITED_AREA': "Нет данных"})
-    else:
-        to_template.update({'UNINHABITED_AREA': f"{q.fUninhabited_Area: .1f}"})
-    if q.sManagement_Co == u"N/A":
-        to_template.update({'MANAGEMENT_CO': "Нет данных"})
-    else:
-        to_template.update({'MANAGEMENT_CO': q.sManagement_Co})
-    if q.iElevators < 0:
-        to_template.update({'NUM_ELEVATORS': "Нет данных"})
-    else:
-        to_template.update({'NUM_ELEVATORS': q.iElevators})
-    if q.fResidential_Area < 0:
-        to_template.update({'RESIDENTIAL_AREA': "Нет данных"})
-    else:
-        to_template.update({'RESIDENTIAL_AREA': f"{q.fResidential_Area: .1f}"})
-    if q.iNum_Residents < 0:
-        to_template.update({'NUM_RESIDENTS': "Нет данных"})
-    else:
-        to_template.update({'NUM_RESIDENTS': q.iNum_Residents})
-    if q.fPrivate_Area < 0:
-        to_template.update({'PRIVATE_AREA': "Нет данных"})
-    else:
-        to_template.update({'PRIVATE_AREA': f"{q.fPrivate_Area:.1f}"})
-    if q.iNum_Accounts < 0:
-        to_template.update({'NUM_ACCOUNTS': "Нет данных"})
-    else:
-        to_template.update({'NUM_ACCOUNTS': q.iNum_Accounts})
-    if q.iCommissioning_year == "N/A":
-        to_template.update({'COMMISSIONING_YEAR': "Нет данных"})
-    else:
-        to_template.update({'COMMISSIONING_YEAR': q.iCommissioning_year})
-    if q.fGovernment_Area < 0:
-        to_template.update({'GOVERNMENT_AREA': "Нет данных"})
-    else:
-        to_template.update({'GOVERNMENT_AREA': f"{q.fGovernment_Area: .1f}"})
-    if q.fCondition_House < 0:
-        to_template.update({'CONDITION_HOUSE': "Нет данных"})
-    else:
-        to_template.update({'CONDITION_HOUSE': f"{q.fCondition_House: .0f}%"})
-    if q.fCondition_Foundation < 0:
-        to_template.update({'CONDITION_FOUNDATION': "Нет данных"})
-    else:
-        to_template.update({'CONDITION_FOUNDATION': f"{q.fCondition_Foundation: .0f}%"})
-    if q.fCondition_Walls < 0:
-        to_template.update({'CONDITION_WALL': u"Нет данных"})
-    else:
-        to_template.update({'CONDITION_WALL': f"{q.fCondition_Walls: .0f}%"})
-    if q.fCondition_Overlap < 0:
-        to_template.update({'CONDITION_OVERLAP': "Нет данных"})
-    else:
-        to_template.update({'CONDITION_OVERLAP': f"{q.fCondition_Overlap: .0f}%"})
-    if q.fMunicipal_Area < 0:
-        to_template.update({'MUNICIPAL_AREA': "Нет данных"})
-    else:
-        to_template.update({'MUNICIPAL_AREA': f"{q.fMunicipal_Area: .1f}"})
-    to_template.update({'URL2REFOEMAGKH': q.sURL})
+    to_template.update({
+        'ADDRESS_ID':          q.id,
+        'SERIA':               q.sSerias_Project,
+        'TOTAL_AREA':          _fmt(q.fTotal_Area),
+        'CADASTRE_NUM':        q.sCadastre_Num_Area,
+        'LAND':                _fmt(q.fLand_Area),
+        'INVENTORY_NUM':       q.sInventory_Num,
+        'NUM_APARTMENTS':      q.iNum_Apartments     if q.iNum_Apartments >= 0    else "Нет данных",
+        'TYPE_BUILDING':       q.sType,
+        'STOREYS':             q.iStoreys            if q.iNum_Apartments >= 0    else "Нет данных",
+        'COMMON_AREA':         _fmt(q.fCommon_Area),
+        'ENERGY_EFFICIENCY':   q.sEnergy_Efficiency,
+        'NUM_ENTERANCES':      q.iEntrances_Porchs   if q.iEntrances_Porchs >= 0  else "Нет",
+        'UNINHABITED_AREA':    _fmt(q.fUninhabited_Area),
+        'MANAGEMENT_CO':       q.sManagement_Co      if q.sManagement_Co != "N/A" else "Нет данных",
+        'NUM_ELEVATORS':       q.iElevators          if q.iElevators >= 0         else "Нет данных",
+        'RESIDENTIAL_AREA':    _fmt(q.fResidential_Area),
+        'NUM_RESIDENTS':       q.iNum_Residents      if q.iNum_Residents >= 0     else "Нет данных",
+        'PRIVATE_AREA':        _fmt(q.fPrivate_Area),
+        'NUM_ACCOUNTS':        q.iNum_Accounts       if q.iNum_Accounts >= 0      else "Нет данных",
+        'COMMISSIONING_YEAR':  q.iCommissioning_year if q.iCommissioning_year != "N/A" else "Нет данных",
+        'GOVERNMENT_AREA':     _fmt(q.fGovernment_Area),
+        'CONDITION_HOUSE':     _fmt(q.fCondition_House,       fmt=".0f", default="Нет данных") + "%" if q.fCondition_House >= 0      else "Нет данных",
+        'CONDITION_FOUNDATION': _fmt(q.fCondition_Foundation, fmt=".0f", default="Нет данных") + "%" if q.fCondition_Foundation >= 0 else "Нет данных",
+        'CONDITION_WALL':      _fmt(q.fCondition_Walls,       fmt=".0f", default="Нет данных") + "%" if q.fCondition_Walls >= 0      else "Нет данных",
+        'CONDITION_OVERLAP':   _fmt(q.fCondition_Overlap,     fmt=".0f", default="Нет данных") + "%" if q.fCondition_Overlap >= 0    else "Нет данных",
+        'MUNICIPAL_AREA':      _fmt(q.fMunicipal_Area),
+        'URL2REFOEMAGKH':      q.sURL,
+    })
     # Пробуем получить базовую серию дома. Для этого рекурсивно раскручиваем записи в таблице Seria_Info
     idd = q.kSeria_Link_id
     all_apartment_in_seria = False
+    q1 = None  # страховка: если у здания нет серии, q1 остаётся None
     while idd is not None:
         # рекурсивно движемся по дерву потомок→предок серий домов.
-        q1 = Seria_Info.objects.get(id=idd)
+        q1 = Seria_Info.objects.select_related('kRoot').get(id=idd)
         # получаем список типовых квартир для серии дома с id == idd
         all_apartment_in_seria = Apartment_Type.objects.filter(kSeria_id=idd).order_by("iSort")
         # проверяем есть-ли что-то в списке типовых квартир.
@@ -258,39 +203,42 @@ def get_address(request: HttpRequest) -> HttpResponse:
     # проверяем, был ли получен список квартир
     if not bool(all_apartment_in_seria):
         # Если списка квартир нет, нужно получить список ближайших адресов, для которых есть цены.
-        q = Building_Info.objects.raw(
-            f"SELECT"
-            f"  oknardia_building_info.sAddress,           oknardia_building_info.id,"
-            f"  oknardia_building_info.fGeoCode_Longitude, oknardia_building_info.fGeoCode_Latitude,"
-            f"  oknardia_seria_info.kRoot_id,              oknardia_seria_info.sName,"
-            f"  COUNT(oknardia_apartment_type.sNameApartment) AS NumApart,"
-            f"  ABS({geocode[0]} - oknardia_building_info.fGeoCode_Latitude)"
-            f"    + ABS({geocode[1]} - oknardia_building_info.fGeoCode_Longitude) AS R2 "
-            f"FROM oknardia_building_info"
-            f"  INNER JOIN oknardia_seria_info"
-            f"    ON oknardia_building_info.kSeria_Link_id = oknardia_seria_info.id"
-            f"  INNER JOIN oknardia_apartment_type"
-            f"    ON oknardia_seria_info.kRoot_id = oknardia_apartment_type.kSeria_id "
-            f"WHERE oknardia_building_info.fGeoCode_Longitude <> 0.0"
-            f"  AND oknardia_building_info.fGeoCode_Latitude <> 0.0 "
-            f"GROUP BY oknardia_seria_info.sName,"
-            f"         oknardia_seria_info.kRoot_id,"
-            f"         oknardia_building_info.id,"
-            f"         oknardia_building_info.sAddress,"
-            f"         oknardia_building_info.fGeoCode_Longitude,"
-            f"         oknardia_building_info.fGeoCode_Latitude "
-            f"ORDER BY R2 "
-            f"LIMIT 5;")
-        q = list(q)
+        # Ищем здания с ненулевыми координатами и у которых через серию есть типовые квартиры.
+        q = list(
+            Building_Info.objects
+            .exclude(fGeoCode_Longitude=0.0)
+            .exclude(fGeoCode_Latitude=0.0)
+            .filter(kSeria_Link__kRoot__apartment_type__isnull=False)
+            .select_related('kSeria_Link', 'kSeria_Link__kRoot')
+            .annotate(
+                R2=ExpressionWrapper(
+                    Abs(float(geocode[0]) - F('fGeoCode_Latitude'))
+                    + Abs(float(geocode[1]) - F('fGeoCode_Longitude')),
+                    output_field=FloatField()
+                ),
+                NumApart=Count('kSeria_Link__kRoot__apartment_type', distinct=True),
+                sName=F('kSeria_Link__sName'),
+                kRoot_id=F('kSeria_Link__kRoot_id'),
+            )
+            .order_by('R2')[:5]
+        )
         for i in q:
+            # Пересчитываем на реальное геодезическое расстояние (км)
             i.R2 = get_geo_distance(i.fGeoCode_Longitude, i.fGeoCode_Latitude, geocode[0], geocode[1])
             # print i.id, i.sAddress, i.sName, i.R2
         # сортируем список по R2 (дистанция от текущего адреса, до домов по которым данные известны)
-        sorted(q, key=lambda item: item.R2)
+        q = sorted(q, key=lambda item: item.R2)  # NOTE: sorted() возвращает новый список
         to_template.update({'NEAR_KNOWN_ADDRESS': q})
         # print q
-    to_template.update({'SERIA_BASE': q1.sName,
-                        'addr': addr,
-                        'addr_T': pytils.translit.slugify(addr),
-                        'ticks': float(time.time()-time_start)})
+    # Определяем корневую серию для формирования канонического URL
+    # Если у серии есть kRoot — берём его, иначе сама q1 является корневой
+    seria_root = (q1.kRoot if (q1 and q1.kRoot_id) else q1)
+    to_template.update({
+        'SERIA_BASE': q1.sName if q1 else "",
+        'BASE_SERIA_ID': seria_root.id if seria_root else "",
+        'BASE_SERIA_LAT': sanitize_slug((seria_root.sName or "").strip()) if seria_root else "",
+        'addr': addr,
+        'addr_T': sanitize_slug(addr),
+        'ticks': float(time.perf_counter() - time_start),
+    })
     return render(request, "popup/popup_show_apartment_variants.html", to_template)

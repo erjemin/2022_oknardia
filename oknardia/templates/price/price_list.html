@@ -6,17 +6,109 @@
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{# SEO-описание: информативно для поисковиков и людей, но кратно. #}
+{% block Description %}Лучшие цены на пластиковые окна для серии {{ APART|safe }} в доме по адресу {{ ADDRESS }}. Сравните {{ PRICE_FRAME|length }} предложений от ведущих компаний, узнайте стоимость окон для вашей квартиры и получите скидку!{% endblock %}
 
-{% block Last4Meta %}{{ META_DATA_PUBLISH|date:"c" }}{% endblock %}
+{# SEO-ключевые слова: расширяем, добавляем вариации, город, преимущества. #}
+{% block Keywords %}цены на окна, пластиковые окна, серия {{ BASE_SERIA }}, стоимость окон, окна для {{ BASE_SERIA }}, размеры окон, проемы серии {{ BASE_SERIA }}, окна в {{ APART|safe }}, скидки на окна, {{ ADDRESS }}, оконный профиль, монтаж окон, установка окон, сравнение цен, лучшие предложения, акции, рассрочка, {{ KEYWORDS_EXTRA }}{% endblock %}
 
-{% block Description %}Цены на окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}. Размер окон (см.): {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}{% if forloop.last %}.{% else %}; {% endif %}{% endfor %} Оконные наборы: {% for CurOffer in PRICE_FRAME %}{{ CurOffer.SETS_NAME }} – {{ CurOffer.FIN_PRICE|stringformat:".0f" }} рублей{% if forloop.last %}.{% else %}; {% endif %}{% endfor %}{% endblock %}
+{% block ADD_TO_HEAD %}{# --- Микроразметка schema.org, Open Graph, Twitter Card, meta-даты --- #}
+    {# --- JSON-LD микроразметка schema.org: хлебные крошки по новой структуре + остальные объекты --- #}
+    <script type="application/ld+json">
+    [
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Главная",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Серия {{ BASE_SERIA }}",
+          "item": "{{ request.scheme }}://{{ request.get_host }}/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "{{ APART }}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 4,
+          "name": "Цены замены окон по адресу: {{ ADDRESS }}"
+        }
+      ]
+    },
+    {
+        "@context": "https://schema.org/",
+        "@type": "Organization",
+        "name": "ОКНАРДИЯ — агрегатор цен на окна",
+        "url": "{{ request.scheme }}://{{ request.get_host }}/",
+        "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}",
+        "description": "Сравнение цен на установку оконных конструкций в типовых жилых домах России",
+        "contactPoint": {"@type": "ContactPoint", "contactType": "Customer Service"}
+      },
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Окна для {{ APART|safe }} ({{ ADDRESS }})",
+        "size": "{% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}мм — {{ I_WIN_DIM.iQuantity }} шт.{% if not forloop.last %}; {% endif %}{% endfor %}",
+        "description": "Цены на пластиковые окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}. Сравните предложения, комплектации, получите скидки и выберите лучшее решение!",
+        "image": {"@type": "ImageObject", "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}"},
+        "brand": {"@type": "Brand", "name": "ОКНАРДИЯ"},
+        "url": "{{ request.scheme }}://{{ request.get_host }}{{ request.path }}",
+        "offers": {"@type": "AggregateOffer", "priceCurrency": "RUB", "itemCondition": "https://schema.org/NewCondition", "availability": "https://schema.org/InStock", "offerCount": "{{ PRICE_FRAME|length }}"}
+      },
+      {# --- ItemList с Offer для каждого предложения (цена, продавец, рейтинг, дата, внутренняя ссылка, профиль, стеклопакет, список окон) --- #}{
+        "@context": "https://schema.org/",
+        "@type": "ItemList",
+        "itemListElement": [
+          {% for CurOffer in PRICE_FRAME %}
+          {
+            "@type": "Offer",
+            "position": {{ forloop.counter }},
+            "name": "{{ CurOffer.SETS_NAME|escapejs }}",
+            "seller": {"@type": "Organization", "name": "{{ CurOffer.MERCHANT|escapejs }}"},
+            "windows": [
+              {% for CurInOffer in CurOffer.DIM %}{"size": "{{ CurInOffer.WIDTH|stringformat:'d' }}x{{ CurInOffer.HIGHT|stringformat:'d' }}", "count": {{ CurInOffer.QUANTITY }}}{% if not forloop.last %}, {% endif %}{% endfor %}
+            ],
+            "profile": "{{ CurOffer.PVC_NAME|escapejs }}",
+            "glazing": "{{ CurOffer.GLAZING_NAME_B|escapejs }}",
+            "price": "{{ CurOffer.FIN_PRICE|stringformat:'d' }}",
+            "priceCurrency": "RUB",
+            {% if CurOffer.SETS_RATING %}"aggregateRating": {"@type": "AggregateRating", "ratingValue": "{{ CurOffer.SETS_RATING|stringformat:'.2f' }}"}, {% endif %}
+            {% if CurOffer.SETS_DATA_MODIFY %}"priceValidUntil": "{{ CurOffer.SETS_DATA_MODIFY|date:'Y-m-d' }}", {% endif %}
+            "availability": "https://schema.org/InStock",
+            "itemCondition": "https://schema.org/NewCondition",
+            "url": "#offer_{{ CurOffer.SETS_ID }}"
+          }{% if not forloop.last %},
+          {% endif %}{% endfor %}
+        ]
+      }
+    ]
+    </script>
+    {# --- Open Graph (OG) --- #}<meta property="og:title" content="Цены на окна для {{ APART|safe }} ({{ ADDRESS }})" />
+    <meta property="og:description" content="Сравните цены, комплектации и получите лучшие предложения на пластиковые окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}!" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}" />
+    <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}" />
+    <meta property="og:site_name" content="ОКНАРДИЯ — агрегатор цен на окна" />
+    {# --- Twitter Card --- #}<meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Цены на окна для {{ APART|safe }} ({{ ADDRESS }})" />
+    <meta name="twitter:description" content="Сравните цены, комплектации и получите лучшие предложения на пластиковые окна для серии {{ APART|safe }} по адресу {{ ADDRESS }}!" />
+    <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'img/oknardia_logo.svg' %}" />
+    {# --- Даты публикации и обновления --- #}<meta name="date" content="{{ META_DATA_PUBLISH|date:'Y-m-d' }}" />
+    <meta property="article:published_time" content="{{ META_DATA_PUBLISH|date:'Y-m-d' }}" />
+    <meta property="article:modified_time" content="{{ META_DATA_PUBLISH|date:'Y-m-d' }}" />
+{% endblock %}
 
-{% comment %}{% block Description %}Цены на плаcтиковые окна для серии {{ BASE_SERIA }} ({{ APART }} квартира, {{ ADDRESS }}) :: {% for CurOffer in PRICE_FRAME %}Поставщик: {{ CurOffer.MERCHANT }}; Комплектация: {{ CurOffer.SETS_NAME }}; Цена: {{ CurOffer.FIN_PRICE }}₽ :: {% endfor %}{% endblock %}{% endcomment %}
-
-{% block Keywords %}цены окон, серия {{ BASE_SERIA }}, {{ BASE_SERIA }}, стоимость окон, окна для {{ BASE_SERIA }}, размеры окон, проемы серии {{ BASE_SERIA }}, окна в {{ APART|safe }}, скидки на окна, {{ ADDRESS }}, оконный профиль, {% for CurOffer in PRICE_FRAME %}{{ CurOffer.MERCHANT }}, {{ CurOffer.PVC_NAME }}, {{ CurOffer.PVC_MANUFACTURER }}, {{ CurOffer.GLAZING_MARK }}, {% endfor %} характеристики пластиковых окон, {% for I_WIN_DIM in FLAP_DIM %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }} см., {% endfor %}{{ META_KEYWORDS|default:"" }}{% endblock %}
-
-{% block Top_JS3%}<script type="text/javascript">
+{% block Top_JS3%}<script type="text/javascript" src="{% static 'js/track_user_visit.js' %}"></script>
+<script type="text/javascript">
 function show_phone_num( id ){ // колапсатор для отображения контатной информации постафшика окон
   $('#tel'+id).collapse('show');
   $('#hid'+id).collapse('hide');
@@ -107,26 +199,36 @@ $(function () { // инициализация и обработка попове
 
 {% block Top_CSS1 %}<link rel="stylesheet" type="text/css" href="{% static "css/csshake-vertical.min.css" %}">{%  endblock %}
 
-{% block Main_Content %}
-<span itemscope itemtype="http://schema.org/Product">
-<div class="row col-md-12">
+{% block Main_Content %}<div class="container-fluid">
+  {# --- Хлебные крошки: НАЧАЛО --- #}<div class="row">
+    <div class="col-md-12">
+      <ol class="breadcrumb">
+        <li><a href="/">Главная</a></li>
+        <li><a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">Серия {{ BASE_SERIA }}</a></li>
+        <li>{{ APART }}</li>
+        <li>Цены замены окон по адресу: {{ ADDRESS }}</li>
+      </ol>
+    </div>
+  </div>{# --- Хлебные крошки: КОНЕЦ --- #}
+  <div class="row">
     <div class="col-md-9">
-      <h1>Цены на окна для серии {{ APART|safe }} <small>({{ ADDRESS }})</small></h1>
+      <h1>Цены на окна для серии {{ APART|safe }} <small><nobr>({{ ADDRESS }})</nobr></small></h1>
     </div>
     <div class="col-md-9">
       <p>Квартира имеет проёмы (окна и балконные двери) следующих размеров: {% for I_WIN_DIM in FLAP_DIM %}{% if not forloop.first %}{% if forloop.last %} и&nbsp;{% else %}, {% endif %}{% endif %}{{ I_WIN_DIM.iWinWidth|floatformat:0 }}x{{ I_WIN_DIM.iWinHight|floatformat:0 }}&nbsp;см. —&nbsp;{{ I_WIN_DIM.iQuantity }}&nbsp;шт.{% endfor %} Проект (<a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">типовая серия {{ BASE_SERIA }}</a>) предполагает следующие схемы открывания окон:</p>
     </div>
-  {# Микроразмектка: названеи продукта #}<meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})" />
+  </div>
 </div>
 
-<div class="row col-md-12 ShowBigFlapPictures">
- <div class="col-sm-9">
-{% include 'report/show_big_flap_pictures.html' %}
- </div>
- <div class="col-sm-3 visible-md visible-lg ap_list">
+<div class="row ShowBigFlapPictures">
+  <div class="col-sm-9">{% include 'report/show_big_flap_pictures.html' %}</div>
+  <div class="col-sm-3 visible-md visible-lg ap_list">
     <h6>Другие типовые квартиры в&nbsp;этом доме:</h6>
     <ul>{% for I_APART in APARTMENT_IN_BUILDING %}
-      {% if I_APART.APT_ID == '!' %}<li>{{ I_APART.APT_NAME|safe }}</li>{% else %}<li><a href="/{{ BUILD_ID }}/{{ I_APART.APT_ID }}/{{ ADDRESS_T }}">{{ I_APART.APT_NAME|safe }}</a></li>{% endif %}{% endfor %}
+      {% if I_APART.APT_ID == '!' %}<li>{{ I_APART.APT_NAME|safe }}</li>{% else %}
+      {# Новый формат роутинга для перехода между квартирами #}
+      <li><a href="/price/seriaID{{ BASE_SERIA_ID }}--{{ BASE_SERIA_LAT }}/appartID{{ I_APART.APT_ID }}/addressID{{ BUILD_ID }}--{{ ADDRESS_T }}/">{{ I_APART.APT_NAME|safe }}</a></li>
+      {% endif %}{% endfor %}
     </ul>
     <a href="/catalog/seria/{{ BASE_SERIA_LAT }}/all{{ BASE_SERIA_ID }}">Информация по серии {{ BASE_SERIA }}</a>
   </div>
@@ -134,10 +236,8 @@ $(function () { // инициализация и обработка попове
 
 <div class="row col-md-12">
   <div class="col-md-12">
-    <p id="tab-note">Таблица содержит цены поставщиков. Клик на&nbsp;название отобразит детальные спецификации каждого предложения: марку профиля рамы и&nbsp;створки, схему стеклопакета, тип фурнитуры, элементы отделки (отлив, подоконник, откос, клапан <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся покадрово, получите следующий кадр кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Просмотреть и&nbsp;сравнить технические характеристик стеклопакетов, профилей и&nbsp;детальное описание сопутствующих услуг возможно с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
+    <p id="tab-note">Таблица содержит цены поставщиков. Клик на&nbsp;название отобразит детальные спецификации каждого предложения: марку профиля рамы и&nbsp;створки, схему стеклопакета, тип фурнитуры, элементы отделки (отлив, подоконник, откос, клапан <nobr>климат-контроля</nobr>) и&nbsp;сопутствующие услуги. Предложения выводятся покадрово, получите следующий кадр кнопкой &laquo;Ещё коммерческие предложения окон&raquo; под таблицей. Просмотреть и&nbsp;сравнить технические характеристики стеклопакетов, профилей и&nbsp;детальное описание сопутствующих услуг возможно с&nbsp;помощью кнопки &laquo;Сравнить выбранные&raquo;.</p>
   </div>
-  {# Микроразмектка: названеи продукта #}
-  <meta itemprop="name" content="Окна {{ APART|safe }} ({{ ADDRESS }})"/>
 </div>
 
 
@@ -168,17 +268,23 @@ $(function () { // инициализация и обработка попове
     {% include "price/price_list_frame.html" %}
   </tbody>
  </table>
-</form>
-</span>
+ </form>
 {% with SERIA_BASE=BASE_SERIA %}{% include "report/build_info_in_table.html" %}{% endwith %}
   {# --- Баннер: НАЧАЛО --- #}
   <div class="row"><div class="col-md-12 col-xs-12"><hr class="dotted-black" />{% include "ad/bannet-wide.html" %}</div></div>
   {# --- Баннер: конец --- #}
-  <div class="row">
-  {% include "report/report_last_user_visit.html" %}
-  {% include "report/report_log_user_visit.html" %}
-  <p id="shadow_buffer"></p>
-  </div>
+   <div class="row">
+   {% include "report/report_last_user_visit.html" %}
+   {% include "report/report_log_user_visit.html" %}
+   <p id="shadow_buffer"></p>
+   </div>
+
+   {# Скрытый элемент для отслеживания визитов пользователя (передача данных в JS track_user_visit.js) #}
+   <div id="tracking-data"
+        data-current-url="{{ request.path }}"
+        data-address="{{ ADDRESS }}"
+        data-apart="{{ APART }}"
+        style="display: none;"></div>
 
   {# модальное окно #}
   <div class="modal fade bs-example-modal-sm" id="modal-exclamation" tabindex="-1" role="dialog">

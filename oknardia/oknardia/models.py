@@ -8,7 +8,8 @@ from datetime import date, datetime
 from django.utils import timezone
 from django.contrib.auth.models import User
 from oknardia.settings import *
-
+from web.add_func import sanitize_slug, safe_html_spec_symbols
+import re
 
 # Таблица: Каталог профилей, стеклопакетов (добавлено 09.авг.2017)
 # create table oknardia_catalog2profile
@@ -1033,6 +1034,28 @@ class BlogPosts(models.Model):
         db_index=False,
         verbose_name=u"Создано"
     )
+    sMetaDescription = models.CharField(
+        max_length=160,
+        blank=True,
+        default=u"",
+        verbose_name=u"Meta описание",
+        help_text=u"SEO: описание для мета-тега (до 160 символов). Если пусто, будет использоваться текст тизера из контента."
+    )
+    sMetaKeywords = models.CharField(
+        max_length=256,
+        blank=True,
+        default=u"",
+        verbose_name=u"Meta ключевые слова",
+        help_text=u"SEO: ключевые слова для мета-тега (до 256 символов). Если пусто, будет использоваться заголовок."
+    )
+    sSlug = models.SlugField(
+        max_length=200,
+        db_index=True,
+        blank=True,
+        verbose_name=u"Slug",
+        help_text=u"SEO: URL-friendly версия заголовка (автоматически генерируется, если оставить пусто)"
+    )
+
 
     def __unicode__(self):
         # return u'%s (%s)' % (self.sPostHeader, datetime.strftime(
@@ -1041,6 +1064,46 @@ class BlogPosts(models.Model):
 
     def __str__(self):
         return self.__unicode__()
+
+    def save(self, *args, **kwargs):
+        """Переопределённый метод save() для автоматической генерации слага и SEO-полей.
+
+        При сохранении записи блога:
+        - Генерируется sSlug из sPostHeader если тот пуст
+        - Генерируется sMetaDescription из текста контента (тизер)
+        - Генерируется sMetaKeywords из заголовка
+        """
+        # Шаг 1: Автоматически генерируем слаг из заголовка, если он не указан
+        if not self.sSlug and self.sPostHeader:
+            self.sSlug = sanitize_slug(self.sPostHeader, max_length=200)
+        
+        # Шаг 2: Автоматически генерируем sMetaDescription из контента (тизер)
+        if not self.sMetaDescription and self.sPostContent:
+            # Удаляем теги <cut> из контента
+            content_clean = re.sub(r'<cut[\s\S]*?>', '', self.sPostContent, flags=re.IGNORECASE)
+
+            # Генерируем тизер (очищенный текст без HTML)
+            tizer = safe_html_spec_symbols(content_clean)
+
+            # Обрезаем до 160 символов для мета-description
+            if len(tizer) > 160:
+                # Обрезаем слово целиком (не посередине)
+                tizer = tizer[:160].rsplit(' ', 1)[0] + '...' if ' ' in tizer[:160] else tizer[:160]
+
+            self.sMetaDescription = tizer
+
+        # Шаг 3: Автоматически генерируем sMetaKeywords из заголовка
+        if not self.sMetaKeywords and self.sPostHeader:
+
+            # Берём заголовок и удаляем HTML-теги
+            header_clean = safe_html_spec_symbols(self.sPostHeader)
+            header_clean = header_clean.strip()
+
+            # Генерируем ключевые слова: фиксированные + заголовок
+            fixed_keywords = u"oknardia, окнардия, блог, публикация"
+            self.sMetaKeywords = f"{fixed_keywords}, {header_clean}"[:256]
+
+        super().save(*args, **kwargs)
 
     class Meta:
         # db_table = "jtb_BlogPost"
@@ -1323,6 +1386,8 @@ class Win_MountDim(models.Model):
     )
     sFlapConfig = models.CharField(
         max_length=32,
+        blank=True,
+        default=u"",
         verbose_name=u"Открывание",
         help_text=u"Рекомендуемая гор.архитектурой конфигурации открывания (МЕТАЯЗЫК)")
     sDescripion = models.CharField(

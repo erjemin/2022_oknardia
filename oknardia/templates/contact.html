@@ -1,16 +1,20 @@
 {% extends "base.html" %}{% load static %}
 
-{% block Title %}Контакты{% endblock %}
+{% block Title %}Контакты маркетплейса Окнардия | Адрес, телефон, email для связи{% endblock %}
 
 {% block Add_Body_Attribute %} style="padding-top:70px;"{% endblock %}
 
-{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Date4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"c" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
+{% block Last4Meta %}{% if PUB_DAT %}{{ PUB_DAT|date:"Y-m-d" }}{% else %}{% now "c" %}{% endif %}{% endblock %}
 
-{% block Description %}Контактная информация маркетплейс-агрегатора «Окнардии»: адрес, телефоны и email для связи, персоны.{% endblock %}
+{% block Description %}Контактная информация маркетплейса Окнардия: адрес офиса, email info@oknardia.ru, руководство и учредители, персоны компании.{% endblock %}
 
-{% block Keywords %}Контакты, контактная информация, телефон для связи, email для связи, адрес, адрес офиса, персоны, Окнардия, маркетплейс-агрегатор «Окнардии»{% endblock %}
+{% block Keywords %}контакты окнардия, контактная информация, email для связи, адрес офиса, маркетплейс окон, агрегатор окон, руководство окнардии, организационные вопросы, партнерство{% endblock %}
+
+{% block Author4Meta %}Контакты маркетплейса «Окнардия»{% endblock %}
+
+{% block CopyrightAuthor4Meta %}Маркетплейс «Окнардия»{% endblock %}
 
 {% block Top_JS1%}
 <script type="text/javascript">
@@ -18,7 +22,101 @@ $(window).load(function(){var images = $('.half');images.each(function(i){$(this
 </script>
 {% endblock %}
 
+{% block Top_Meta1 %}{# <!-- BEGIN Дополнительные Metатags для контактов --> #}
+  {# Удалить: устаревшие теги если появятся #}
+  <meta name="news_keywords" content="контакты окнардия, адрес офиса, email, организационные вопросы, партнерство" />
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}/contact/" />
+  <!-- Разметка для соц-сетей Facebook Open Graph -->
+  <meta property="fb:admins" name="admins" content="100000084781830" />
+  <meta property="fb:app_id" content="258354027974262" />
+  <meta property="og:locale" content="ru_RU" />
+  <meta property="og:site_name" content="oknardia.ru" />
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}/contact/" />
+  <meta property="og:type" content="contact" />
+  <meta property="og:title" content="Контакты маркетплейса Окнардия" />
+  <meta property="og:description" content="Свяжитесь с командой Окнардия: адрес офиса, email info@oknardia.ru, руководство и учредители компании." />
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <link rel="image_src" href="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+  <!-- Разметка для соц-сетей Twitter Card -->
+  <meta name="twitter:title" content="Контакты маркетплейса Окнардия" />
+  <meta name="twitter:description" content="Адрес офиса, email для связи и руководство компании Окнардия." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@oknardia" />
+  <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}/contact/" />
+  <meta name="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}/static/img/MerDY3gpU0w.jpg" />
+{# <!-- END Дополнительные Metатags для контактов --> #}{% endblock %}
+
+{% block ADD_TO_HEAD %}
+  {# JSON-LD: страница контактов — Organization + ContactPoint + BreadcrumbList #}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Окнардия",
+    "legalName": "Маркетплейс-агрегатор Окнардия",
+    "url": "{{ request.scheme }}://{{ request.get_host }}/",
+    "logo": "{{ request.scheme }}://{{ request.get_host }}/static/img/logo.png",
+    "description": "Маркетплейс-агрегатор для сравнения цен на установку пластиковых и деревянных окон в зданиях типового строительства в России.",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "Customer Support",
+      "email": "info@oknardia.ru",
+      "url": "{{ request.scheme }}://{{ request.get_host }}/contact/"
+    },
+    "sameAs": [
+      "https://www.facebook.com/oknardia",
+      "https://t.me/oknardia"
+    ],
+    "founders": [
+      {
+        "@type": "Person",
+        "name": "Сергей Еремин",
+        "jobTitle": "CEO/CTO",
+        "description": "Организационные вопросы, технические решения, партнерство"
+      },
+      {
+        "@type": "Person",
+        "name": "Тимофей Молдованин",
+        "jobTitle": "CFO/COO",
+        "description": "Финансовые и коммерческие вопросы"
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Главная",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Контакты",
+        "item": "{{ request.scheme }}://{{ request.get_host }}/contact/"
+      }
+    ]
+  }
+  </script>
+{% endblock %}
+
 {% block Main_Content %}<div class="container-fluid">
+{# Хлебные крошки: НАЧАЛО #}
+<div class="row">
+  <div class="col-md-11 col-xs-12">
+    <ol class="breadcrumb">
+      <li><a href="/">Главная</a></li>
+      <li class="active">Контакты</li>
+    </ol>
+  </div>
+</div>
+{# Хлебные крошки: КОНЕЦ #}
+
 <div class="row">
   <div class="col-md-9"><h1>Контакты «Окнардия»</h1></div>
 </div>
@@ -39,7 +137,7 @@ img {background-color: whitesmoke;}
 
 <div class="row">
 	<div class="col-md-3" >
-    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/avatar_eserg_160x160.png" width="160" height="160" alt="Сергей Еремин — CEO/CTO «Окнардия», организационные вопросы, технические решения, партнерство" />
+    <img class="img-circle" src="{{ request.scheme }}://{{ request.get_host }}/media/img_avatar/avatar_eserg_160x160.png" width="160" height="160" alt="Сергей Еремин — CEO/CTO «Окнардия», организационные вопросы, технические решения, партнерство" />
     <h3>Сергей Еремин</h3>
     <h4>CEO/CTO</h4>
     <h5>организационные вопросы, технические решения, партнерство</h5>
@@ -61,7 +159,7 @@ img {background-color: whitesmoke;}
     </dl>
   </div>
   <div class="col-md-3" >
-    <img class="img-circle" src="https://oknardia.ru/media/img_avatar/timofei_molodovanin.jpg" width="160" height="160" alt="Тимофей Молдованин — CFO/COO «Окнардия», финансовые и коммерческие вопросы" />
+    <img class="img-circle" src="{{ request.scheme }}://{{ request.get_host }}/media/img_avatar/timofei_molodovanin.jpg" width="160" height="160" alt="Тимофей Молдованин — CFO/COO «Окнардия», финансовые и коммерческие вопросы" />
     <h3>Тимофей Молдованин</h3>
     <h4>CFO/COO</h4>
     <h5>финансовые и коммерческие вопросы</h5>
