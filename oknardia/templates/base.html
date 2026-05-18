@@ -16,10 +16,12 @@
   <meta name="document-state" content="{{ META_DOCUMENT_STATE|default:"Dynamic" }}" />
   <meta name="generator" content="OKNARDIA 0.3β by Python/Django" />
   <title>{% block Title %}{% endblock %} : ОКНАРДИЯ</title>
-  <link rel="icon" href="{{ request.scheme }}://{{ request.get_host }}/favicon.svg" type="image/svg+xml ">
-  <link rel="icon" href="{{ request.scheme }}://{{ request.get_host }}/favicon.png" type="image/png">
-  <link rel="icon" href="{{ request.scheme }}://{{ request.get_host }}/favicon.gif" type="image/gif">
-  <link rel="icon" href="{{ request.scheme }}://{{ request.get_host }}/favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" href="{{ request.scheme }}://{{ request.get_host }}/favicon.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="{{ request.scheme }}://{{ request.get_host }}/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ request.scheme }}://{{ request.get_host }}/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="oknardia.ru" />
+  <link rel="manifest" href="{{ request.scheme }}://{{ request.get_host }}/site.webmanifest" />
   <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet" type="text/css" />{# <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css"  rel="stylesheet" type="text/css" />#}
   <link href="{% static 'css/bootstrap-theme.min.css' %}" rel="stylesheet" type="text/css" />{#  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css"  />#}
   <link href="{% static 'css/oknardia1.css' %}" rel="stylesheet" type="text/css"  />{% block Top_CSS1 %}{% endblock %}{% block Top_CSS2 %}{% endblock %}{% block Top_CSS3 %}{% endblock %}
