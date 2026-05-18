@@ -344,15 +344,25 @@ if DEBUG:
     pass
 
 else:
-    # В prod: WhiteNoise + CompressedManifestStaticFilesStorage для оптимизации.
+    # В prod: WhiteNoise + CompressedStaticFilesStorage для оптимизации.
     # Статика собирается с хешем в имени и кэшируется.
+    #
+    # ВАЖНО: Для production нужна полная настройка Nginx:
+    # - Nginx обслуживает статику (/static/) прямо из /home/app/public/static_collected/
+    # - Nginx обслуживает медиа (/media/) прямо из /home/app/public/media/
+    # - Nginx проксирует остальное на Gunicorn (:8000)
+    #
+    # Для локального тестирования production конфига этот файл симулирует Nginx.
 
     # 1. Добавляем WhiteNoise в начало MIDDLEWARE (после SecurityMiddleware) для отдачи статики
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
     # 2. Переводим staticfiles на WhiteNoise со сжатием
+    # ВАЖНО: используем CompressedStaticFilesStorage вместо CompressedManifestStaticFilesStorage,
+    # потому что Manifest не справляется с relative paths в CSS (например, jQuery UI).
+    # CompressedStaticFilesStorage сжимает файлы без manifest, что работает надежнее.
     STORAGES['staticfiles'] = {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',  # noqa: F821
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',  # noqa: F821
     }
 
     # 3. WhiteNoise конфиг: обслуживание корневых файлов из public/ (robots.txt, favicon.*, sitemap.xml и т.д.)
@@ -364,7 +374,21 @@ else:
         '.woff': 'font/woff',
         '.woff2': 'font/woff2',
     }
+    # 5. Конфигурация WhiteNoise для обслуживания статических файлов и файлов из /public (например,
+    # robots.txt, favicon.ico и т.п.)
+    # WHITENOISE_ROOT = PUBLIC_ROOT
 
-    # 5. Кэширование неизменяемых файлов (с хешем в имени) на 1 год в браузере
-    WHITENOISE_IMMUTABLE_FILE_TEST = lambda path: 'CACHE' in path
+    # 6. Кэширование неизменяемых файлов (с хешем в имени) на 1 год в браузере
+    # ВАЖНО: лямбда должна принимает ДВА аргумента: path и url (как требует WhiteNoise)
+    WHITENOISE_IMMUTABLE_FILE_TEST = lambda path, url: 'CACHE' in path
+
+    # 7. ЛОКАЛЬНЫЙ ТЕСТ: для отдачи медиа в docker-compose.local-prod.yml
+    # В реальном production это обслуживает Nginx! Никогда не используй в production!
+    # Добавляем StaticFilesHandler который обслуживает и медиа и статику
+    if env.bool('ALLOW_MEDIA_SERVE', default=False):
+        # Для локального тестирования добавляем обслуживание медиа через Django
+        # ВАЖНО: это очень медленно и небезопасно для production!
+        from django.conf.urls.static import static
+        # Будет добавлено в urls.py при импорте: urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+
 

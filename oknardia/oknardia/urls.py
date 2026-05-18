@@ -17,6 +17,12 @@
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.conf.urls.static import static
+from pathlib import Path
+import environ
+# Инициализируем env
+env = environ.Env()
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 from oknardia.settings import *
 from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service, \
     catalog_profiles, catalog_series, catalog_openings, catalog_companies
@@ -105,9 +111,24 @@ urlpatterns = [
 ]
 
 
+# Для локального тестирования production конфига: отдача медиа через Django
+# В реальном production медиа обслуживает Nginx!
+import os
+if DEBUG or env.bool('ALLOW_MEDIA_SERVE', default=False):
+    from django.views.static import serve as serve_static
+    # Проверяем что директория медиа существует
+    if os.path.isdir(MEDIA_ROOT):
+        # Добавляем URL pattern для отдачи медиа файлов
+        urlpatterns += [
+            re_path(
+                r'^media/(?P<path>.*)$',
+                serve_static,
+                {'document_root': MEDIA_ROOT},
+                name='media'
+            ),
+        ]
+
 if DEBUG:
-    # Медиа-файлы
-    urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
     # --- страничка для тестирования верстки текста в блоге
     urlpatterns += [re_path(r'^blog/tmp[/*]$', service.tmp),]
     #  ___    ____      _              _____         _ _              _____             _
