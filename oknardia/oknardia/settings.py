@@ -34,6 +34,8 @@ STATIC_SOURCE_ROOT = PUBLIC_ROOT / 'static'
 env = environ.Env()
 environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 
+CSRF_TRUSTED_ORIGINS = env.list('DJANGO_CSRF_TRUSTED_ORIGINS', default=[])
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -139,7 +141,6 @@ DATETIME_FORMAT = 'Y-m-d H:i:s'
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 
-
 MEDIA_ROOT = str(PUBLIC_ROOT / 'media')
 # STATIC_ROOT отделен от исходной статики, чтобы избежать staticfiles.E002.
 STATIC_ROOT = str(PUBLIC_ROOT / 'static_collected')
@@ -157,13 +158,30 @@ STATICFILES_DIRS = [
     str(STATIC_SOURCE_ROOT)
 ] if STATIC_SOURCE_ROOT.is_dir() else []
 
+# Django 5 требует явное описание хранилищ.
+# `default` нужен для загружаемых файлов (FileField, ImageField, filer и подобное) и смотрит в `MEDIA_ROOT`.
+# `staticfiles` остаётся отдельно: в dev используется обычная статика Django, в prod — WhiteNoise.
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'OPTIONS': {
+            'location': MEDIA_ROOT,
+        },
+    },
+    'staticfiles': {
+        'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
+}
+
 # Путь к каталогу static для генерации кэш-файлов и служебных JS.
 STATIC_BASE_PATH = str(STATIC_SOURCE_ROOT)
 
+# Определяем движок БД из переменной окружения (по умолчанию SQLite)
 database_engine = env('DATABASE_ENGINE', default='django.db.backends.sqlite3')
+
 if database_engine == 'django.db.backends.sqlite3':
     # Для SQLite принимаем только имя файла из env и кладем БД в PROJECT_ROOT/database.
-    sqlite_db_filename = Path(env('DATABASE_NAME', default='oknadria.sqlite3')).name
+    sqlite_db_filename = Path(env('DATABASE_NAME', default='oknardia.sqlite3')).name
     sqlite_db_path = PROJECT_ROOT / 'database' / sqlite_db_filename
     DATABASES = {
         'default': {
@@ -172,6 +190,7 @@ if database_engine == 'django.db.backends.sqlite3':
         }
     }
 else:
+     # База не SQLite (mariaDB, например): читаем все параметры подключения из env.
     DATABASES = {
         'default': {
             'ENGINE': database_engine,
@@ -314,3 +333,38 @@ CATALOG_SORTER_MAGIC_NUMBER_TIZER = 1
 MAX_LEN_RING_LOG_BUFFER = 250  # МАКСИМАЛЬНЫЙ РАЗМЕР КОЛЬЦЕВОГО БУФЕРА
 
 YANDEX_MAPS_API_KEY = env('YANDEX_MAPS_API_KEY', default='')
+
+# ============================================================================
+# Конфигурация в зависимости от режима разработки (DEBUG) vs. production
+# ============================================================================
+
+if DEBUG:
+    # В dev: стандартная отдача статики Django (без WhiteNoise/кэширования).
+    # Медиа-файлы отдаются через Django.
+    pass
+
+else:
+    # В prod: WhiteNoise + CompressedManifestStaticFilesStorage для оптимизации.
+    # Статика собирается с хешем в имени и кэшируется.
+
+    # 1. Добавляем WhiteNoise в начало MIDDLEWARE (после SecurityMiddleware) для отдачи статики
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+    # 2. Переводим staticfiles на WhiteNoise со сжатием
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',  # noqa: F821
+    }
+
+    # 3. WhiteNoise конфиг: обслуживание корневых файлов из public/ (robots.txt, favicon.*, sitemap.xml и т.д.)
+    # Параметр WHITENOISE_LOCATION указывает WhiteNoise, где искать файлы помимо STATIC_ROOT
+    WHITENOISE_LOCATION = str(PUBLIC_ROOT)
+
+    # 4. MIME-типы для шрифтов (иначе браузер может не загрузить)
+    WHITENOISE_MIMETYPES = {
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+    }
+
+    # 5. Кэширование неизменяемых файлов (с хешем в имени) на 1 год в браузере
+    WHITENOISE_IMMUTABLE_FILE_TEST = lambda path: 'CACHE' in path
+

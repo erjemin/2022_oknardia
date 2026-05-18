@@ -78,6 +78,10 @@ public/static/**/*.map
 *.temp
 *.bak
 
+# Шрифты
+*.ttf
+*.otf
+
 # Системные файлы macOS
 .AppleDouble
 .LSOverride

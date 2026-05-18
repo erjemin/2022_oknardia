@@ -164,3 +164,7 @@ db.json.zip
 .log/
 .logs/
 sitemap*.xml
+
+# Django static files (собранная статика, пересоздается при деплое)
+public/static_collected/
+
