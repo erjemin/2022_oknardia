@@ -29,13 +29,17 @@ services:
     # 3. Собираем статику
     # 4. Генерируем sitemap'ы
     # 5. Пересоздаём пре-рендер шаблоны серий
-    # 6. Запускаем Gunicorn (нет live reload — это production режим!)
+    # 6. Пересчитываем рейтинги профилей, стеклопакетов и наборов
+    #    (метод Манна-Уитни: может занять 30-60 сек на БД с 94+ профилями)
+    # 7. Запускаем Gunicorn (нет live reload — это production режим!)
+    #    (timeout=120 сек для запуска, достаточно для всех процедур инициализации)
     command: >
       sh -c "mkdir -p /home/app/public/media &&
              python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              python manage.py generate_sitemaps &&
              python manage.py regenerate_seria_prerender &&
+             python manage.py make_rating &&
              python -m gunicorn --workers 2 --bind 0.0.0.0:8000 --timeout 120 oknardia.wsgi:application"
 
     # 2. МОНТИРОВАНИЕ КОДА И ДАННЫХ
