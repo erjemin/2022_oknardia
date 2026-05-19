@@ -1,0 +1,93 @@
+{# ============================================================================ #}
+{# КАРТА И СТАТИСТИКА СЕРИИ (кешируемая статическая часть)                    #}
+{# ============================================================================ #}
+{% load humanize %}
+{% load filters %}
+
+{# БЛОК КАРТА: левая часть (col-md-7) #}
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+<script type="text/javascript">
+
+// Функция для декодирования Base64-обфускованных геоданных (защита координат)
+function decodeGeoData(b64str) {
+	try {
+		var json = atob(b64str);
+		return JSON.parse(json);
+	} catch(e) {
+		console.error('Ошибка декодирования геоданных:', e);
+		return [];
+	}
+}
+
+ymaps.ready(function () {
+    let myMap = new ymaps.Map('SeriaMap', {
+        center: [55.75, 37.57],
+        zoom: 10,
+        behaviors: ['default', 'scrollZoom'],
+        controls: [ 'rulerControl', 'zoomControl', 'geolocationControl', 'fullscreenControl' ]
+        });
+    // Создадим кластеризатор, вызвав функцию-конструктор.
+    clusterer = new ymaps.Clusterer({
+        preset: 'islands#invertedGrayClusterIcons',
+        groupByCoordinates: false,
+        hasHint: false,
+        viewportMargin: 0,
+        zoomMargin: 16,
+        clusterDisableClickZoom: false,
+        gridSize: 80
+        });
+    geoObjects = [];
+
+    const linkText = 'Смотреть коммерческие предложения</a>';
+    const hintText = '<b>Здание серии {{ THIS_SERIA_NAME }}</b>';
+    const apartmentId = {{ first_apart_id|default:0 }};
+    const seriaId = {{ THIS_SERIA_ID }};
+    const seriaSlug = '{{ THIS_SERIA_NAME_T }}';
+
+    // Декодируем обфускованные геоданные: [lat, lon, addr_id, seria_id]
+    var geoData = decodeGeoData('{{ DATA4GEO_B64 }}');
+
+    // Создаем метки для каждого здания серии
+    for(var i = 0, len = geoData.length; i < len; i++) {
+        const latitude = geoData[i][0];
+        const longitude = geoData[i][1];
+        const buildingId = geoData[i][2];
+        // Формируем SEO-URL для каждой метки
+        const balloonLink = `<a href="/price/seriaID${seriaId}--${seriaSlug}/appartID${apartmentId}/addressID${buildingId}--null">`;
+
+        geoObjects[i] = new ymaps.Placemark( [longitude, latitude],
+    	        { // Содержимое иконки, балуна и хинта.
+                balloonContent: balloonLink + linkText,
+                hintContent: hintText
+              },
+    	        { preset:'islands#circleIcon',iconColor: 'silver'} );
+          	      geoObjects[i].events
+    	      .add('mouseenter', function (e) {
+                  e.get('target').options.set('preset', 'islands#yellowCircleIcon');
+                 })
+    	        .add('mouseleave', function (e) {
+                  e.get('target').options.set('preset', 'islands#grayCircleIcon');
+                 });
+    	    }
+    // Добавляем метки в кластеризатор.
+    clusterer.add(geoObjects);
+    myMap.geoObjects.add(clusterer);
+     // позиционирование карты так, чтобы на ней были видны все объекты кластера.
+     myMap.setBounds(clusterer.getBounds(), { checkZoomRange: true });
+});
+</script>
+
+{# БЛОК СТАТИСТИКА: правая часть (col-md-4) #}
+<diV class="col-md-4">
+	<h3  class="header">Статистика <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
+	<p>Совокупно во&nbsp;всех зданиях типового проекта:</p>
+	<ul>
+		<li><strong>{{ ACCOUNTS|price_format }}</strong> квартир.</li>
+		<li>Проживает <strong>{{ APARTMENTS|price_format }}</strong> семей <small>(<strong>{{ RESIDENTS|price_format }}</strong> человек)</small>.</li>
+		<li><strong>{{ RESIDENTIAL_M2|stringformat:".1f"|price_format }} м²</strong> жилых помещений.</li>
+		<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong>&nbsp;— муниципальное жильё.</li>
+		<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и&nbsp;городские	службы, учреждения бытового обслуживания, магазины, офисы и&nbsp;тому подобное.</li>
+		<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }}&nbsp;— <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный&nbsp;— <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
+	</ul>
+</diV>
+

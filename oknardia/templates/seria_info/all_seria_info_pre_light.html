@@ -132,40 +132,47 @@ TechArticle: описывает страницу как технический �
     </div>
   </div>{# <!--- Хлебные крошки: КОНЕЦ ---> #}
 	<div class="row">
-    <div class="col-md-12">{{ THIS_SERIA_DESCRIPTION|safe }}</div>
+     <div class="col-md-12">
+       {# ВЕРХНЯЯ СТАТЬЯ: рендерится динамически (из БД), можно редактировать через админку #}
+       <div>{{ THIS_SERIA_DESCRIPTION|safe }}</div>
+     </div>
 	</div>
 
 	<div class="row">
-    <div class="col-lg-10">
-      <h2 class="header">Дома серии {{ THIS_SERIA_NAME }}: типовые размеры и&nbsp;схемы открывания</h2>
+     <div class="col-lg-10">
+       <h2 class="header">Дома серии {{ THIS_SERIA_NAME }}: типовые размеры и&nbsp;схемы открывания</h2>
+     </div>
+     <div class="col-lg-12" style="padding:1em 0 0 0;margin-left:-1em">
+       {# СХЕМЫ ОТКРЫВАНИЯ: статическая часть, если используется кеш #}
+       {% if PRE_RENDERED_STATIC_FLAPS_PATH %}
+         {% include PRE_RENDERED_STATIC_FLAPS_PATH %}
+       {% else %}
+         {% include 'report/show_big_flap_pictures.html' %}
+       {% endif %}
+     </div>
     </div>
-    <div class="col-lg-12" style="padding:1em 0 0 0;margin-left:-1em">
-      {% include 'report/show_big_flap_pictures.html' %}
-    </div>
-  </div>
 
   <div class="row">
     <div class="col-lg-8 col-xs-12 col-md-offset-1">
       <h3 class="header">Оконные проёмы в&nbsp;типовых квартирах <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
     </div>
     <div class="col-lg-8 col-xs-12 col-md-offset-1">
-      {# --- ОСНОВНОЙ БЛОК С ТАБЛИЦЕЙ --- #}
-      {# Если есть кешированный файл, включаем его. Иначе - рендерим блок на лету. #}
-      {% if PRE_RENDERED_INCLUDE_PATH %}
-        {% include PRE_RENDERED_INCLUDE_PATH %}
-      {% else %}
-        {% include "seria_info/all_seria_info_pre_light_include.html" %}
-      {% endif %}
-      {# --- КОНЕЦ ОСНОВНОГО БЛОКА --- #}
+      {# ТАБЛИЦА ОКОН: часть, которая считается при каждом запросе #}
+      {% include "seria_info/all_seria_info_pre_light_dynamic_include.html" %}
     </div>
   </div>
 
-	<div class="row">
-		<div class="col-md-9"><a name="s_graph"></a>
-			<h2 class="header">Здания серия {{ THIS_SERIA_NAME }}: ввод в&nbsp;эксплуатацию по&nbsp;годам</h2>
-    </div>
-		<div class="col-md-9 col-md-offset-1" style="height:300px;font-size:large;">
-			{% include 'seria_info/yaer_graph.html' %}
+   <div class="row">
+     <div class="col-md-9"><a name="s_graph"></a>
+       <h2 class="header">Здания серия {{ THIS_SERIA_NAME }}: ввод в&nbsp;эксплуатацию по&nbsp;годам</h2>
+     </div>
+     <div class="col-md-9 col-md-offset-1" style="height:300px;font-size:large;" id="graph">
+       {# ГРАФИК: статическая часть, если используется кеш #}
+       {% if PRE_RENDERED_STATIC_GRAPH_PATH %}
+         {% include PRE_RENDERED_STATIC_GRAPH_PATH %}
+       {% else %}
+         {% include 'seria_info/all_seria_info_pre_light_static_graph.html' %}
+       {% endif %}
 		</div>
 		<div class="col-md-9 col-md-offset-1">
 			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
@@ -176,26 +183,31 @@ TechArticle: описывает страницу как технический �
 		<div class="col-md-7"><a name="s_map"></a>
       <h2 class="header">Строения серии {{ THIS_SERIA_NAME }} на&nbsp;карте</h2>
     </div>
-		<div class="col-md-7 col-lg-offset-1">
+    <div class="col-md-7 col-lg-offset-1">
       <p><small>Чтобы посмотреть цены на&nbsp;установку и&nbsp;замену окон от&nbsp;партнёров &laquo;Окнардия&raquo; в&nbsp;своей квартире: найдите дом на&nbsp;карте; кликните на&nbsp;него; перейдите по&nbsp;ссылке &laquo;Смотреть коммерческие предложения&raquo;. При необходимости смените типовую планировку квартиры (на&nbsp;странице ценовой выдачи, справа от&nbsp;изображения типовых проёмов и&nbsp;схем открывания).</small></p>
-			<div style="height:350px;">
-        {% include 'seria_info/geo_map.html' with first_apart_id=TABLE_OF_WINDOWS.0.APART_ID %}
+      <div style="height:350px;">
+        <div id="SeriaMap" style="height: 100%;"></div>
       </div>
 			<div style="font-size: xx-small;float: right">© 2015-{% now "Y" %}, данные: oknardia.ru</div>
 		</div>
 
-		<diV class="col-md-4">
-			<h3  class="header">Статистика <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
-			<p>Совокупно во&nbsp;всех зданиях типового проекта:</p>
-			<ul>
-				<li><strong>{{ ACCOUNTS|price_format }}</strong> квартир.</li>
-				<li>Проживает <strong>{{ APARTMENTS|price_format }}</strong> семей <small>(<strong>{{ RESIDENTS|price_format }}</strong> человек)</small>.</li>
-				<li><strong>{{ RESIDENTIAL_M2|stringformat:".1f"|price_format }} м²</strong> жилых помещений.</li>
-				<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong>&nbsp;— муниципальное жильё.</li>
-				<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и&nbsp;городские	службы, учреждения бытового обслуживания, магазины, офисы и&nbsp;тому подобное.</li>
-				<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }}&nbsp;— <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный&nbsp;— <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
-			</ul>
-		</diV>
+		{# КАРТА И СТАТИСТИКА: статическая часть, если используется кеш #}
+		{% if PRE_RENDERED_STATIC_MAP_STATS_PATH %}
+		  {% include PRE_RENDERED_STATIC_MAP_STATS_PATH %}
+		{% else %}
+		  <diV class="col-md-4">
+				<h3  class="header">Статистика <nobr>серии {{ THIS_SERIA_NAME }}</nobr></h3>
+				<p>Совокупно во&nbsp;всех зданиях типового проекта:</p>
+				<ul>
+					<li><strong>{{ ACCOUNTS|price_format }}</strong> квартир.</li>
+					<li>Проживает <strong>{{ APARTMENTS|price_format }}</strong> семей <small>(<strong>{{ RESIDENTS|price_format }}</strong> человек)</small>.</li>
+					<li><strong>{{ RESIDENTIAL_M2|stringformat:".1f"|price_format }} м²</strong> жилых помещений.</li>
+					<li><strong>{{ MUNICIPAL_M2|stringformat:".1f"|price_format }} м²</strong>&nbsp;— муниципальное жильё.</li>
+					<li><strong>{{ GOVERNMENT_M2|stringformat:".1f"|price_format }} м²</strong> занимают государственные и&nbsp;городские	службы, учреждения бытового обслуживания, магазины, офисы и&nbsp;тому подобное.</li>
+					<li>Максимальный износ жилого фонда серии {{ THIS_SERIA_NAME }}&nbsp;— <strong>{{ CONDITION_MAX|stringformat:".2f" }} %</strong>. Минимальный&nbsp;— <strong>{{ CONDITION_MIN|stringformat:".2f" }} %</strong>.	</li>
+				</ul>
+			</diV>
+		{% endif %}
 	</div>
 
 	<div class="row">

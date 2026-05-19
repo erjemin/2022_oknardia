@@ -14,9 +14,20 @@ from web.add_func import sanitize_slug
 
 
 class Command(BaseCommand):
-    """Пересоздает pre-render шаблоны для страниц серий (/catalog/seria/.../all<ID>)."""
+    """Пересоздает pre-render шаблоны ��ля статических данных страниц серий (/catalog/seria/.../all<ID>).
 
-    help = "Пересоздает pre-render шаблоны catalog_seria_info для выбранных или всех корневых серий."
+    ВАЖНО: Кешируются ТОЛЬКО статические данные (схемы, график, карта, статистика).
+    Верхняя статья рендерится ДИНАМИЧЕСКИ из БД, чтобы изменения через админку
+    были видны без перезагрузки контейнера.
+    Таблица оконных проёмов также пересчитывается при каждом запросе.
+
+    Создаёт 3 файла для каждой серии:
+    - _id_static_flaps.html (схемы открывания)
+    - _id_static_graph.html (график ввода в эксплуатацию)
+    - _id_static_map_stats.html (карта и статистика)
+    """
+
+    help = "Пересоздает pre-render шаблоны (3 файла) для статических данных выбранных или всех корневых серий."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -29,7 +40,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--force",
             action="store_true",
-            help="Пересоздать даже если pre-render файл уже существует.",
+            help="Пересоздать даже если pre-render файлы уже существуют.",
         )
         parser.add_argument(
             "--dry-run",
@@ -61,26 +72,35 @@ class Command(BaseCommand):
         skipped = 0
 
         for seria in targets:
-            target_file = prepared_dir / f"{seria.id}_id.html"
-            if target_file.exists() and not force:
+            # Проверяем существование вс��х 3 файлов (верхняя статья НЕ кешируется)
+            target_files = [
+                prepared_dir / f"{seria.id}_id_static_flaps.html",
+                prepared_dir / f"{seria.id}_id_static_graph.html",
+                prepared_dir / f"{seria.id}_id_static_map_stats.html",
+            ]
+            all_exist = all(f.exists() for f in target_files)
+
+            if all_exist and not force:
                 skipped += 1
-                self.stdout.write(f"SKIP  {seria.id}: {target_file}")
+                self.stdout.write(f"SKIP  {seria.id}: все кеш-файлы уже существуют")
                 continue
 
             if dry_run:
-                action = "REGEN" if target_file.exists() else "CREATE"
-                self.stdout.write(f"{action} {seria.id}: {target_file}")
+                action = "REGEN" if all_exist else "CREATE"
+                self.stdout.write(f"{action} {seria.id}: 3 файла (flaps, graph, map_stats)")
                 planned += 1
                 continue
 
-            if target_file.exists():
-                target_file.unlink()
+            # Удаляем старые файлы перед пересоздаванием
+            for f in target_files:
+                if f.exists():
+                    f.unlink()
 
             slug = sanitize_slug(seria.sName)
             request = request_factory.get(f"/catalog/seria/{slug}/all{seria.id}")
 
             # В команде принудительно включаем «production-mode» для вьюхи,
-            # чтобы она прошла тяжелую ветку и пересоздала pre-render файл.
+            # чтобы она прошла тяжелую ветку и пересоздала pre-render файлы.
             old_debug = catalog_series.DEBUG
             try:
                 catalog_series.DEBUG = False
@@ -92,22 +112,29 @@ class Command(BaseCommand):
                 raise CommandError(
                     f"Серия {seria.id}: ожидался status=200, получен {response.status_code}."
                 )
-            if not target_file.exists():
-                raise CommandError(f"Серия {seria.id}: pre-render файл не создан: {target_file}")
+
+            # Проверяем, что все 3 файла были созданы
+            missing_files = [f for f in target_files if not f.exists()]
+            if missing_files:
+                raise CommandError(
+                    f"Серия {seria.id}: не созданы файлы: {[f.name for f in missing_files]}"
+                )
 
             created += 1
-            self.stdout.write(self.style.SUCCESS(f"OK    {seria.id}: {target_file}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"OK    {seria.id}: 3 кеш-файла созданы")
+            )
 
         if dry_run:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"DRY-RUN. Обработано: {len(targets)}. Будет создано/пересоздано: {planned}. Пропущено: {skipped}."
+                    f"DRY-RUN. Обработано: {len(targets)}. Б��дет создано/пересоздано: {planned}. Пропущено: {skipped}."
                 )
             )
         else:
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Готово. Обработано: {len(targets)}. Создано/пересоздано: {created}. Пропущено: {skipped}."
+                    f"Готово. Обработано: {len(targets)}. Создано/пересоздано: {created} × 3 файла. Пропущено: {skipped}."
                 )
             )
 

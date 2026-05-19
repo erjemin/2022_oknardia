@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pathlib import Path
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Count, F, IntegerField, Value
 from django.shortcuts import render, redirect
@@ -17,6 +18,9 @@ from web.report1 import get_last_all_user_visit_list
 from web.add_func import get_flaps_for_big_pictures, sanitize_slug
 import time
 import os
+import math
+import base64
+import json
 
 
 def _append_visit_context(to_template: dict, request: HttpRequest, time_start: float) -> None:
@@ -89,13 +93,15 @@ def catalog_seria_info(
     # чтобы тестировать актуальную серверную логику, а не сохраненный html-файл.
     if DEBUG:
         light_template = "seria_info/all_seria_info_pre_light.html"
-        light_template_w_path = ""
+        static_include_path = ""  # в DEV не используем кеш
         is_hard_template = True
     else:
-        # В PROD используем существующий pre-render include при наличии на диске.
-        light_template = f"seria_info/prepared/{seria_id}_id.html"
-        light_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{light_template}"
-        is_hard_template = not os.path.isfile(light_template_w_path)
+        # В PROD используем существующий pre-render include для статических данных (если есть).
+        light_template = "seria_info/all_seria_info_pre_light.html"
+        static_template_filename = f"seria_info/prepared/{seria_id}_id_static.html"
+        static_template_w_path = f"{TEMPLATES[0]['DIRS'][0]}/{static_template_filename}"
+        is_hard_template = not os.path.isfile(static_template_w_path)
+        static_include_path = static_template_filename if not is_hard_template else ""
 
     to_template: dict[str, object] = {}
     # Получаем все уникальные проемы серии и сразу добавляем iQuantity=1
@@ -192,30 +198,80 @@ def catalog_seria_info(
         {
             "WIN_OFFER_AND_MERCHANT": offer_and_merchant_per_win,
             "TABLE_OF_WINDOWS": table_of_win_in_seria_by_apartmment,
+            # Первая квартира из таблицы (нужна для картоки в пре-рендер шаблоне)
+            "first_apart_id": table_of_win_in_seria_by_apartmment[0]["APART_ID"] if table_of_win_in_seria_by_apartmment else 0,
         }
     )
 
-    # Для "тяжелого" шаблона получаем навигацию, карту и график, затем кэшируем pre-render.
+    # Для "тяжелого" шаблона получаем навигацию, карту и график.
+    # ВАЖНО: таблица окон (TABLE_OF_WINDOWS) считается ВСЕГДА — она не кешируется!
     if is_hard_template:
         to_template.update(get_flaps_for_big_pictures(list_win_in_seria))
         seria_id, for_seria_nav = seria_nav(seria_id)
         to_template.update(for_seria_nav)
         to_template.update(seria_info_year(seria_id))
         to_template.update(seria_info_geo_code(seria_id))
+
         if not DEBUG:
-            # Пре-рендер происходит только для "включаемого" шаблона,
-            # чтобы избежать дублирования базовой разметки.
-            string_prerender = render_to_string("seria_info/all_seria_info_pre_light_include.html", to_template)
-            with open(light_template_w_path, "w", encoding="utf-8") as file:
-                file.write(string_prerender)
-            # Основной шаблон будет просто включать в себя уже готовый HTML
-            light_template = "seria_info/all_seria_info_pre_light.html"
-    else:
-        to_template.update({"THIS_SERIA_NAME": q_seria.sName})
-        # Указываем путь к кешированному файлу для include
-        to_template.update({"PRE_RENDERED_INCLUDE_PATH": light_template})
-        # Основной шаблон должен быть один и тот же
-        light_template = "seria_info/all_seria_info_pre_light.html"
+            # Пре-рендер ТРЁХ отдельных файлов для статических данных.
+            # Верхняя статья НЕ кешируется — она рендерится динамически, чтобы изменения
+            # через админку были видны сразу без перезагрузки контейнера.
+            prepared_dir = Path(TEMPLATES[0]["DIRS"][0]) / PATH_FOR_SERIA_INFO_HTML_INCLUDE
+            prepared_dir.mkdir(parents=True, exist_ok=True)
+
+            # 1. Схемы открывания и размеры
+            string_flaps = render_to_string(
+                "seria_info/all_seria_info_pre_light_static_flaps.html",
+                to_template
+            )
+            file_flaps = prepared_dir / f"{seria_id}_id_static_flaps.html"
+            with open(file_flaps, "w", encoding="utf-8") as f:
+                f.write(string_flaps)
+
+            # 2. График ввода в эксплуатацию
+            string_graph = render_to_string(
+                "seria_info/all_seria_info_pre_light_static_graph.html",
+                to_template
+            )
+            file_graph = prepared_dir / f"{seria_id}_id_static_graph.html"
+            with open(file_graph, "w", encoding="utf-8") as f:
+                f.write(string_graph)
+
+            # 3. Карта и статистика
+            string_map_stats = render_to_string(
+                "seria_info/all_seria_info_pre_light_static_map_stats.html",
+                to_template
+            )
+            file_map_stats = prepared_dir / f"{seria_id}_id_static_map_stats.html"
+            with open(file_map_stats, "w", encoding="utf-8") as f:
+                f.write(string_map_stats)
+
+    # Добавляем в контекст пути к кешируемым файлам (верхняя статья всегда динамична)
+    pre_rendered_flaps_path = ""
+    pre_rendered_graph_path = ""
+    pre_rendered_map_stats_path = ""
+
+    if not DEBUG:
+        # В production используем кеширующие файлы, если они существую��
+        prepared_dir = Path(TEMPLATES[0]["DIRS"][0]) / PATH_FOR_SERIA_INFO_HTML_INCLUDE
+
+        file_flaps = prepared_dir / f"{seria_id}_id_static_flaps.html"
+        file_graph = prepared_dir / f"{seria_id}_id_static_graph.html"
+        file_map_stats = prepared_dir / f"{seria_id}_id_static_map_stats.html"
+
+        if file_flaps.exists():
+            pre_rendered_flaps_path = f"seria_info/prepared/{seria_id}_id_static_flaps.html"
+        if file_graph.exists():
+            pre_rendered_graph_path = f"seria_info/prepared/{seria_id}_id_static_graph.html"
+        if file_map_stats.exists():
+            pre_rendered_map_stats_path = f"seria_info/prepared/{seria_id}_id_static_map_stats.html"
+
+    to_template.update({
+        "THIS_SERIA_NAME": q_seria.sName,
+        "PRE_RENDERED_STATIC_FLAPS_PATH": pre_rendered_flaps_path,
+        "PRE_RENDERED_STATIC_GRAPH_PATH": pre_rendered_graph_path,
+        "PRE_RENDERED_STATIC_MAP_STATS_PATH": pre_rendered_map_stats_path,
+    })
 
 
     _append_visit_context(to_template, request, time_start)
@@ -440,4 +496,20 @@ def seria_info_geo_code(seria_id: int | str = DEFAULT_SERIA_ID_FOR_CATALOG) -> d
                         "ACCOUNTS": accounts,
                         "CONDITION_MAX": condition_max,
                         "CONDITION_MIN": condition_min})
+    
+    # Кодируем геоданные в Base64 для защиты (используется в статик-шаблонах)
+    # Формат: [latitude, longitude, addr_id, seria_id] для каждого здания
+    geo_for_encoding = []
+    for geo_point in seria_to_geo:
+        geo_for_encoding.append([
+            float(geo_point["LATITUDE"]),
+            float(geo_point["LONGITUDE"]),
+            geo_point["ADDR_ID"],
+            geo_point["SER_ID"]
+        ])
+    
+    geo_json = json.dumps(geo_for_encoding, separators=(',', ':'))
+    geo_b64 = base64.b64encode(geo_json.encode('utf-8')).decode('utf-8')
+    data_return["DATA4GEO_B64"] = geo_b64
+    
     return data_return
