@@ -1,24 +1,13 @@
 # -*- coding: utf-8 -*-
-"""oknardia Конфигурация URL
-
-Список `urlpatterns` направляет URL-адреса в представления. Дополнительную информацию см.:
-     https://docs.djangoproject.com/en/4.1/topics/http/urls/
-Примеры:
-Представления функций
-     1. Добавьте import: из представлений импорта my_app
-     2. Добавьте URL-адрес в urlpatterns: path('', views.home, name='home')
-Представления на основе классов
-     1. Добавьте импорт: from other_app.views import Home
-     2. Добавьте URL-адрес в шаблоны URL-адресов: path('', Home.as_view(), name='home')
-Включение другой конфигурации URL
-     1. Импортируйте функцию include(): из django.urls import include, path
-     2. Добавьте URL-адрес в urlpatterns: path('blog/', include('blog.urls'))
-"""
+"""oknardia Конфигурация URL"""
 from django.contrib import admin
 from django.urls import include, path, re_path
 from django.conf.urls.static import static
+from django.http import FileResponse
 from pathlib import Path
 import environ
+import mimetypes
+
 # Инициализируем env
 env = environ.Env()
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -26,6 +15,67 @@ environ.Env.read_env(str(PROJECT_ROOT / '.env'))
 from oknardia.settings import *
 from web import views, autocomplete_addr, user_manager, blog, diagrams, report1, report2, catalog, prices, service, \
     catalog_profiles, catalog_series, catalog_openings, catalog_companies
+
+
+def _serve_public_root_file(request, path):
+    """Отдает статик-файл из public/ с правильным Content-Type и UTF-8 для текстовых файлов."""
+    file_path = PUBLIC_ROOT / path
+
+    # Безопасность: проверяем, что файл гарантированно внутри PUBLIC_ROOT
+    try:
+        file_path = file_path.resolve()
+        file_path.relative_to(PUBLIC_ROOT.resolve())
+    except ValueError:
+        from django.http import Http404
+        raise Http404("Файл не найден")
+
+    if not file_path.is_file():
+        from django.http import Http404
+        raise Http404("Файл не найден")
+
+    # Определяем MIME type
+    mime_type, _ = mimetypes.guess_type(str(file_path))
+
+    # Для текстовых файлов добавляем charset=utf-8
+    if mime_type and mime_type.startswith('text'):
+        mime_type = f"{mime_type}; charset=utf-8"
+
+    response = FileResponse(open(file_path, 'rb'), content_type=mime_type)
+
+    # Определяем Content-Disposition в зависимости от типа файла:
+    # inline — браузер отображает/обрабатывает (иконки, картинки, CSS, JS, robots.txt, manifest)
+    # attachment — браузер скачивает (архивы, документы и т.д.)
+    inline_types = {
+        'image/',      # все картинки (PNG, SVG, JPG и т.д.)
+        'text/',       # все текстовые файлы
+        'application/javascript',
+        'application/json',
+        'application/xml',
+        'application/rss+xml',
+        'application/x-web-app-manifest+json',  # manifest
+    }
+
+    if mime_type and any(mime_type.lower().startswith(t) for t in inline_types):
+        response['Content-Disposition'] = 'inline'
+    else:
+        # Для остального (неизвестные типы, архивы и т.д.) — скачивание
+        response['Content-Disposition'] = f'attachment; filename="{file_path.name}"'
+
+    return response
+
+
+def _iter_public_root_files():
+    """Находит все обычные файлы в корне public/, кроме служебных артефактов (начинающихся с точки)."""
+    if not PUBLIC_ROOT.exists():
+        return
+
+    for file_path in sorted(PUBLIC_ROOT.iterdir()):
+        if not file_path.is_file():
+            continue
+        # Пропускаем служебные файлы (начинающиеся с точки)
+        if file_path.name.startswith('.'):
+            continue
+        yield file_path.name
 
 urlpatterns = [
     path(ADMIN_URL, admin.site.urls),
@@ -111,6 +161,20 @@ urlpatterns = [
 ]
 
 
+# Динамическая генерация URL patterns для всех файлов в корне public/
+# (кроме служебных файлов, начинающихся с точки)
+# В DEV режиме и при ALLOW_MEDIA_SERVE=True отдаются через Django,
+# в PRODUCTION это должно обслуживать Nginx/WhiteNoise
+PUBLIC_ROOT_URLPATTERNS = [
+    path(filename, _serve_public_root_file, {'path': filename})
+    for filename in _iter_public_root_files()
+]
+
+# Добавляем static файлы для корня ДО основных URL patterns
+# (чтобы отдавать файлы быстро и не проверять остальные рулы)
+urlpatterns = [*PUBLIC_ROOT_URLPATTERNS, *urlpatterns]
+
+
 # Для локального тестирования production конфига: отдача медиа через Django
 # В реальном production медиа обслуживает Nginx!
 import os
@@ -127,6 +191,7 @@ if DEBUG or env.bool('ALLOW_MEDIA_SERVE', default=False):
                 name='media'
             ),
         ]
+
 
 if DEBUG:
     # --- страничка для тестирования верстки текста в блоге
