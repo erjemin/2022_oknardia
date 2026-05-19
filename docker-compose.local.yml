@@ -23,9 +23,12 @@ services:
     # - Имеет встроенный auto-reload при изменении кода
     # - Безопаснее и проще для dev, чем Gunicorn
     # - Миграции применяются автоматически при каждом старте
+    # - Пересоздаём пре-рендер шаблоны и sitemap'ы для актуальности
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
+             python manage.py generate_sitemaps &&
+             python manage.py regenerate_seria_prerender &&
              python manage.py runserver 0.0.0.0:8000"
 
     # 2. МОНТИРОВАНИЕ КОДА (Live Reload)

@@ -47,10 +47,11 @@ SECRET_KEY = env(
 ADMIN_URL = _normalize_admin_url(env(var='ADMIN_URL', default='admin/'))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# ПРЕДУПРЕЖДЕНИЕ БЕЗОПАСНОСТИ: не работайте в режиме DEBUG в продашене!
+# PREDУПРЕЖДЕНИЕ БЕЗОПАСНОСТИ: не работайте в режиме DEBUG в продашене!
 DEBUG = TEMPLATE_DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
+# Допустимые хосты (+ 'testserver' для management команд типа regenerate_seria_prerender)
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost', 'testserver'])
 
 # Настройки сообщений об ошибках когда все упало и т.п.
 ADMINS = _env_admins(env.list('ADMINS', default=[]))
