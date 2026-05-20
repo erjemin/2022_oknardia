@@ -1,0 +1,123 @@
+# ==============================================================================
+# Docker Compose для PRODUCTION
+# Этот файл запускается на боевом сервере.
+# Вариант 1 (если переименовали в docker-compose.yml): docker compose up -d
+# Вариант 2 (если оставили имя): docker compose -f docker-compose.prod.yml up -d
+# ==============================================================================
+
+services:
+  # --- ОСНОВНОЙ СЕРВИС: DJANGO + GUNICORN + WHITENOISE ---
+  web:
+    # Имя контейнера для удобства
+    container_name: oknardia-backend
+
+    # В production используем готовый, собранный образ из реестра (Gitea)
+    image: git.cube2.ru/erjemin/oknardia:latest
+
+    # ПЕРЕЗАПУСК при сбое
+    restart: always
+
+    # Метки для Watchtower (авто-обновление)
+    labels:
+      - "com.centurylinklabs.watchtower.scope=oknardia-scope"
+
+    # КОМАНДА ЗАПУСКА (Production режим)
+    # При старте контейнера:
+    # 1. Применяем миграции
+    # 2. Собираем статику
+    # 3. Генерируем sitemap'ы
+    # 4. Пересоздаём пре-рендер шаблоны серий
+    # 5. Пересчитываем рейтинги
+    # 6. Создаём папку конфигов nginx (если нет)
+    # 7. Копируем конфиг nginx с авто-заменой путей через sed
+    # 8. Инициализируем боевой конфиг (если нет, копируем из примера)
+    # 9. Запускаем Gunicorn
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             python manage.py generate_sitemaps &&
+             python manage.py regenerate_seria_prerender &&
+             python manage.py make_rating &&
+             mkdir -p /nginx_configs_host/nginx &&
+             sed \"s|/home/user/app/oknardia-site|$${HOST_PROJECT_PATH:-/home/default_user/projects/oknardia-site}|g\" /home/app/config/nginx/oknardia-app--external-nginx.conf > /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example &&
+             if [ ! -f /nginx_configs_host/nginx/oknardia-app--external-nginx.conf ]; then
+                 cp /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example /nginx_configs_host/nginx/oknardia-app--external-nginx.conf;
+                 echo 'INIT: Created new nginx config with correct paths';
+             fi &&
+             python -m gunicorn --workers 4 --bind 0.0.0.0:8000 --timeout 120 oknardia.wsgi:application"
+
+    # Пробрасывание портов
+    # Слушаем только на localhost хоста для безопасности
+    ports:
+      - "127.0.0.1:8060:8000"
+
+    # МОНТИРОВАНИЕ ТОМОВ (Volumes)
+    volumes:
+      # БД SQLite
+      - ./database:/home/app/database
+
+      # Медиа файлы
+      - ./media:/home/app/public/media
+
+      # Конфиги nginx
+      - ./config:/nginx_configs_host
+
+    # Пользователь и права
+    user: "0:0"
+
+    # ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ (Production)
+    env_file:
+      - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=oknardia.settings
+      - PYTHONUNBUFFERED=1
+      - DEBUG=False
+      - DJANGO_LOG_LEVEL=INFO
+      - ALLOW_MEDIA_SERVE=False
+      - HOST_PROJECT_PATH=${HOST_PROJECT_PATH:-/home/default_user/projects/oknardia-site}
+
+    # ЗДОРОВЬЕ КОНТЕЙНЕРА (Healthcheck)
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/').read()"]
+      interval: 3m
+      timeout: 12s
+      start_period: 60s
+      retries: 3
+
+    # ЛОГИРОВАНИЕ (Ротация)
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    # РЕСУРСЫ
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    mem_limit: 1g
+
+  # --- WATCHTOWER: АВТО-ОБНОВЛЕНИЕ ОБРАЗОВ ---
+  watchtower:
+    image: containrrr/watchtower
+    container_name: oknardia_watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - REPO_USER=${REPO_USER}
+      - REPO_PASS=${REPO_PASS}
+      - WATCHTOWER_SCOPE=oknardia-scope
+      - WATCHTOWER_CLEANUP=true
+      - DOCKER_API_VERSION=1.44
+      - WATCHTOWER_WAIT_ON_TIMEOUT=60
+      - WATCHTOWER_LIFECYCLE_HOOKS=true
+    command: --interval 1800 --cleanup
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
