@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """oknardia Конфигурация URL"""
 from django.contrib import admin
-from django.urls import include, path, re_path
-from django.conf.urls.static import static
+from django.urls import include, re_path, path
 from django.http import FileResponse
 from pathlib import Path
 import environ
 import mimetypes
+import os
 
 # Инициализируем env
 env = environ.Env()
@@ -174,10 +174,13 @@ PUBLIC_ROOT_URLPATTERNS = [
 # (чтобы отдавать файлы быстро и не проверять остальные рулы)
 urlpatterns = [*PUBLIC_ROOT_URLPATTERNS, *urlpatterns]
 
+handler404 = 'web.views.handler404'
+handler400 = 'web.views.handler400'
+handler403 = 'web.views.handler403'
+handler500 = 'web.views.handler500'
 
 # Для локального тестирования production конфига: отдача медиа через Django
 # В реальном production медиа обслуживает Nginx!
-import os
 if DEBUG or env.bool('ALLOW_MEDIA_SERVE', default=False):
     from django.views.static import serve as serve_static
     # Проверяем что директория медиа существует
@@ -196,6 +199,13 @@ if DEBUG or env.bool('ALLOW_MEDIA_SERVE', default=False):
 if DEBUG:
     # --- страничка для тестирования верстки текста в блоге
     urlpatterns += [re_path(r'^blog/tmp[/*]$', service.tmp),]
+    # --- странички для тестирования страниц с кодами ошибок
+    urlpatterns += [
+        re_path(r'^400$', views.handler400),
+        re_path(r'^403$', views.handler403),
+        re_path(r'^404$', views.handler404),
+        re_path(r'^500$', views.handler500),
+    ]
     #  ___    ____      _              _____         _ _              _____             _
     # | | |  |    \ ___| |_ _ _ ___   |_   _|___ ___| | |_ ___ ___   |  _  |___ ___ ___| |
     # |_  |  |  |  | -_| . | | | . |    | | | . | . | | . | .'|  _|  |   __| .'|   | -_| |

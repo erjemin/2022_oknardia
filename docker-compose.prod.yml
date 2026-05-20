@@ -45,6 +45,12 @@ services:
                  cp /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example /nginx_configs_host/nginx/oknardia-app--external-nginx.conf;
                  echo 'INIT: Created new nginx config with correct paths';
              fi &&
+             ERROR_DIR=/home/app/web/public/media/_error &&
+             mkdir -p "$$ERROR_DIR" &&
+                   for code in 400 401 403 404 413 429 500 502 503 504; do
+                        cp /home/user/path-to-oknardia-app/oknardia/templates/error/$${code}.html "$$ERROR_DIR/$${code}.html";
+                    done &&
+                   cp /home/user/path-to-oknardia-app/oknardia/templates/error/under_reconstruction.html "$$ERROR_DIR/under_reconstruction.html" 
              python -m gunicorn --workers 2 --bind 0.0.0.0:8000 --timeout 120 oknardia.wsgi:application"
 
     # Пробрасывание портов

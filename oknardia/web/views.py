@@ -242,3 +242,66 @@ def get_address(request: HttpRequest) -> HttpResponse:
         'ticks': float(time.perf_counter() - time_start),
     })
     return render(request, "popup/popup_show_apartment_variants.html", to_template)
+
+
+# ============================================================================
+# ОБРАБОТЧИКИ ОШИБОК ДЛЯ ТЕСТИРОВАНИЯ В DEBUG РЕЖИМЕ
+# ============================================================================
+# Используется в urls.py при DEBUG=True для тестирования верстки страниц ошибок.
+# Позволяет визуально проверить, как выглядят страницы 400, 403, 404 и 500
+# без необходимости искусственно вызывать реальные ошибки.
+
+
+def handler400(request: HttpRequest, exception=None) -> HttpResponse:
+    """Отображает страницу ошибки 400 (Bad Request).
+
+    Используется только в DEBUG режиме для тестирования верстки.
+
+    :param request: входящий http-запрос
+    :param exception: исключение (если есть)
+    :return response: исходящий http-ответ с кодом 400
+    """
+    response = render(request, "error/400.html", {})
+    response.status_code = 400
+    return response
+
+
+def handler403(request: HttpRequest, exception=None) -> HttpResponse:
+    """Отображает страницу ошибки 403 (Forbidden).
+
+    Используется только в DEBUG режиме для тестирования верстки.
+
+    :param request: входящий http-запрос
+    :param exception: исключение (если есть)
+    :return response: исходящий http-ответ с кодом 403
+    """
+    response = render(request, "error/403.html", {})
+    response.status_code = 403
+    return response
+
+
+def handler404(request: HttpRequest, exception=None) -> HttpResponse:
+    """Отображает страницу ошибки 404 (Not Found).
+
+    Используется только в DEBUG режиме для тестирования верстки.
+
+    :param request: входящий http-запрос
+    :param exception: исключение (если есть)
+    :return response: исходящий http-ответ с кодом 404
+    """
+    response = render(request, "error/404.html", {})
+    response.status_code = 404
+    return response
+
+
+def handler500(request: HttpRequest) -> HttpResponse:
+    """Отображает страницу ошибки 500 (Internal Server Error).
+
+    Используется только в DEBUG режиме для тестирования верстки.
+
+    :param request: входящий http-запрос
+    :return response: исходящий http-ответ с кодом 500
+    """
+    response = render(request, "error/500.html", {})
+    response.status_code = 500
+    return response
