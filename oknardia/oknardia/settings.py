@@ -188,7 +188,10 @@ if database_engine == 'django.db.backends.sqlite3':
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': str(sqlite_db_path),
-        }
+            'OPTIONS': {
+                'timeout': 20,
+            },
+        },
     }
 else:
      # База не SQLite (mariaDB, например): читаем все параметры подключения из env.
