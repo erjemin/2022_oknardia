@@ -30,6 +30,7 @@ services:
     # 5. Пересчитываем рейтинги
     # 6. Создаём папку конфигов nginx (если нет)
     # 7. Копируем конфиг nginx с авто-заменой путей через sed
+    #    (переменная HOST_PROJECT_PATH берется из .env и подставляется в контейнер)
     # 8. Инициализируем боевой конфиг (если нет, копируем из примера)
     # 9. Запускаем Gunicorn
     command: >
@@ -39,12 +40,12 @@ services:
              python manage.py regenerate_seria_prerender &&
              python manage.py make_rating &&
              mkdir -p /nginx_configs_host/nginx &&
-             sed \"s|/home/user/app/oknardia-site|$${HOST_PROJECT_PATH:-/home/default_user/projects/oknardia-site}|g\" /home/app/config/nginx/oknardia-app--external-nginx.conf > /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example &&
+             sed \"s|/home/user/app/oknardia-site|$${HOST_PROJECT_PATH}|g\" /home/app/config/nginx/oknardia-app--external-nginx.conf > /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example &&
              if [ ! -f /nginx_configs_host/nginx/oknardia-app--external-nginx.conf ]; then
                  cp /nginx_configs_host/nginx/oknardia-app--external-nginx.conf.example /nginx_configs_host/nginx/oknardia-app--external-nginx.conf;
                  echo 'INIT: Created new nginx config with correct paths';
              fi &&
-             python -m gunicorn --workers 4 --bind 0.0.0.0:8000 --timeout 120 oknardia.wsgi:application"
+             python -m gunicorn --workers 2 --bind 0.0.0.0:8000 --timeout 120 oknardia.wsgi:application"
 
     # Пробрасывание портов
     # Слушаем только на localhost хоста для безопасности
@@ -66,6 +67,7 @@ services:
     user: "0:0"
 
     # ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ (Production)
+    # .env файл содержит все sensitive данные (DB, Email, API keys, REPO_USER/PASS)
     env_file:
       - .env
     environment:
@@ -74,7 +76,6 @@ services:
       - DEBUG=False
       - DJANGO_LOG_LEVEL=INFO
       - ALLOW_MEDIA_SERVE=False
-      - HOST_PROJECT_PATH=${HOST_PROJECT_PATH:-/home/default_user/projects/oknardia-site}
 
     # ЗДОРОВЬЕ КОНТЕЙНЕРА (Healthcheck)
     healthcheck:
@@ -95,9 +96,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'
-          memory: 1G
-    mem_limit: 1g
+          cpus: '0.75'
+          memory: 768M
+    mem_limit: 768M
 
   # --- WATCHTOWER: АВТО-ОБНОВЛЕНИЕ ОБРАЗОВ ---
   watchtower:

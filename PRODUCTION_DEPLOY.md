@@ -41,18 +41,21 @@ cp config/nginx/oknardia-app--external-nginx.conf ~/docker-app/oknardia-site/con
 Отредактировать `~/docker-app/oknardia-site/.env`:
 
 ```bash
-# Критично: должны быть правильные credentials для реестра Gitea
-REPO_USER=erjemin
-REPO_PASS=<сгенерированный токен из личного кабинета>
+# ОБЯЗАТЕЛЬНО заполнить эти переменные!
 
-# Критично: переменная с путем проекта для sed в конфиге nginx
-export HOST_PROJECT_PATH=/home/default_user/projects/oknardia-site
-# (если путь другой, обновить эту переменную)
+# Путь к проекту на хосте (используется для sed-замены в конфиге nginx)
+HOST_PROJECT_PATH=/home/default_user/projects/oknardia-site
 
-# Остальное можно скопировать из локального .env
+# Credentials для скачивания образа из реестра Gitea
+REPO_USER=имя_пользователя_gitea
+REPO_PASS=токен_из_личного_кабинета_gitea
+
+# Остальное скопировать из локального .env
 DEBUG=False
 DJANGO_SECRET_KEY=...
 ```
+
+**Важно:** `HOST_PROJECT_PATH` должен совпадать с корневой папкой проекта на хосте, куда ты скопировал docker-compose.prod.yml!
 
 ### 3. Запустить контейнеры
 
