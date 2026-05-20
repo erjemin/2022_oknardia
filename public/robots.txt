@@ -1,5 +1,5 @@
 # Маркетплейс-агрегатор цен на установку пластиковых и деревянных окон — ОКНАРДИЯ
-# robots.txt последняя версия: 2026-05-15
+# robots.txt последняя версия: 2026-05-20
 
 User-Agent: *
 Allow: /
@@ -9,6 +9,9 @@ Disallow: /*?*password*
 Disallow: /*?*token*
 Disallow: /*.json$
 Disallow: /.*\.(js|css)$ # CSS и JS обслуживаются отдельно через CDN
+
+# Параметры, которые не влияют на смысловое содержимое
+Clean-param: page-back /
 
 # Быстрые краулеры
 User-agent: YandexBot
